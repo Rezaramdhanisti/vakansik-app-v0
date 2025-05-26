@@ -10,7 +10,6 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -24,6 +23,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
+// Import custom Text component with Satoshi font
+import Text from './src/components/Text';
+// Import font configuration
+import { FONTS } from './src/config/fonts';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.8;
@@ -359,12 +362,13 @@ const styles = StyleSheet.create({
   greeting: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: FONTS.SATOSHI_BOLD,
   },
   welcomeBack: {
     color: '#FFFFFF',
     fontSize: 14,
     opacity: 0.8,
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   notificationIcon: {
     width: 40,
@@ -380,12 +384,13 @@ const styles = StyleSheet.create({
   mainHeading: {
     color: '#FFFFFF',
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: FONTS.SATOSHI_BOLD,
     marginBottom: 5,
   },
   subHeading: {
     color: '#FFFFFF',
     fontSize: 18,
+    fontFamily: FONTS.SATOSHI_REGULAR,
     marginBottom: 20,
   },
   searchContainer: {
@@ -404,6 +409,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#333',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   categoriesContainer: {
     flexDirection: 'row',
@@ -455,14 +461,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 5,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#999',
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
     marginBottom: 15,
   },
   carouselContainer: {
@@ -502,24 +509,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   agencyName: {
-    color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   starIcon: {
     color: '#FFD700',
   },
   ratingText: {
-    color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontFamily: FONTS.SATOSHI_BOLD,
   },
   cardContent: {
     padding: 15,
   },
   packageTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
   },
@@ -534,6 +541,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     color: '#666',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   priceContainer: {
     marginTop: 5,
@@ -541,16 +549,18 @@ const styles = StyleSheet.create({
   priceLabel: {
     fontSize: 12,
     color: '#999',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   priceValue: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
   },
   paxText: {
     fontSize: 14,
     fontWeight: 'normal',
     color: '#666',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   inspirationSection: {
     paddingVertical: 20,
@@ -594,14 +604,14 @@ const styles = StyleSheet.create({
   locationBadgeText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: FONTS.SATOSHI_BOLD,
   },
   gridCardContent: {
     padding: 10,
   },
   gridPackageTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
     height: 40,
@@ -617,9 +627,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   agencyBadgeText: {
-    color: '#555',
-    fontSize: 12,
-    marginLeft: 4,
+    color: '#333',
+    fontSize: 10,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
   },
   gridRatingContainer: {
     flexDirection: 'row',
@@ -630,25 +640,27 @@ const styles = StyleSheet.create({
     marginRight: 2,
   },
   gridRatingText: {
-    fontSize: 12,
-    color: '#555',
-    fontWeight: '500',
+    fontSize: 10,
+    color: '#333',
+    fontFamily: FONTS.SATOSHI_BOLD,
+    marginLeft: 2,
   },
   gridPriceContainer: {
     marginTop: 5,
   },
   gridPriceLabel: {
-    fontSize: 11,
-    color: '#999',
+    fontSize: 10,
+    color: '#666',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   gridPriceValue: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: FONTS.SATOSHI_BOLD,
     color: '#00AA44',
   },
   gridPaxText: {
-    fontSize: 12,
-    fontWeight: 'normal',
+    fontSize: 10,
+    fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
   },
   bottomNavContainer: {
@@ -681,10 +693,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999999',
     textAlign: 'center',
+    fontFamily: FONTS.SATOSHI_REGULAR,
   },
   activeNavText: {
     color: '#00AA44',
     fontWeight: '500',
+    fontFamily: FONTS.SATOSHI_BOLD,
   },
 });
 
