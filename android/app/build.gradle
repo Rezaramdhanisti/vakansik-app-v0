@@ -78,6 +78,14 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.mytravel"
+    
+    // Add the following line for react-native-vector-icons
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+    }
     defaultConfig {
         applicationId "com.mytravel"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -116,4 +124,7 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+    
+    // Add react-native-vector-icons dependency
+    implementation project(':react-native-vector-icons')
 }
