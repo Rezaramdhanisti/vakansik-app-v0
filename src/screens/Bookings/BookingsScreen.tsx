@@ -13,7 +13,7 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
   const bookings = [];
 
   const handleStartSearching = () => {
-    navigation.navigate('Search');
+    navigation.navigate('Explore');
   };
 
   return (
@@ -35,7 +35,7 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
             style={styles.startSearchingButton}
             onPress={handleStartSearching}
           >
-            <Text style={styles.startSearchingButtonText}>Start searching</Text>
+            <Text style={styles.startSearchingButtonText}>Start exploring</Text>
           </TouchableOpacity>
         </View>
       ) : (
