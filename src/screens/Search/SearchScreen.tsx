@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,13 +12,14 @@ import {
   Switch
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import Modal from 'react-native-modal';
 import Text from '../../components/Text';
 import { FONTS,FONT_WEIGHT } from '../../config/fonts';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 
 const { width } = Dimensions.get('window');
 
@@ -30,9 +31,39 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const [activeCategory, setActiveCategory] = useState('Castles');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
   const [sortByHighestPrice, setSortByHighestPrice] = useState(false);
   const [sortByLowestPrice, setSortByLowestPrice] = useState(false);
+  
+  // Bottom sheet ref
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  
+  // Snap points
+  const snapPoints = useMemo(() => ['40%'], []);
+  
+  // Callbacks
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+  }, []);
+  
+  // Open and close bottom sheet
+  const openBottomSheet = useCallback(() => {
+    bottomSheetRef.current?.expand();
+  }, []);
+  
+  // Backdrop component for the bottom sheet
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        style={[props.style]}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        pressBehavior="close"
+      />
+    ),
+    []
+  );
   // Define property listing type
   type PropertyListing = {
     id: string;
@@ -224,6 +255,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   );
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
@@ -316,33 +348,32 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       <View style={styles.mapButtonContainer}>
         <TouchableOpacity 
           style={styles.mapButton}
-          onPress={() => setFilterModalVisible(true)}
+          onPress={openBottomSheet}
         >
           <Text style={styles.mapButtonText}>Filter</Text>
           <MaterialCommunityIcons name="filter-outline" size={18} color="#FFF" style={styles.mapIcon} />
         </TouchableOpacity>
       </View>
       
-      {/* Price Filter Modal */}
-      <Modal
-        isVisible={isFilterModalVisible}
-        onBackdropPress={() => setFilterModalVisible(false)}
-        backdropOpacity={0.5}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
-        style={styles.modal}
+      {/* Bottom Sheet */}
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
+        enablePanDownToClose={true}
+        enableContentPanningGesture={true}
+        backdropComponent={renderBackdrop}
       >
-        <View style={styles.modalContent}>
+        <BottomSheetView style={styles.bottomSheetContent}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Filters</Text>
-            <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+            <TouchableOpacity onPress={() => bottomSheetRef.current?.close()}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
           </View>
           
           <View style={styles.filterSection}>
-            <Text style={styles.filterSectionTitle}>Price</Text>
-            
             <View style={styles.filterOption}>
               <View style={styles.filterOptionTextContainer}>
                 <Text style={styles.filterOptionText}>Highest price first</Text>
@@ -387,14 +418,15 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
             
             <TouchableOpacity 
               style={styles.applyButton}
-              onPress={() => setFilterModalVisible(false)}
+              onPress={() => bottomSheetRef.current?.close()}
             >
               <Text style={styles.applyButtonText}>Show results</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        </BottomSheetView>
+      </BottomSheet>
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -630,15 +662,10 @@ const styles = StyleSheet.create({
   mapIcon: {
     marginLeft: 5,
   },
-  // Modal styles
-  modal: {
-    margin: 0,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
+  // Bottom Sheet styles
+  bottomSheetContent: {
+    flex: 1,
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 20,
