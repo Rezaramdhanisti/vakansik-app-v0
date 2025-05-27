@@ -38,6 +38,38 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
     beds: 8,
     bathrooms: 'Dedicated bathroom'
   };
+  
+  // Reviews data
+  const reviews = [
+    {
+      id: '1',
+      rating: 5,
+      date: '3 days ago',
+      text: 'Such a fun and beautiful experience, being fully immersed in the lush green jungle atmosphere. The rafting was incredible, lunch was delicious, ATV was adventurous, our group was fun...',
+      reviewer: 'Maria',
+    },
+    {
+      id: '2',
+      rating: 5,
+      date: '1 week ago',
+      text: 'Amazing experience with professional guides. The views were breathtaking and the entire day was well organized. Highly recommend!',
+      reviewer: 'John',
+    },
+    {
+      id: '3',
+      rating: 5,
+      date: '2 weeks ago',
+      text: 'Great experience! The guides were knowledgeable and friendly. Would definitely recommend to anyone visiting Bali.',
+      reviewer: 'Sarah',
+    },
+    {
+      id: '4',
+      rating: 5,
+      date: '1 month ago',
+      text: 'One of the highlights of our trip to Bali. The rafting was exciting but safe, and the scenery was absolutely stunning.',
+      reviewer: 'David',
+    },
+  ];
 
   const handleImageChange = (index: number) => {
     setCurrentImageIndex(index);
@@ -176,6 +208,112 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
             <Text style={styles.sectionSubtitle}>Pick up area available:</Text>
             <Text style={styles.sectionContent}>Kuta, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu</Text>
             <Text style={styles.locationAddress}>Ubud, Bali, 80572</Text>
+          </View>
+          
+          <View style={styles.divider} />
+          
+          {/* Reviews section */}
+          <View>
+            <Text style={styles.sectionTitle}>Reviews</Text>
+            <View style={styles.reviewSummary}>
+              <Ionicons name="star" size={18} color="#000" />
+              <Text style={styles.reviewRating}> 4.91 · 775 reviews</Text>
+            </View>
+            
+            {/* Horizontal scrollable reviews using FlatList */}
+            <FlatList
+              data={reviews}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalReviewsContainer}
+              keyExtractor={(item) => item.id}
+              ItemSeparatorComponent={() => <View style={styles.reviewSeparator} />}
+              renderItem={({ item }) => (
+                <View style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.reviewStars}>
+                      {[...Array(item.rating)].map((_, index) => (
+                        <Ionicons key={index} name="star" size={14} color="#000" />
+                      ))}
+                    </View>
+                    <Text style={styles.reviewDate}>· {item.date}</Text>
+                  </View>
+                  
+                  <Text style={styles.reviewText}>
+                    {item.text}
+                  </Text>
+                  
+                  <View style={styles.reviewerInfo}>
+                    <View style={styles.reviewerAvatar}>
+                      <Ionicons name="person-circle" size={40} color="#666" />
+                    </View>
+                    <Text style={styles.reviewerName}>{item.reviewer}</Text>
+                  </View>
+                </View>
+              )}
+            />
+          </View>
+          
+          <View style={styles.divider} />
+          
+          {/* Things to know section */}
+          <View>
+            <Text style={styles.sectionTitle}>Things to know</Text>
+            
+            {/* Guest requirements */}
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="people-outline" size={24} color="#333" />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Guest requirements</Text>
+                <Text style={styles.infoText}>Guests ages 4 and up can attend, up to 10 guests total.</Text>
+              </View>
+            </View>
+            
+            {/* Activity level */}
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="walk-outline" size={24} color="#333" />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Activity level</Text>
+                <Text style={styles.infoText}>The activity level for this experience is light and the skill level is beginner.</Text>
+              </View>
+            </View>
+            
+            {/* What to bring */}
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="calendar-outline" size={24} color="#333" />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>What to bring</Text>
+                <Text style={styles.infoText}>Change of clothes, Swim suit / sport wear for water activity, Sunscreen</Text>
+              </View>
+            </View>
+            
+            {/* Accessibility */}
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="accessibility-outline" size={24} color="#333" />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Accessibility</Text>
+                <Text style={styles.infoText}>Step-free bathroom available, Access provider supported, Entrances wider than 32 inches, Mainly flat or leveled ground, No extreme sensory stimuli</Text>
+              </View>
+            </View>
+            
+            {/* Cancellation policy */}
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="close-circle-outline" size={24} color="#333" />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Cancellation policy</Text>
+                <Text style={styles.infoText}>Cancel at least 1 day before the start time for a full refund.</Text>
+              </View>
+            </View>
           </View>
           
           <View style={styles.divider} />
@@ -507,6 +645,119 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#FFFFFF',
+  },
+  // Review section styles
+  reviewSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  reviewRating: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+  },
+  horizontalReviewsContainer: {
+    paddingVertical: 10,
+    paddingRight: 20,
+  },
+  reviewCard: {
+    width: width * 0.75,
+    padding: 16,
+    marginLeft: 16,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  reviewStars: {
+    flexDirection: 'row',
+  },
+  reviewDate: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+    marginLeft: 4,
+  },
+  reviewText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#333',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  showMoreText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+    marginBottom: 12,
+  },
+  reviewerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  reviewerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E0E0E0',
+    overflow: 'hidden',
+    marginRight: 10,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  reviewerName: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+  },
+  verticalDivider: {
+    width: 1,
+    height: '100%',
+    backgroundColor: '#EEEEEE',
+    marginHorizontal: 8,
+    alignSelf: 'center',
+  },
+  reviewSeparator: {
+    width: 16,
+  },
+  // Things to know section styles
+  infoItem: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  infoIconContainer: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#333',
+    marginBottom: 4,
+  },
+  infoText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+    lineHeight: 20,
   },
 });
 
