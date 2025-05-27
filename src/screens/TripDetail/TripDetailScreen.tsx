@@ -229,7 +229,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               keyExtractor={(item) => item.id}
               ItemSeparatorComponent={() => <View style={styles.reviewSeparator} />}
               renderItem={({ item }) => (
-                <View style={styles.reviewCard}>
+                <View style={styles.reviewItem}>
                   <View style={styles.reviewHeader}>
                     <View style={styles.reviewStars}>
                       {[...Array(item.rating)].map((_, index) => (
@@ -242,6 +242,10 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
                   <Text style={styles.reviewText}>
                     {item.text}
                   </Text>
+                  
+                  <TouchableOpacity>
+                    <Text style={styles.showMoreText}>Show more</Text>
+                  </TouchableOpacity>
                   
                   <View style={styles.reviewerInfo}>
                     <View style={styles.reviewerAvatar}>
@@ -406,7 +410,8 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: 20,
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     backgroundColor: '#FFFFFF',
     marginTop: -20,
     shadowColor: '#000',
@@ -661,17 +666,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingRight: 20,
   },
-  reviewCard: {
+  reviewItem: {
     width: width * 0.75,
-    padding: 16,
-    marginLeft: 16,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    paddingRight: 12,
+    borderRightWidth: 1,
+    borderRightColor: '#EEEEEE',
   },
   reviewHeader: {
     flexDirection: 'row',
