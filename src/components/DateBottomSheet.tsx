@@ -13,6 +13,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 export interface DateBottomSheetProps {
   price?: string;
+  onDismiss?: () => void;
 }
 
 export interface DateBottomSheetRef {
@@ -20,7 +21,7 @@ export interface DateBottomSheetRef {
   dismiss: () => void;
 }
 
-const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000' }, ref) => {
+const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss }, ref) => {
   // ref for bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   
@@ -114,11 +115,18 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   // callbacks for bottom sheet modal
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
-  }, []);
+    // If sheet is closed (index -1), call onDismiss
+    if (index === -1 && onDismiss) {
+      onDismiss();
+    }
+  }, [onDismiss]);
   
   const handleCloseModal = useCallback(() => {
     bottomSheetModalRef.current?.dismiss();
-  }, []);
+    if (onDismiss) {
+      onDismiss();
+    }
+  }, [onDismiss]);
   
   // Select a date
   const handleSelectDate = (date: string) => {
@@ -145,6 +153,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     ),
     []
   );
+  
+
   
   return (
     <BottomSheetModal
@@ -241,7 +251,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
           })}
         </ScrollView>
         
-        {/* Book Now Button */}
+        {/* Only show Book Now button when a date and time slot are selected */}
         {selectedDate && selectedTimeSlot && (
           <View style={styles.bookButtonContainer}>
             <TouchableOpacity style={styles.bookButton}>

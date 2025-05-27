@@ -27,6 +27,7 @@ type TripDetailScreenProps = StackScreenProps<SearchStackParamList, 'TripDetail'
 function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.JSX.Element {
   const { property } = route.params;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   
   // ref for bottom sheet modal
   const dateBottomSheetRef = useRef<DateBottomSheetRef>(null);
@@ -83,7 +84,13 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   
   // Function to open the date bottom sheet
   const handleShowDates = () => {
+    setIsBottomSheetVisible(true);
     dateBottomSheetRef.current?.present();
+  };
+  
+  // Function to handle bottom sheet dismiss
+  const handleSheetDismiss = () => {
+    setIsBottomSheetVisible(false);
   };
 
   const renderImageItem = ({ item, index }: { item: any; index: number }) => (
@@ -348,23 +355,28 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
         </View>
       </ScrollView>
       
-      {/* Floating booking button */}
-      <View style={styles.floatingButtonContainer}>
-        <View style={styles.floatingBookingBar}>
-          <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>{property.price}</Text>
-            <Text style={styles.priceSubtext}>/ guest</Text>
+      {/* Floating booking button - hidden when bottom sheet is visible */}
+      {!isBottomSheetVisible && (
+        <View style={styles.floatingButtonContainer}>
+          <View style={styles.floatingBookingBar}>
+            <View style={styles.priceContainer}>
+              <Text style={styles.priceText}>{property.price}</Text>
+              <Text style={styles.priceSubtext}>/ guest</Text>
+            </View>
+            
+            <TouchableOpacity style={styles.bookButton} onPress={handleShowDates}>
+              <Text style={styles.bookButtonText}>Show dates</Text>
+            </TouchableOpacity>
           </View>
-          
-          <TouchableOpacity style={styles.bookButton} onPress={handleShowDates}>
-            <Text style={styles.bookButtonText}>Show dates</Text>
-          </TouchableOpacity>
         </View>
-      </View>
+      )}
         </SafeAreaView>
         
         {/* Date Bottom Sheet Component */}
-        <DateBottomSheet ref={dateBottomSheetRef} />
+        <DateBottomSheet 
+          ref={dateBottomSheetRef} 
+          onDismiss={handleSheetDismiss}
+        />
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
