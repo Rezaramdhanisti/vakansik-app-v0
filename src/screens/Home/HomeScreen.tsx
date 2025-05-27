@@ -124,7 +124,7 @@ function HomeScreen(): React.JSX.Element {
         switch(item.name) {
           case 'Budget Trip': return <FontAwesome name="money" size={24} color="#0096B4" />;
           case 'Luxury Trip': return <FontAwesome name="diamond" size={24} color="#0096B4" />;
-          case 'Holyland': return <FontAwesome name="star" size={24} color="#9C27B0" />;
+          case 'Holyland': return <FontAwesome name="star" size={24} color="#0096B4" />;
           case 'All Product': return <FontAwesome name="th-large" size={24} color="#0096B4" />;
           default: return <FontAwesome name="suitcase" size={24} color="#0096B4" />;
         }
@@ -143,8 +143,7 @@ function HomeScreen(): React.JSX.Element {
           styles.iconContainer,
           isContinent ? styles.continentIcon : styles.tripTypeIcon,
           item.name === 'Budget Trip' ? styles.budgetIcon : null,
-          item.name === 'Luxury Trip' ? styles.luxuryIcon : null,
-          item.name === 'Holyland' ? styles.holylandIcon : null,
+          item.name === 'Luxury Trip' ? styles.luxuryIcon : null
         ]}>
           {getIcon()}
         </View>
@@ -410,9 +409,6 @@ const styles = StyleSheet.create({
   luxuryIcon: {
     backgroundColor: '#E3F2FD',
   },
-  holylandIcon: {
-    backgroundColor: '#F3E5F5',
-  },
   categoryText: {
     textAlign: 'center',
     fontSize: 12,
@@ -625,7 +621,7 @@ const styles = StyleSheet.create({
   gridPriceValue: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
-    color: '#00AA44',
+    color: '#FF5E57',
   },
   gridPaxText: {
     fontSize: 10,
