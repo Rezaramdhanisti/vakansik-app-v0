@@ -509,6 +509,7 @@ const styles = StyleSheet.create({
   },
   propertyCard: {
     marginBottom: 24,
+    marginTop:16
   },
   propertyImageContainer: {
     position: 'relative',
