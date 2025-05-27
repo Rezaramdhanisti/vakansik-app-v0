@@ -2,12 +2,15 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import 'react-native-gesture-handler';
 
 // Import screens
 import HomeScreen from '../screens/Home/HomeScreen';
-import SearchScreen from '../screens/Search/SearchScreen';
 import BookingsScreen from '../screens/Bookings/BookingsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+
+// Import navigators
+import SearchNavigator from './SearchNavigator';
 
 // Create bottom tab navigator
 const Tab = createBottomTabNavigator();
@@ -18,7 +21,7 @@ function AppNavigator() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
+            let iconName: string = 'help-circle'; // Default icon
 
             if (route.name === 'Home') {
               iconName = focused ? 'home' : 'home-outline';
@@ -48,7 +51,7 @@ function AppNavigator() {
         })}
       >
         {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
-        <Tab.Screen name="Explore" component={SearchScreen} />
+        <Tab.Screen name="Explore" component={SearchNavigator} />
         <Tab.Screen name="Bookings" component={BookingsScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>

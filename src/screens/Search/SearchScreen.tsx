@@ -22,7 +22,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 const { width } = Dimensions.get('window');
 
-function SearchScreen(): React.JSX.Element {
+type SearchScreenProps = {
+  navigation: any;
+};
+
+function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const [activeCategory, setActiveCategory] = useState('Castles');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -175,10 +179,20 @@ function SearchScreen(): React.JSX.Element {
 
   // Render a property listing item
   const renderPropertyItem = ({ item }: { item: any }) => (
-    <View style={styles.propertyCard}>
+    <TouchableOpacity 
+      style={styles.propertyCard}
+      onPress={() => navigation.navigate('TripDetail', { property: item })}
+      activeOpacity={0.9}
+    >
       <View style={styles.propertyImageContainer}>
         <View style={styles.propertyImage} />
-        <TouchableOpacity style={styles.favoriteButton}>
+        <TouchableOpacity 
+          style={styles.favoriteButton}
+          onPress={(e) => {
+            e.stopPropagation(); // Prevent triggering the parent TouchableOpacity
+            // Toggle favorite logic would go here
+          }}
+        >
           <Ionicons 
             name={item.isFavorite ? 'heart' : 'heart-outline'} 
             size={24} 
@@ -206,7 +220,7 @@ function SearchScreen(): React.JSX.Element {
           <Text style={styles.propertyReviews}>{item.reviews}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
