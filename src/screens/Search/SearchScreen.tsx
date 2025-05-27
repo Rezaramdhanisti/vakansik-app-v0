@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -24,6 +24,8 @@ const { width } = Dimensions.get('window');
 
 function SearchScreen(): React.JSX.Element {
   const [activeCategory, setActiveCategory] = useState('Castles');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
   const [sortByHighestPrice, setSortByHighestPrice] = useState(false);
   const [sortByLowestPrice, setSortByLowestPrice] = useState(false);
@@ -40,6 +42,21 @@ function SearchScreen(): React.JSX.Element {
   
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
   
+  // Search suggestions data - divided into cities and activities
+  const citySuggestions = [
+    { id: 'city-1', name: 'Bali, Indonesia', type: 'city' },
+    { id: 'city-2', name: 'Tokyo, Japan', type: 'city' },
+    { id: 'city-3', name: 'Paris, France', type: 'city' },
+    { id: 'activity-2', name: 'Surfing in Bali', type: 'activity' },
+    { id: 'activity-3', name: 'Snorkeling in Raja Ampat', type: 'activity' },
+    { id: 'activity-4', name: 'Trekking Mount Bromo', type: 'activity' },
+    { id: 'activity-6', name: 'Exploring Borobudur Temple', type: 'activity' },
+  ];
+  
+  // Group suggestions by type
+  const cityOnlySuggestions = citySuggestions.filter(item => item.type === 'city');
+  const activitySuggestions = citySuggestions.filter(item => item.type === 'activity');
+
   // Categories data
   const categories = [
     { id: '1', name: 'Budget', icon: 'star' },
@@ -201,9 +218,59 @@ function SearchScreen(): React.JSX.Element {
             placeholder="Start your search"
             placeholderTextColor="#666"
             textAlign="center"
+            value={searchText}
+            onChangeText={setSearchText}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => {
+              // Small delay to allow item selection before hiding suggestions
+              setTimeout(() => setIsSearchFocused(false), 200);
+            }}
           />
         </View>
       </View>
+
+      {/* Search Suggestions */}
+      {isSearchFocused && (
+        <View style={styles.suggestionsContainer}>
+          <ScrollView style={styles.suggestionsList} showsVerticalScrollIndicator={false}>
+            {/* Cities Section */}
+            <View style={styles.suggestionSection}>
+              <Text style={styles.sectionHeader}>Cities</Text>
+              {cityOnlySuggestions.map((item) => (
+                <TouchableOpacity 
+                  key={item.id}
+                  style={styles.suggestionItem}
+                  onPress={() => {
+                    setSearchText(item.name);
+                    setIsSearchFocused(false);
+                  }}
+                >
+                  <Icon name="location-on" size={16} color="#666" style={styles.locationIcon} />
+                  <Text style={styles.suggestionText}>{item.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            {/* Activities Section */}
+            <View style={styles.suggestionSection}>
+              <Text style={styles.sectionHeader}>Activities</Text>
+              {activitySuggestions.map((item) => (
+                <TouchableOpacity 
+                  key={item.id}
+                  style={styles.suggestionItem}
+                  onPress={() => {
+                    setSearchText(item.name);
+                    setIsSearchFocused(false);
+                  }}
+                >
+                  <MaterialCommunityIcons name="hiking" size={16} color="#666" style={styles.locationIcon} />
+                  <Text style={styles.suggestionText}>{item.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      )}
       
       {/* Categories Section */}
       <View style={styles.categoriesContainer}>
@@ -347,6 +414,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontFamily: FONTS.SATOSHI_BOLD,
+    flex: 1,
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: 80,
+    left: 16,
+    right: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 1000,
+    maxHeight: 350,
+  },
+  suggestionsList: {
+    borderRadius: 12,
+    maxHeight: 350,
+  },
+  suggestionSection: {
+    marginBottom: 8,
+  },
+  sectionHeader: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: '#F8F8F8',
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: '#333',
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+  },
+  locationIcon: {
+    marginRight: 8,
   },
   categoriesContainer: {
     borderBottomWidth: 1,
@@ -497,7 +611,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: 20,
   },
   modalHeader: {
     flexDirection: 'row',
