@@ -22,7 +22,7 @@ function AppNavigator() {
 
             if (route.name === 'Home') {
               iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'Search') {
+            } else if (route.name === 'Explore') {
               iconName = focused ? 'search' : 'search-outline';
             } else if (route.name === 'Bookings') {
               iconName = focused ? 'calendar' : 'calendar-outline';
@@ -48,7 +48,7 @@ function AppNavigator() {
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Search" component={SearchScreen} />
+        <Tab.Screen name="Explore" component={SearchScreen} />
         <Tab.Screen name="Bookings" component={BookingsScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
