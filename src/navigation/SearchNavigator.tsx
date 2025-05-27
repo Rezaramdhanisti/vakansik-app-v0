@@ -39,7 +39,10 @@ function SearchNavigator() {
       }}
     >
       <Stack.Screen name="SearchMain" component={SearchScreen} />
-      <Stack.Screen name="TripDetail" component={TripDetailScreen} />
+      <Stack.Screen 
+        name="TripDetail" 
+        component={TripDetailScreen}
+      />
     </Stack.Navigator>
   );
 }

@@ -193,16 +193,18 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
         </View>
       </ScrollView>
       
-      {/* Bottom booking bar */}
-      <View style={styles.bookingBar}>
-        <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>{property.price}</Text>
-          <Text style={styles.priceSubtext}>night</Text>
+      {/* Floating booking button */}
+      <View style={styles.floatingButtonContainer}>
+        <View style={styles.floatingBookingBar}>
+          <View style={styles.priceContainer}>
+            <Text style={styles.priceText}>{property.price}</Text>
+            <Text style={styles.priceSubtext}>/ guest</Text>
+          </View>
+          
+          <TouchableOpacity style={styles.bookButton}>
+            <Text style={styles.bookButtonText}>Show dates</Text>
+          </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity style={styles.bookButton}>
-          <Text style={styles.bookButtonText}>Reserve</Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -275,6 +277,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
     zIndex: 1,
+    paddingBottom: 100,
   },
   tripTitle: {
     fontSize: 26,
@@ -446,6 +449,29 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  floatingBookingBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 40,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    width: '90%',
+  },
   bookingBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -461,7 +487,7 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   priceText: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
   },
@@ -473,12 +499,12 @@ const styles = StyleSheet.create({
   },
   bookButton: {
     backgroundColor: '#FF5E57',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    borderRadius: 24,
   },
   bookButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#FFFFFF',
   },
