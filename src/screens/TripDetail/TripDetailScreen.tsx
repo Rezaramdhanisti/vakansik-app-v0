@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -10,11 +10,14 @@ import {
   Dimensions,
   FlatList
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import { StackScreenProps } from '@react-navigation/stack';
 import { SearchStackParamList } from '../../navigation/SearchNavigator';
+import DateBottomSheet, { DateBottomSheetRef } from '../../components/DateBottomSheet';
 
 const { width } = Dimensions.get('window');
 
@@ -24,6 +27,9 @@ type TripDetailScreenProps = StackScreenProps<SearchStackParamList, 'TripDetail'
 function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.JSX.Element {
   const { property } = route.params;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // ref for bottom sheet modal
+  const dateBottomSheetRef = useRef<DateBottomSheetRef>(null);
 
   // Images for the gallery
   const images = [
@@ -74,6 +80,11 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   const handleImageChange = (index: number) => {
     setCurrentImageIndex(index);
   };
+  
+  // Function to open the date bottom sheet
+  const handleShowDates = () => {
+    dateBottomSheetRef.current?.present();
+  };
 
   const renderImageItem = ({ item, index }: { item: any; index: number }) => (
     <View style={styles.imageContainer}>
@@ -83,7 +94,9 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* Header with back and share buttons */}
@@ -343,12 +356,17 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
             <Text style={styles.priceSubtext}>/ guest</Text>
           </View>
           
-          <TouchableOpacity style={styles.bookButton}>
+          <TouchableOpacity style={styles.bookButton} onPress={handleShowDates}>
             <Text style={styles.bookButtonText}>Show dates</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+        </SafeAreaView>
+        
+        {/* Date Bottom Sheet Component */}
+        <DateBottomSheet ref={dateBottomSheetRef} />
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -499,6 +517,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
+
   amenityItem: {
     flexDirection: 'row',
     alignItems: 'center',
