@@ -32,11 +32,11 @@ function SearchScreen(): React.JSX.Element {
   // Define property listing type
   type PropertyListing = {
     id: string;
-    location: string;
-    builtYear: string;
-    dateRange: string;
+    title: string;
+    description: string;
     price: string;
-    nights: string;
+    rating: string;
+    reviews: string;
     isFavorite: boolean;
   };
   
@@ -91,54 +91,57 @@ function SearchScreen(): React.JSX.Element {
     {
       id: '1',
       location: 'Bujra, India',
+      title: "Explore India",
+      description: "Explore India with a great great tour guide",
       builtYear: '2020',
       dateRange: 'Jun 1 - 6',
-      price: 'Rp53,601,871',
-      nights: '5 nights',
+      price: 'Rp 350,000',
+      rating: '4.93',
+      reviews: '1,844 reviews',
       isFavorite: false
     },
     {
       id: '2',
-      location: 'Ubud, Bali',
-      builtYear: '2018',
-      dateRange: 'Jul 10 - 15',
-      price: 'Rp12,500,000',
-      nights: '5 nights',
+      title: "Explore India",
+      description: "Explore India with a great great tour guide",
+      price: 'Rp 275,000',
+      rating: '4.87',
+      reviews: '956 reviews',
       isFavorite: true
     },
     {
       id: '3',
-      location: 'Kyoto, Japan',
-      builtYear: '2019',
-      dateRange: 'Aug 5 - 10',
-      price: 'Rp18,750,000',
-      nights: '5 nights',
+      title: "Explore India",
+      description: "Explore India with a great great tour guide",
+      price: 'Rp 425,000',
+      rating: '4.95',
+      reviews: '2,103 reviews',
       isFavorite: false
     },{
       id: '4',
-      location: 'Bujra, India',
-      builtYear: '2020',
-      dateRange: 'Jun 1 - 6',
-      price: 'Rp53,601,871',
-      nights: '5 nights',
+      title: "Explore India",
+      description: "Explore India with a great great tour guide",
+      price: 'Rp 350,000',
+      rating: '4.93',
+      reviews: '1,844 reviews',
       isFavorite: false
     },
     {
       id: '5',
-      location: 'Ubud, Bali',
-      builtYear: '2018',
-      dateRange: 'Jul 10 - 15',
-      price: 'Rp12,500,000',
-      nights: '5 nights',
+      title: "Explore India",
+      description: "Explore India with a great great tour guide",
+      price: 'Rp 275,000',
+      rating: '4.87',
+      reviews: '956 reviews',
       isFavorite: true
     },
     {
       id: '6',
-      location: 'Kyoto, Japan',
-      builtYear: '2019',
-      dateRange: 'Aug 5 - 10',
-      price: 'Rp18,750,000',
-      nights: '5 nights',
+      title: "Explore India",
+      description: "Explore India with a great great tour guide",
+      price: 'Rp 425,000',
+      rating: '4.95',
+      reviews: '2,103 reviews',
       isFavorite: false
     },
   ];
@@ -195,12 +198,12 @@ function SearchScreen(): React.JSX.Element {
       </View>
       
       <View style={styles.propertyDetails}>
-        <Text style={styles.propertyLocation}>{item.location}</Text>
-        <Text style={styles.propertyInfo}>Built in {item.builtYear}</Text>
-        <Text style={styles.propertyInfo}>{item.dateRange}</Text>
+        <Text style={styles.propertyLocation}>{item.title}</Text>
+        <Text style={styles.propertyInfo}>{item.description}</Text>
         <View style={styles.priceContainer}>
           <Text style={styles.propertyPrice}>{item.price}</Text>
-          <Text style={styles.propertyNights}> for {item.nights}</Text>
+          <Text style={styles.propertyRating}> • {item.rating} • </Text>
+          <Text style={styles.propertyReviews}>{item.reviews}</Text>
         </View>
       </View>
     </View>
@@ -568,7 +571,12 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
   },
-  propertyNights: {
+  propertyRating: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+  },
+  propertyReviews: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
