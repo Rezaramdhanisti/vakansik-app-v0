@@ -24,9 +24,11 @@ export interface DateBottomSheetRef {
 const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss }, ref) => {
   // ref for bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const calendarBottomSheetRef = useRef<BottomSheetModal>(null);
   
   // variables for bottom sheet modal
   const snapPoints = useMemo(() => ['90%'], []);
+  const calendarSnapPoints = useMemo(() => ['90%'], []);
   
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
@@ -154,120 +156,250 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     []
   );
   
+  // Handle opening the calendar bottom sheet
+  const handleOpenCalendar = useCallback(() => {
+    calendarBottomSheetRef.current?.present();
+  }, []);
+  
+  // Handle closing the calendar bottom sheet
+  const handleCloseCalendar = useCallback(() => {
+    calendarBottomSheetRef.current?.dismiss();
+  }, []);
+  
+  // State for selected date and month
+  const [selectedMonth, setSelectedMonth] = useState('June 2025');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
+  
+  // Available months
+  const months = useMemo(() => [
+    { name: 'May 2025', days: 31, startDay: 3 }, // 0 = Sunday, so 3 = Wednesday
+    { name: 'June 2025', days: 30, startDay: 6 }, // 6 = Saturday
+    { name: 'July 2025', days: 31, startDay: 1 },
+    { name: 'August 2025', days: 31, startDay: 4 },
+    { name: 'September 2025', days: 30, startDay: 0 },
+    { name: 'October 2025', days: 31, startDay: 2 },
+    { name: 'November 2025', days: 30, startDay: 5 },
+    { name: 'December 2025', days: 31, startDay: 0 }
+  ], []);
+  
+  // Generate calendar data
+  const generateCalendarData = useCallback(() => {
+    const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    return months.map(month => {
+      // Generate days array with empty slots for proper alignment
+      const days = [];
+      
+      // Add empty slots for alignment
+      for (let i = 0; i < month.startDay; i++) {
+        days.push({ day: '', empty: true });
+      }
+      
+      // Add actual days
+      for (let i = 1; i <= month.days; i++) {
+        days.push({ day: i.toString(), empty: false });
+      }
+      
+      return {
+        name: month.name,
+        weekDays,
+        days
+      };
+    });
+  }, [months]);
+  
+  const calendarData = useMemo(() => generateCalendarData(), [generateCalendarData]);
+  
+  // Handle selecting a date
+  const handleSelectCalendarDate = useCallback((month: string, day: string) => {
+    const formattedDate = `${month} ${day}`;
+    setSelectedCalendarDate(formattedDate);
+    setSelectedMonth(month);
+    handleCloseCalendar();
+  }, [handleCloseCalendar]);
+  
 
   
   return (
-    <BottomSheetModal
-      ref={bottomSheetModalRef}
-      index={0}
-      snapPoints={snapPoints}
-      onChange={handleSheetChanges}
-      enablePanDownToClose={true}
-      backgroundStyle={styles.bottomSheetBackground}
-      handleIndicatorStyle={styles.bottomSheetIndicator}
-      backdropComponent={renderBackdrop}
-    >
-      <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.bottomSheetTitle}>Select a time</Text>
-          <TouchableOpacity onPress={handleCloseModal}>
-            <Ionicons name="close" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-        
-        {/* Guest Count Selector */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.guestCountRow}>
-            <View>
-              <Text style={styles.guestCountText}>{adultCount} adults</Text>
-            </View>
-            
-            <View style={styles.counterContainer}>
-              <TouchableOpacity 
-                style={[styles.counterButton, adultCount <= 1 && styles.counterButtonDisabled]} 
-                onPress={decreaseAdultCount}
-                disabled={adultCount <= 1}
-              >
-                <Text style={styles.counterButtonText}>−</Text>
-              </TouchableOpacity>
-              
-              <Text style={styles.counterValue}>{adultCount}</Text>
-              
-              <TouchableOpacity 
-                style={[styles.counterButton, adultCount >= 10 && styles.counterButtonDisabled]} 
-                onPress={increaseAdultCount}
-                disabled={adultCount >= 10}
-              >
-                <Text style={styles.counterButtonText}>+</Text>
-              </TouchableOpacity>
-            </View>
+    <>
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={0}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
+        enablePanDownToClose={true}
+        backgroundStyle={styles.bottomSheetBackground}
+        handleIndicatorStyle={styles.bottomSheetIndicator}
+        backdropComponent={renderBackdrop}
+      >
+        <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.bottomSheetTitle}>Select a time</Text>
+            <TouchableOpacity onPress={handleCloseModal}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
           </View>
-        </View>
-        
-        <View style={styles.divider} />
-        
-        {/* Date Selector Header */}
-        <View style={styles.dateHeaderContainer}>
-          <Text style={styles.dateHeaderText}>June 2025</Text>
-          <TouchableOpacity style={styles.calendarButton}>
-            <Ionicons name="calendar-outline" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-        
-        {/* Dates and Time Slots using ScrollView */}
-        <ScrollView 
-          style={styles.scrollViewContainer}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollViewContent}
-        >
-          {dateTimeData.map(item => {
-            if (item.type === 'header') {
-              // Render date header
-              return (
-                <Text key={item.id} style={styles.dayText}>{item.day}, {item.date}</Text>
-              );
-            } else {
-              // Render time slot
-              return (
-                <Pressable
-                  key={item.id}
-                  style={[
-                    styles.timeSlotContainer,
-                    selectedDate === item.date && selectedTimeSlot === item.slotId && styles.selectedTimeSlot
-                  ]}
-                  onPress={() => {
-                    handleSelectDate(item.date);
-                    handleSelectTimeSlot(item.slotId || '');
-                  }}
-                >
-                  <View>
-                    <Text style={styles.timeSlotText}>{item.time}</Text>
-                    <Text style={styles.priceText}>{item.price} / guest</Text>
-                  </View>
-                  <Text style={styles.spotsLeftText}>{item.spotsLeft} spots left</Text>
-                </Pressable>
-              );
-            }
-          })}
-        </ScrollView>
-        
-        {/* Only show Book Now button when a date and time slot are selected */}
-        {selectedDate && selectedTimeSlot && (
-          <View style={styles.bookButtonContainer}>
-            <View style={styles.bookingBar}>
-              <View style={styles.priceContainer}>
-                <Text style={styles.totalPriceText}>Rp780,000</Text>
-                <Text style={styles.guestInfoText}>for {adultCount} guests</Text>
+          
+          {/* Guest Count Selector */}
+          <View style={styles.sectionContainer}>
+            <View style={styles.guestCountRow}>
+              <View>
+                <Text style={styles.guestCountText}>{adultCount} adults</Text>
               </View>
               
-              <TouchableOpacity style={styles.nextButton}>
-                <Text style={styles.nextButtonText}>Next</Text>
-              </TouchableOpacity>
+              <View style={styles.counterContainer}>
+                <TouchableOpacity 
+                  style={[styles.counterButton, adultCount <= 1 && styles.counterButtonDisabled]} 
+                  onPress={decreaseAdultCount}
+                  disabled={adultCount <= 1}
+                >
+                  <Text style={styles.counterButtonText}>−</Text>
+                </TouchableOpacity>
+                
+                <Text style={styles.counterValue}>{adultCount}</Text>
+                
+                <TouchableOpacity 
+                  style={[styles.counterButton, adultCount >= 10 && styles.counterButtonDisabled]} 
+                  onPress={increaseAdultCount}
+                  disabled={adultCount >= 10}
+                >
+                  <Text style={styles.counterButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        )}
-      </BottomSheetView>
-    </BottomSheetModal>
+          
+          <View style={styles.divider} />
+          
+          {/* Date Selector Header */}
+          <View style={styles.dateHeaderContainer}>
+            <Text style={styles.dateHeaderText}>{selectedMonth}</Text>
+            <TouchableOpacity style={styles.calendarButton} onPress={handleOpenCalendar}>
+              <Ionicons name="calendar-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          
+          {/* Dates and Time Slots using ScrollView */}
+          <ScrollView 
+            style={styles.scrollViewContainer}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollViewContent}
+          >
+            {dateTimeData.map(item => {
+              if (item.type === 'header') {
+                // Render date header
+                return (
+                  <Text key={item.id} style={styles.dayText}>{item.day}, {item.date}</Text>
+                );
+              } else {
+                // Render time slot
+                return (
+                  <Pressable
+                    key={item.id}
+                    style={[
+                      styles.timeSlotContainer,
+                      selectedDate === item.date && selectedTimeSlot === item.slotId && styles.selectedTimeSlot
+                    ]}
+                    onPress={() => {
+                      handleSelectDate(item.date);
+                      handleSelectTimeSlot(item.slotId || '');
+                    }}
+                  >
+                    <View>
+                      <Text style={styles.timeSlotText}>{item.time}</Text>
+                      <Text style={styles.priceText}>{item.price} / guest</Text>
+                    </View>
+                    <Text style={styles.spotsLeftText}>{item.spotsLeft} spots left</Text>
+                  </Pressable>
+                );
+              }
+            })}
+          </ScrollView>
+          
+          {/* Only show Book Now button when a date and time slot are selected */}
+          {selectedDate && selectedTimeSlot && (
+            <View style={styles.bookButtonContainer}>
+              <View style={styles.bookingBar}>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.totalPriceText}>Rp780,000</Text>
+                  <Text style={styles.guestInfoText}>for {adultCount} guests</Text>
+                </View>
+                
+                <TouchableOpacity style={styles.nextButton}>
+                  <Text style={styles.nextButtonText}>Next</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </BottomSheetView>
+      </BottomSheetModal>
+      
+      {/* Calendar Bottom Sheet */}
+      <BottomSheetModal
+        ref={calendarBottomSheetRef}
+        index={0}
+        snapPoints={calendarSnapPoints}
+        enablePanDownToClose={true}
+        backgroundStyle={styles.bottomSheetBackground}
+        handleIndicatorStyle={styles.bottomSheetIndicator}
+        backdropComponent={renderBackdrop}
+      >
+        <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.bottomSheetTitle}>Select a date</Text>
+            <TouchableOpacity onPress={handleCloseCalendar}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView
+            style={styles.scrollViewContainer}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollViewContent}
+          >
+            {calendarData.map((monthData) => (
+              <View key={monthData.name} style={styles.calendarMonthContainer}>
+                <Text style={styles.calendarMonthTitle}>{monthData.name}</Text>
+                
+                {/* Week days header */}
+                <View style={styles.weekDaysContainer}>
+                  {monthData.weekDays.map((day, index) => (
+                    <Text key={`${monthData.name}-weekday-${index}`} style={styles.weekDayText}>
+                      {day}
+                    </Text>
+                  ))}
+                </View>
+                
+                {/* Calendar days grid */}
+                <View style={styles.calendarDaysContainer}>
+                  {monthData.days.map((dayObj, index) => {
+                    const isSelected = selectedCalendarDate === `${monthData.name} ${dayObj.day}`;
+                    const isToday = monthData.name === 'May 2025' && dayObj.day === '27';
+                    
+                    return (
+                      <View 
+                        key={`${monthData.name}-day-${index}`} 
+                        style={[styles.calendarDayCell, dayObj.empty && styles.emptyDayCell]}
+                      >
+                        {!dayObj.empty && (
+                          <Pressable
+                            style={[styles.calendarDayButton, isSelected && styles.selectedDayButton, isToday && styles.todayButton]}
+                            onPress={() => handleSelectCalendarDate(monthData.name, dayObj.day)}
+                          >
+                            <Text style={[styles.calendarDayText, isSelected && styles.selectedDayText, isToday && styles.todayText]}>
+                              {dayObj.day}
+                            </Text>
+                          </Pressable>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </BottomSheetView>
+      </BottomSheetModal>
+    </>
   );
 });
 
@@ -451,6 +583,68 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: '#FFF',
     fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+  },
+  calendarMonthContainer: {
+    marginBottom: 32,
+  },
+  calendarMonthTitle: {
+    fontSize: 20,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+    marginBottom: 16,
+  },
+  weekDaysContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  weekDayText: {
+    width: 40,
+    textAlign: 'center',
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#666',
+  },
+  calendarDaysContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  calendarDayCell: {
+    width: '14.28%',
+    height: 50,
+    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyDayCell: {
+    opacity: 0,
+  },
+  calendarDayButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedDayButton: {
+    backgroundColor: '#000',
+  },
+  todayButton: {
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+  calendarDayText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#000',
+  },
+  selectedDayText: {
+    color: '#FFF',
+    fontFamily: FONTS.SATOSHI_BOLD,
+  },
+  todayText: {
     fontFamily: FONTS.SATOSHI_BOLD,
   },
 });
