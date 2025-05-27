@@ -82,7 +82,7 @@ function App(): React.JSX.Element {
   const inspirationPackages = [
     {
       id: '1',
-      title: 'Swiss Alpine Heritage: Zurich and...',
+      title: 'Swiss Alpine Heritage: Zurich and Geneva',
       location: 'Switzerland',
       price: 'Rp 30,990,000',
       rating: 4.6,
@@ -98,7 +98,7 @@ function App(): React.JSX.Element {
     },
     {
       id: '3',
-      title: 'Korean Dream Escape: 7 Days of C...',
+      title: 'Korean Dream Escape: 7 Days of Culture',
       location: 'South Korea',
       price: 'Rp 24,990,000',
       rating: 4.6,
@@ -106,11 +106,11 @@ function App(): React.JSX.Element {
     },
     {
       id: '4',
-      title: 'Parisian Charm: Exploring the Best o...',
+      title: 'Parisian Charm: Exploring the Best of Paris',
       location: 'Spain',
       price: 'Rp 25,990,000',
       rating: 4.6,
-      agency: 'Catalan Esca...'
+      agency: 'Catalan Escape'
     }
   ];
 
@@ -120,11 +120,11 @@ function App(): React.JSX.Element {
     const getIcon = () => {
       if (isContinent) {
         switch(item.name) {
-          case 'Asia': return <FontAwesome name="globe" size={24} color="#00AA44" />;
-          case 'Oceania': return <FontAwesome name="ship" size={24} color="#00AA44" />;
-          case 'Europe': return <FontAwesome name="building" size={24} color="#00AA44" />;
-          case 'North America': return <FontAwesome name="tree" size={24} color="#00AA44" />;
-          default: return <FontAwesome name="map-marker" size={24} color="#00AA44" />;
+          case 'Asia': return <FontAwesome name="globe" size={24} color="#FF5E57" />;
+          case 'Oceania': return <FontAwesome name="ship" size={24} color="#FF5E57" />;
+          case 'Europe': return <FontAwesome name="building" size={24} color="#FF5E57" />;
+          case 'North America': return <FontAwesome name="tree" size={24} color="#FF5E57" />;
+          default: return <FontAwesome name="map-marker" size={24} color="#FF5E57" />;
         }
       } else {
         switch(item.name) {
@@ -161,7 +161,7 @@ function App(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#00AA44" />
+      <StatusBar barStyle="light-content" backgroundColor="#FF5E57" />
       
       <ScrollView 
         contentInsetAdjustmentBehavior="automatic"
@@ -265,7 +265,7 @@ function App(): React.JSX.Element {
                 </View>
                 
                 <View style={styles.gridCardContent}>
-                  <Text style={styles.gridPackageTitle} numberOfLines={2}>{item.title}</Text>
+                  <Text style={styles.gridPackageTitle} numberOfLines={3}>{item.title}</Text>
                   
                   <View style={styles.gridAgencyRow}>
                     <View style={styles.agencyBadge}>
@@ -292,7 +292,7 @@ function App(): React.JSX.Element {
       <View style={styles.bottomNavContainer}>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
           <View style={styles.navIconContainer}>
-            <Ionicons name="home" size={24} color="#00AA44" />
+            <Ionicons name="home" size={24} color="#FF5E57" />
           </View>
           <Text style={[styles.navText, styles.activeNavText]}>Home</Text>
         </TouchableOpacity>
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    backgroundColor: '#00AA44',
+    backgroundColor: '#FF5E57',
     padding: 20,
     paddingTop: 40,
     borderBottomLeftRadius: 0,
@@ -386,6 +386,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: FONTS.SATOSHI_BOLD,
     marginBottom: 5,
+    lineHeight: 34,
   },
   subHeading: {
     color: '#FFFFFF',
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
     // Specific styles for trip type items
   },
   continentIcon: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#FFF0F0',
   },
   tripTypeIcon: {
     backgroundColor: '#E3F2FD',
@@ -525,10 +526,12 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   packageTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
+    flexWrap: 'wrap',
+    lineHeight: 20,
   },
   locationContainer: {
     flexDirection: 'row',
@@ -574,16 +577,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   gridCard: {
-    width: '48%',
+    width: (width - 60) / 2,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 10,
+    overflow: 'hidden',
     marginBottom: 15,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
-    overflow: 'hidden',
+    minHeight: 260,
   },
   gridImageContainer: {
     position: 'relative',
@@ -608,19 +612,23 @@ const styles = StyleSheet.create({
   },
   gridCardContent: {
     padding: 10,
+    width: '100%',
   },
   gridPackageTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
-    height: 40,
+    minHeight: 40,
+    flexWrap: 'wrap',
+    lineHeight: 18,
   },
   gridAgencyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    flexWrap: 'wrap',
   },
   agencyBadge: {
     flexDirection: 'row',
@@ -628,7 +636,7 @@ const styles = StyleSheet.create({
   },
   agencyBadgeText: {
     color: '#333',
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: FONTS.SATOSHI_MEDIUM,
   },
   gridRatingContainer: {
@@ -668,7 +676,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
+    height: 70,
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -696,7 +704,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_REGULAR,
   },
   activeNavText: {
-    color: '#00AA44',
+    color: '#FF5E57',
     fontWeight: '500',
     fontFamily: FONTS.SATOSHI_BOLD,
   },
