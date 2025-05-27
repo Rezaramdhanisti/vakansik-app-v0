@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,8 +9,10 @@ import {
   Dimensions,
   FlatList,
   StatusBar,
-  Image
+  Image,
+  Switch
 } from 'react-native';
+import Modal from 'react-native-modal';
 import Text from '../../components/Text';
 import { FONTS,FONT_WEIGHT } from '../../config/fonts';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -22,6 +24,21 @@ const { width } = Dimensions.get('window');
 
 function SearchScreen(): React.JSX.Element {
   const [activeCategory, setActiveCategory] = useState('Castles');
+  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
+  const [sortByHighestPrice, setSortByHighestPrice] = useState(false);
+  const [sortByLowestPrice, setSortByLowestPrice] = useState(false);
+  // Define property listing type
+  type PropertyListing = {
+    id: string;
+    location: string;
+    builtYear: string;
+    dateRange: string;
+    price: string;
+    nights: string;
+    isFavorite: boolean;
+  };
+  
+  const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
   
   // Categories data
   const categories = [
@@ -31,6 +48,26 @@ function SearchScreen(): React.JSX.Element {
     { id: '4', name: 'Jakarta', icon: 'home-modern' },
     { id: '5', name: 'Yogyakarta', icon: 'tree' },
   ];
+
+  // Convert price string to number for sorting
+  const getPriceValue = (priceString: string) => {
+    // Extract the numeric part from strings like 'Rp53,601,871'
+    const numericString = priceString.replace(/[^0-9]/g, '');
+    return parseInt(numericString, 10);
+  };
+
+  // Apply filters and sorting to property listings
+  useEffect(() => {
+    let sorted = [...propertyListings];
+    
+    if (sortByHighestPrice) {
+      sorted.sort((a, b) => getPriceValue(b.price) - getPriceValue(a.price));
+    } else if (sortByLowestPrice) {
+      sorted.sort((a, b) => getPriceValue(a.price) - getPriceValue(b.price));
+    }
+    
+    setFilteredListings(sorted);
+  }, [sortByHighestPrice, sortByLowestPrice]);
 
   // Property listings data
   const propertyListings = [
@@ -181,20 +218,95 @@ function SearchScreen(): React.JSX.Element {
       
       {/* Property Listings */}
       <FlatList
-        data={propertyListings}
+        data={filteredListings.length > 0 ? filteredListings : propertyListings}
         renderItem={renderPropertyItem}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listingsContainer}
       />
       
-      {/* Map Button */}
+      {/* Filter Button */}
       <View style={styles.mapButtonContainer}>
-        <TouchableOpacity style={styles.mapButton}>
+        <TouchableOpacity 
+          style={styles.mapButton}
+          onPress={() => setFilterModalVisible(true)}
+        >
           <Text style={styles.mapButtonText}>Filter</Text>
           <MaterialCommunityIcons name="filter-outline" size={18} color="#FFF" style={styles.mapIcon} />
         </TouchableOpacity>
       </View>
+      
+      {/* Price Filter Modal */}
+      <Modal
+        isVisible={isFilterModalVisible}
+        onBackdropPress={() => setFilterModalVisible(false)}
+        backdropOpacity={0.5}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Filters</Text>
+            <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.filterSection}>
+            <Text style={styles.filterSectionTitle}>Price</Text>
+            
+            <View style={styles.filterOption}>
+              <View style={styles.filterOptionTextContainer}>
+                <Text style={styles.filterOptionText}>Highest price first</Text>
+              </View>
+              <Switch
+                value={sortByHighestPrice}
+                onValueChange={(value) => {
+                  setSortByHighestPrice(value);
+                  if (value) setSortByLowestPrice(false);
+                }}
+                trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+            
+            <View style={styles.filterOption}>
+              <View style={styles.filterOptionTextContainer}>
+                <Text style={styles.filterOptionText}>Lowest price first</Text>
+              </View>
+              <Switch
+                value={sortByLowestPrice}
+                onValueChange={(value) => {
+                  setSortByLowestPrice(value);
+                  if (value) setSortByHighestPrice(false);
+                }}
+                trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+          
+          <View style={styles.modalFooter}>
+            <TouchableOpacity 
+              style={styles.clearButton}
+              onPress={() => {
+                setSortByHighestPrice(false);
+                setSortByLowestPrice(false);
+              }}
+            >
+              <Text style={styles.clearButtonText}>Clear all</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.applyButton}
+              onPress={() => setFilterModalVisible(false)}
+            >
+              <Text style={styles.applyButtonText}>Show results</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -372,8 +484,91 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   mapIcon: {
-    marginLeft: 4,
+    marginLeft: 5,
   },
+  // Modal styles
+  modal: {
+    margin: 0,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 30,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  filterSection: {
+    marginBottom: 20,
+  },
+  filterSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  filterOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  filterOptionTextContainer: {
+    flex: 1,
+  },
+  filterOptionText: {
+    fontSize: 16,
+  },
+  filterOptionDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  clearButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '45%',
+  },
+  clearButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  applyButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    backgroundColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '45%',
+  },
+  applyButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFF',
+  }
 });
 
 export default SearchScreen;
