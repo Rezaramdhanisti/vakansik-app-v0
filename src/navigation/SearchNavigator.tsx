@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 // Import screens
 import SearchScreen from '../screens/Search/SearchScreen';
 import TripDetailScreen from '../screens/TripDetail/TripDetailScreen';
+import ConfirmPayScreen from '../screens/ConfirmPay/ConfirmPayScreen';
 
 // Define the type for the property object
 type Property = {
@@ -27,6 +28,18 @@ type Property = {
 export type SearchStackParamList = {
   SearchMain: undefined;
   TripDetail: { property: Property };
+  ConfirmPay: {
+    tripDetails: {
+      title: string;
+      image: any;
+      rating: number;
+      reviewCount: number;
+      date: string;
+      timeSlot: string;
+      price: string;
+      guestCount: number;
+    };
+  };
 };
 
 const Stack = createStackNavigator<SearchStackParamList>();
@@ -67,6 +80,14 @@ function SearchNavigator() {
       <Stack.Screen 
         name="TripDetail" 
         component={TripDetailScreen}
+        options={{
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+        }}
+      />
+      <Stack.Screen 
+        name="ConfirmPay" 
+        component={ConfirmPayScreen}
         options={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',

@@ -59,7 +59,7 @@ function AppNavigator() {
           component={SearchNavigator}
           options={({ route }) => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-            const hideOnScreens = ['TripDetail'];
+            const hideOnScreens = ['TripDetail', 'ConfirmPay'];
             const isTabBarHidden = hideOnScreens.includes(routeName);
             
             return {

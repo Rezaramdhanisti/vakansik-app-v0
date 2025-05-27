@@ -7,6 +7,9 @@ import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps
 } from '@gorhom/bottom-sheet';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/types';
 import Text from './Text';
 import { FONTS } from '../config/fonts';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -22,6 +25,8 @@ export interface DateBottomSheetRef {
 }
 
 const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss }, ref) => {
+  // Get navigation with proper typing
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   // ref for bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const calendarBottomSheetRef = useRef<BottomSheetModal>(null);
@@ -327,7 +332,28 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                   <Text style={styles.guestInfoText}>for {adultCount} guests</Text>
                 </View>
                 
-                <TouchableOpacity style={styles.nextButton}>
+                <TouchableOpacity 
+                  style={styles.nextButton}
+                  onPress={() => {
+                    // Navigate to the Confirm and Pay screen with trip details
+                    navigation.navigate('ConfirmPay', {
+                      tripDetails: {
+                        title: 'Explore Bali Highlights -Customized Full day Tour',
+                        image: require('../../assets/images/lovina-1.jpg'),
+                        rating: 4.9,
+                        reviewCount: 5098,
+                        date: `${selectedDate}`,
+                        timeSlot: dateTimeData.find(item => 
+                          item.type === 'timeSlot' && 
+                          item.date === selectedDate && 
+                          item.slotId === selectedTimeSlot
+                        )?.time || '3:30 AM – 11:45 AM',
+                        price: 'Rp780,000',
+                        guestCount: adultCount
+                      }
+                    });
+                  }}
+                >
                   <Text style={styles.nextButtonText}>Next</Text>
                 </TouchableOpacity>
               </View>
