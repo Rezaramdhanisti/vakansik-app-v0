@@ -77,7 +77,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
       {/* Main content */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Trip Images */}
-        <View style={{ width: width, height: 300 }}>
+        <View style={styles.imageGalleryWrapper}>
           <FlatList
             data={images}
             renderItem={renderImageItem}
@@ -95,50 +95,92 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
         {/* Trip Title and Location */}
         <View style={styles.detailsContainer}>
           <Text style={styles.tripTitle}>{property.title}</Text>
-          <Text style={styles.tripLocation}>Room in {property.location}</Text>
+          <Text style={styles.tripDescription}>{property.description}</Text>
           
-          {/* Features */}
-          <View style={styles.featuresContainer}>
-            <Text style={styles.featureText}>
-              {features.bedrooms} bedrooms • {features.beds} beds • {features.bathrooms}
-            </Text>
-          </View>
           
           {/* Rating */}
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={16} color="#000" />
-            <Text style={styles.ratingText}>{property.rating} review</Text>
+
+            <Text style={styles.propertyRating}> • {property.rating} • </Text>
+            <Text style={styles.propertyReviews}>{property.reviews}</Text>
           </View>
           
+          {/* Divider */}
+          <View style={styles.divider} />
+          
           {/* Description */}
-          <View style={styles.sectionContainer}>
+          <View >
             <Text style={styles.sectionTitle}>About this trip</Text>
             <Text style={styles.sectionContent}>{property.description}</Text>
           </View>
-          
-          {/* What this trip offers */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>What this trip offers</Text>
-            <View style={styles.amenitiesContainer}>
-              {['Mountain view', 'Kitchen', 'Wifi', 'Free parking', 'Air conditioning', 'Washing machine'].map((amenity, index) => (
-                <View key={index} style={styles.amenityItem}>
-                  <Ionicons name="checkmark-circle-outline" size={20} color="#000" />
-                  <Text style={styles.amenityText}>{amenity}</Text>
+
+          <View style={styles.divider} />
+          {/* What you'll do */}
+          <View>
+            <Text style={styles.sectionTitle}>What you'll do</Text>
+            <View style={styles.timelineContainer}>
+              {[
+                {
+                  title: 'Pick up from stay',
+                  description: 'Meet between 8-8:30am for pick up from your stay',
+                  icon: 'car-outline'
+                },
+                {
+                  title: 'Meet the instructors',
+                  description: 'Get a full safety briefing and preparation for rafting adventure',
+                  icon: 'people-outline'
+                },
+                {
+                  title: 'Get rafting',
+                  description: 'Enjoy two-hour white-water rafting trip at Ayung river',
+                  icon: 'boat-outline'
+                },
+                {
+                  title: 'Enjoy lunch',
+                  description: 'Take a break and enjoy a buffet-style delicious lunch',
+                  icon: 'restaurant-outline'
+                },
+                {
+                  title: 'Visit coffee farm',
+                  description: 'Explore a local coffee plantation before returning to your accommodation',
+                  icon: 'cafe-outline'
+                },
+                {
+                  title: 'Drop off from stay',
+                  description: 'Meet between 8-8:30am for drop off from your stay',
+                  icon: 'car-outline'
+                },
+              ].map((item, index, array) => (
+                <View key={index} style={styles.timelineItem}>
+                  <View style={styles.timelineIconContainer}>
+                    <View style={styles.timelineIcon}>
+                      <Ionicons name={item.icon} size={24} color="#000" />
+                    </View>
+                    {index < array.length - 1 && <View style={styles.timelineConnector} />}
+                  </View>
+                  <View style={styles.timelineContent}>
+                    <Text style={styles.timelineTitle}>{item.title}</Text>
+                    <Text style={styles.timelineDescription}>{item.description}</Text>
+                  </View>
                 </View>
               ))}
             </View>
           </View>
           
+          <View style={styles.divider} />
+
           {/* Location section */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Location</Text>
-            <View style={styles.mapPlaceholder}>
-              <Text style={styles.mapText}>Map view of {property.location}</Text>
-            </View>
+          <View>
+            <Text style={styles.sectionTitle}>Meeting Point</Text>
+            <Text style={styles.sectionSubtitle}>Pick up area available:</Text>
+            <Text style={styles.sectionContent}>Kuta, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu</Text>
+            <Text style={styles.locationAddress}>Ubud, Bali, 80572</Text>
           </View>
           
+          <View style={styles.divider} />
           {/* Host section */}
-          <View style={styles.sectionContainer}>
+          <View>
             <Text style={styles.sectionTitle}>Hosted by Raja</Text>
             <View style={styles.hostContainer}>
               <View style={styles.hostAvatar} />
@@ -195,11 +237,16 @@ const styles = StyleSheet.create({
   headerRightButtons: {
     flexDirection: 'row',
   },
+  imageGalleryWrapper: {
+    width: width,
+    height: 300,
+    overflow: 'hidden',
+    marginBottom: -20, // To create overlap with the details container
+  },
   imageContainer: {
     width,
     height: 300,
     position: 'relative',
-    overflow: 'hidden',
   },
   image: {
     width: '100%',
@@ -219,20 +266,29 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    marginTop: -20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 1,
   },
   tripTitle: {
     fontSize: 26,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
     marginBottom: 8,
+    textAlign:'center'
   },
-  tripLocation: {
+  tripDescription: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
-    color: '#333',
+    color: '#777777',
     marginBottom: 12,
+    textAlign:'center'
   },
   featuresContainer: {
     marginBottom: 12,
@@ -245,16 +301,27 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent:'center',
+  },
+  propertyRating: {
+    fontSize: 12,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+  },
+  propertyReviews: {
+    fontSize: 12,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#DDDDDD',
+    marginVertical: 20,
+    width: '100%',
   },
   ratingText: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#000',
     marginLeft: 4,
-  },
-  sectionContainer: {
-    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
@@ -267,6 +334,20 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#333',
     lineHeight: 22,
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  locationAddress: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#777777',
+    marginBottom: 16,
   },
   amenitiesContainer: {
     flexDirection: 'row',
@@ -283,6 +364,50 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#333',
     marginLeft: 8,
+  },
+  timelineContainer: {
+    marginTop: 10,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  timelineIconContainer: {
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  timelineIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  timelineConnector: {
+    width: 2,
+    height: 40,
+    backgroundColor: '#DDDDDD',
+    position: 'absolute',
+    top: 50,
+    left: 24,
+  },
+  timelineContent: {
+    flex: 1,
+    paddingBottom: 5,
+  },
+  timelineTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+    marginBottom: 4,
+  },
+  timelineDescription: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#777777',
+    lineHeight: 20,
   },
   mapPlaceholder: {
     height: 200,
