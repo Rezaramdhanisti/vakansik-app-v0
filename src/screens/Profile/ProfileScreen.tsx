@@ -1,14 +1,100 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 function ProfileScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
-        <Text style={styles.subtitle}>Manage your account and preferences</Text>
+        <TouchableOpacity style={styles.notificationButton}>
+          <Ionicons name="notifications-outline" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.profileCardContainer}>
+        <View style={styles.profileCard}>
+          <View style={styles.profileSection}>
+            <View style={styles.avatarContainer}>
+              <Text style={styles.avatarText}>R</Text>
+              <View style={styles.verifiedBadge}>
+                <MaterialCommunityIcons name="check" size={16} color="#FFF" />
+              </View>
+            </View>
+            
+            <Text style={styles.userName}>Reza</Text>
+            <Text style={styles.userType}>Guest</Text>
+          </View>
+          
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>2</Text>
+              <Text style={styles.statLabel}>Trips</Text>
+              <View style={styles.statDivider} />
+            </View>
+            
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>2</Text>
+              <Text style={styles.statLabel}>Reviews</Text>
+              <View style={styles.statDivider} />
+            </View>
+            
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>5</Text>
+              <Text style={styles.statLabel}>Years on Liburun</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      
+      {/* Menu Options */}
+      <View style={styles.menuContainer}>
+        {/* First Section */}
+        <View style={styles.menuSection}>
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="help-circle-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Get help</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#999" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>View profile</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#999" />
+          </TouchableOpacity>
+          
+        </View>
+        
+        {/* Divider */}
+        <View style={styles.divider} />
+        
+        {/* Second Section */}
+        <View style={styles.menuSection}>
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="people-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Refer a frined</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#999" />
+          </TouchableOpacity>
+          
+         
+          
+         
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="log-out-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Log out</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -19,23 +105,147 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginBottom: 10,
+    marginTop: 12,
+    height: 40
   },
-  subtitle: {
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileCardContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  profileCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  profileSection: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#222',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    position: 'relative',
+  },
+  avatarText: {
+    fontSize: 40,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#FFFFFF',
+  },
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FF5E57',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  userName: {
+    fontSize: 24,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#333',
+    marginBottom: 4,
+  },
+  userType: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
-    textAlign: 'center',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#333',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+  },
+  statDivider: {
+    position: 'absolute',
+    right: 0,
+    top: 10,
+    height: 30,
+    width: 1,
+    backgroundColor: '#F0F0F0',
+  },
+  // Menu styles
+  menuContainer: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  menuSection: {
+    backgroundColor: '#FFFFFF',
+    marginBottom: 16,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+    marginLeft: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#EEEEEE',
+    marginVertical: 8,
   },
 });
 
