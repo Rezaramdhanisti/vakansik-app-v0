@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  FlatList,
   StatusBar,
   Image,
   Switch
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import Modal from 'react-native-modal';
 import Text from '../../components/Text';
 import { FONTS,FONT_WEIGHT } from '../../config/fonts';
@@ -287,13 +287,16 @@ function SearchScreen(): React.JSX.Element {
       </View>
       
       {/* Property Listings */}
-      <FlatList
-        data={filteredListings.length > 0 ? filteredListings : propertyListings}
-        renderItem={renderPropertyItem}
-        keyExtractor={item => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listingsContainer}
-      />
+      <View style={styles.flashListContainer}>
+        <FlashList
+          data={filteredListings.length > 0 ? filteredListings : propertyListings}
+          renderItem={renderPropertyItem}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listingsContainer}
+          estimatedItemSize={350}
+        />
+      </View>
       
       {/* Filter Button */}
       <View style={styles.mapButtonContainer}>
@@ -503,9 +506,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     borderRadius: 1,
   },
+  flashListContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
   listingsContainer: {
-    padding: 16,
-    paddingBottom: 80, // Extra padding for the map button
+    paddingTop: 16,
+    paddingBottom: 80, 
   },
   propertyCard: {
     marginBottom: 24,
