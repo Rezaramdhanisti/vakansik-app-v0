@@ -158,6 +158,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   
   // Handle opening the calendar bottom sheet
   const handleOpenCalendar = useCallback(() => {
+    // Present the calendar bottom sheet without dismissing the first one
     calendarBottomSheetRef.current?.present();
   }, []);
   
@@ -214,6 +215,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     const formattedDate = `${month} ${day}`;
     setSelectedCalendarDate(formattedDate);
     setSelectedMonth(month);
+    
+    // Just close the calendar sheet without affecting the main sheet
     handleCloseCalendar();
   }, [handleCloseCalendar]);
   
@@ -342,6 +345,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
         backgroundStyle={styles.bottomSheetBackground}
         handleIndicatorStyle={styles.bottomSheetIndicator}
         backdropComponent={renderBackdrop}
+        stackBehavior="push" // This makes it stack on top of the first bottom sheet
       >
         <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
           <View style={styles.modalHeader}>
