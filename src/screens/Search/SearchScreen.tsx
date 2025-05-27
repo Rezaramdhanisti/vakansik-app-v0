@@ -38,7 +38,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const bottomSheetRef = useRef<BottomSheet>(null);
   
   // Snap points
-  const snapPoints = useMemo(() => ['40%'], []);
+  const snapPoints = useMemo(() => ['35%'], []);
   
   // Callbacks
   const handleSheetChanges = useCallback((index: number) => {
