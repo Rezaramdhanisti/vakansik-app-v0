@@ -272,7 +272,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => {
               // Small delay to allow item selection before hiding suggestions
-              setTimeout(() => setIsSearchFocused(false), 200);
+             setIsSearchFocused(false)
             }}
           />
         </View>
