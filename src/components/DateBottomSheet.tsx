@@ -254,9 +254,16 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
         {/* Only show Book Now button when a date and time slot are selected */}
         {selectedDate && selectedTimeSlot && (
           <View style={styles.bookButtonContainer}>
-            <TouchableOpacity style={styles.bookButton}>
-              <Text style={styles.bookButtonText}>Book now</Text>
-            </TouchableOpacity>
+            <View style={styles.bookingBar}>
+              <View style={styles.priceContainer}>
+                <Text style={styles.totalPriceText}>Rp780,000</Text>
+                <Text style={styles.guestInfoText}>for {adultCount} guests</Text>
+              </View>
+              
+              <TouchableOpacity style={styles.nextButton}>
+                <Text style={styles.nextButtonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </BottomSheetView>
@@ -408,18 +415,40 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   bookButtonContainer: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 8,
   },
-  bookButton: {
-    backgroundColor: '#000',
-    borderRadius: 8,
-    paddingVertical: 16,
+  bookingBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  bookButtonText: {
+  priceContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  totalPriceText: {
+    fontSize: 18,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+  },
+  guestInfoText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+  },
+  nextButton: {
+    backgroundColor: '#222',
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+  },
+  nextButtonText: {
     color: '#FFF',
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
