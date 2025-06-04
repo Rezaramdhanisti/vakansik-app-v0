@@ -18,6 +18,7 @@ interface ConfirmPayScreenProps {
         timeSlot: string;
         price: string;
         guestCount: number;
+        requiredIdCard?: boolean;
       };
     };
   };
@@ -29,6 +30,7 @@ interface Guest {
   name: string;
   title: 'Tuan' | 'Nona' | '';
   phoneNumber: string;
+  idCardNumber?: string;
 }
 
 // Define payment method types
@@ -50,8 +52,8 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   
   // Guest state management
   const [guests, setGuests] = useState<Guest[]>([
-    { id: '1', name: '', title: 'Tuan', phoneNumber: '+62' },
-    { id: '2', name: '', title: 'Tuan', phoneNumber: '+62' },
+    { id: '1', name: '', title: 'Tuan', phoneNumber: '+62', idCardNumber: '' },
+    { id: '2', name: '', title: 'Tuan', phoneNumber: '+62', idCardNumber: '' },
   ]);
   const [isGuestModalVisible, setIsGuestModalVisible] = useState(false);
   const [currentGuest, setCurrentGuest] = useState<Guest | null>(null);
@@ -97,8 +99,10 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     date: 'Saturday, Jun 28, 2025',
     timeSlot: '3:30 AM – 11:45 AM',
     price: 'Rp780,000',
-    guestCount: 2
+    guestCount: 2,
+    requiredIdCard: true
   };
+  
   
   const togglePrivateBooking = () => {
     setIsPrivate(!isPrivate);
@@ -128,6 +132,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   
   // Guest modal functions
   const openGuestModal = (guest: Guest) => {
+    console.log('Opening guest modal, requiredIdCard:', tripDetails.requiredIdCard);
     setCurrentGuest(guest);
     setEditedGuest({...guest});
     setIsGuestModalVisible(true);
@@ -144,7 +149,14 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const handleSaveGuest = () => {
     setShowValidation(true);
     
-    if (editedGuest && currentGuest && editedGuest.name && editedGuest.phoneNumber.length > 3) {
+    // Check if ID card is required and validate accordingly
+    const isIdCardValid = !tripDetails.requiredIdCard || 
+      (editedGuest?.idCardNumber && editedGuest.idCardNumber.trim() !== '');
+    
+    if (editedGuest && currentGuest && 
+        editedGuest.name && 
+        editedGuest.phoneNumber.length > 3 && 
+        isIdCardValid) {
       setGuests(guests.map(guest => 
         guest.id === currentGuest.id ? editedGuest : guest
       ));
@@ -236,6 +248,23 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                 />
               </View>
               {showValidation && (!editedGuest?.phoneNumber || editedGuest.phoneNumber.length <= 3) && <Text style={styles.inputLabel}>Isi nomor ponsel dulu, ya.</Text>}
+              
+              {/* ID Card Number Input - Temporarily always visible for debugging */}
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Nomor KTP"
+                      placeholderTextColor="#CCC"
+                      value={editedGuest?.idCardNumber}
+                      onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, idCardNumber: text})}
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                  <Text style={styles.infoText}>Nomor KTP diperlukan untuk berlabuh menggunakan kapal sesuai dengan peraturan pelayaran.</Text>
+                  {showValidation && (!editedGuest?.idCardNumber || editedGuest.idCardNumber.trim() === '') && 
+                    <Text style={styles.inputLabel}>Isi nomor KTP dulu, ya.</Text>
+                  }
+              )}
             </View>
             
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveGuest}>
@@ -622,6 +651,14 @@ const styles = StyleSheet.create({
     color: '#FF5A5F',
     marginBottom: 8,
   },
+  infoText: {
+    fontSize: 12,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666666',
+    marginTop: -4,
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
   inputContainer: {
     borderWidth: 1,
     borderColor: '#DDDDDD',
@@ -640,7 +677,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DDDDDD',
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 24,
   },
   countryCodeContainer: {
     flexDirection: 'row',
