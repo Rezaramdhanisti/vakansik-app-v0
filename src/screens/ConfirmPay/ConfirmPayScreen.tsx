@@ -27,7 +27,7 @@ interface ConfirmPayScreenProps {
 interface Guest {
   id: string;
   name: string;
-  title: 'Tuan' | 'Nyonya' | 'Nona';
+  title: 'Tuan' | 'Nona' | '';
   phoneNumber: string;
 }
 
@@ -171,7 +171,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                   style={[styles.titleOption]}
                   onPress={() => handleTitleChange('Tuan')}
                 >
-                  <View style={[styles.radioButton, editedGuest?.title === 'Tuan' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]} />
+                  <View style={[styles.radioButton, editedGuest?.title === 'Tuan' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]}>
+                    {editedGuest?.title === 'Tuan' && <View style={styles.radioButtonInner} />}
+                  </View>
                   <Text style={styles.titleText}>Tuan</Text>
                 </TouchableOpacity>
                 
@@ -180,11 +182,12 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                   style={[styles.titleOption, {marginLeft: 16}]}
                   onPress={() => handleTitleChange('Nona')}
                 >
-                  <View style={[styles.radioButton, editedGuest?.title === 'Nona' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]} />
+                  <View style={[styles.radioButton, editedGuest?.title === 'Nona' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]}>
+                    {editedGuest?.title === 'Nona' && <View style={styles.radioButtonInner} />}
+                  </View>
                   <Text style={styles.titleText}>Nona</Text>
                 </TouchableOpacity>
               </View>
-              {showValidation && !editedGuest?.title && <Text style={styles.inputLabel}>Pilih titel.</Text>}
               
               {/* Name Input */}
               <View style={styles.inputContainer}>
@@ -228,7 +231,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       </Modal>
       <View style={styles.header}>
         <View style={styles.placeholder} />
-        <Text style={styles.headerTitle}>Select a time</Text>
+        <Text style={styles.headerTitle}>Confirm and pay</Text>
         <TouchableOpacity onPress={handleGoBack} style={styles.closeButton}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
@@ -516,7 +519,7 @@ const styles = StyleSheet.create({
   // Title selection
   titleSelectionContainer: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 16
   },
   titleOption: {
     flexDirection: 'row',
@@ -549,6 +552,8 @@ const styles = StyleSheet.create({
   },
   modalRadioButtonSelected: {
     borderColor: '#FF5A5F',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   radioButtonInner: {
     width: 12,
@@ -567,13 +572,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#FF5A5F',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   inputContainer: {
     borderWidth: 1,
     borderColor: '#DDDDDD',
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 24,
   },
   input: {
     paddingHorizontal: 16,
@@ -621,7 +626,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-    margin: 16,
+    marginHorizontal: 16,
   },
   saveButtonText: {
     fontSize: 16,
@@ -639,8 +644,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 4,
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },
