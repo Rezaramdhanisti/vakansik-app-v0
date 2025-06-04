@@ -385,19 +385,6 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               </View>
             </View>
           </View>
-          
-          <View style={styles.divider} />
-          {/* Host section */}
-          <View>
-            <Text style={styles.sectionTitle}>Hosted by Raja</Text>
-            <View style={styles.hostContainer}>
-              <View style={styles.hostAvatar} />
-              <View style={styles.hostInfo}>
-                <Text style={styles.hostSince}>Host since 2018</Text>
-                <Text style={styles.hostRating}>⭐ 4.98 • 124 reviews</Text>
-              </View>
-            </View>
-          </View>
         </View>
       </ScrollView>
       
