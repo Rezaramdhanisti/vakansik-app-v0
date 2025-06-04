@@ -164,7 +164,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         <View style={styles.divider} />
         
         {/* Private Booking Option */}
-        <View style={styles.sectionContainer}>
+        {/* <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Book for just your group</Text>
           <View style={styles.privateBookingContainer}>
             <View style={styles.privateBookingRow}>
@@ -183,7 +183,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
               <Text style={styles.learnMoreText}>Learn more</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
         
         <View style={styles.divider} />
         
