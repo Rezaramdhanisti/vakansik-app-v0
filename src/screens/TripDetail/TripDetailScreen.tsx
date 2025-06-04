@@ -10,6 +10,7 @@ import {
   Dimensions,
   FlatList
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,10 +25,55 @@ const { width } = Dimensions.get('window');
 // Use StackScreenProps to properly type the component props
 type TripDetailScreenProps = StackScreenProps<SearchStackParamList, 'TripDetail'>;
 
+// Timeline data constant with day grouping
+const TIMELINE_DATA = [
+  {
+    day: 'Day 1',
+    activities: [
+      {
+        title: 'Pick up from stay',
+        description: 'Meet between 8-8:30am for pick up from your stay',
+        icon: 'car-outline'
+      },
+      {
+        title: 'Meet the instructors',
+        description: 'Get a full safety briefing and preparation for rafting adventure',
+        icon: 'people-outline'
+      },
+      {
+        title: 'Get rafting',
+        description: 'Enjoy two-hour white-water rafting trip at Ayung river',
+        icon: 'boat-outline'
+      },
+      {
+        title: 'Enjoy lunch',
+        description: 'Take a break and enjoy a buffet-style delicious lunch',
+        icon: 'restaurant-outline'
+      },
+    ]
+  },
+  {
+    day: 'Day 2',
+    activities: [
+      {
+        title: 'Visit coffee farm',
+        description: 'Explore a local coffee plantation before returning to your accommodation',
+        icon: 'cafe-outline'
+      },
+      {
+        title: 'Drop off from stay',
+        description: 'Meet between 8-8:30am for drop off from your stay',
+        icon: 'car-outline'
+      },
+    ]
+  }
+];
+
 function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.JSX.Element {
   const { property } = route.params;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({});
   
   // ref for bottom sheet modal
   const dateBottomSheetRef = useRef<DateBottomSheetRef>(null);
@@ -172,51 +218,51 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           <View>
             <Text style={styles.sectionTitle}>What you'll do</Text>
             <View style={styles.timelineContainer}>
-              {[
-                {
-                  title: 'Pick up from stay',
-                  description: 'Meet between 8-8:30am for pick up from your stay',
-                  icon: 'car-outline'
-                },
-                {
-                  title: 'Meet the instructors',
-                  description: 'Get a full safety briefing and preparation for rafting adventure',
-                  icon: 'people-outline'
-                },
-                {
-                  title: 'Get rafting',
-                  description: 'Enjoy two-hour white-water rafting trip at Ayung river',
-                  icon: 'boat-outline'
-                },
-                {
-                  title: 'Enjoy lunch',
-                  description: 'Take a break and enjoy a buffet-style delicious lunch',
-                  icon: 'restaurant-outline'
-                },
-                {
-                  title: 'Visit coffee farm',
-                  description: 'Explore a local coffee plantation before returning to your accommodation',
-                  icon: 'cafe-outline'
-                },
-                {
-                  title: 'Drop off from stay',
-                  description: 'Meet between 8-8:30am for drop off from your stay',
-                  icon: 'car-outline'
-                },
-              ].map((item, index, array) => (
-                <View key={index} style={styles.timelineItem}>
-                  <View style={styles.timelineIconContainer}>
-                    <View style={styles.timelineIcon}>
-                      <Ionicons name={item.icon} size={24} color="#000" />
-                    </View>
-                    {index < array.length - 1 && <View style={styles.timelineConnector} />}
+              {TIMELINE_DATA.map((dayData, dayIndex) => {
+                const isCollapsed = collapsedDays[dayIndex] || false;
+                
+                return (
+                  <View key={dayIndex} style={styles.dayContainer}>
+                    <TouchableOpacity 
+                      style={styles.dayTitleContainer}
+                      onPress={() => setCollapsedDays({...collapsedDays, [dayIndex]: !isCollapsed})}
+                    >
+                      <Text style={styles.dayTitle}>{dayData.day}</Text>
+                      <Ionicons 
+                        name={isCollapsed ? 'chevron-down-outline' : 'chevron-up-outline'} 
+                        size={20} 
+                        color="#000" 
+                      />
+                    </TouchableOpacity>
+                    
+                    {!isCollapsed && (
+                        <FlashList
+                          data={dayData.activities}
+                          estimatedItemSize={80}
+                          renderItem={({ item, index }) => {
+                            const isLastItem = index === dayData.activities.length - 1;
+                            return (
+                              <View style={styles.timelineItem}>
+                                <View style={styles.timelineIconContainer}>
+                                  <View style={styles.timelineIcon}>
+                                    <Ionicons name={item.icon} size={24} color="#000" />
+                                  </View>
+                                  {!isLastItem && <View style={styles.timelineConnector} />}
+                                </View>
+                                <View style={styles.timelineContent}>
+                                  <Text style={styles.timelineTitle}>{item.title}</Text>
+                                  <Text style={styles.timelineDescription}>{item.description}</Text>
+                                </View>
+                              </View>
+                            );
+                          }}
+                          keyExtractor={(item, index) => `${dayIndex}-${index}`}
+                          showsVerticalScrollIndicator={false}
+                        />
+                    )}
                   </View>
-                  <View style={styles.timelineContent}>
-                    <Text style={styles.timelineTitle}>{item.title}</Text>
-                    <Text style={styles.timelineDescription}>{item.description}</Text>
-                  </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
           
@@ -543,7 +589,22 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   timelineContainer: {
-    marginTop: 10,
+    marginTop: 10
+  },
+  dayContainer: {
+    marginBottom: 20,
+  },
+  dayTitleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingVertical: 4,
+  },
+  dayTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
   },
   timelineItem: {
     flexDirection: 'row',
