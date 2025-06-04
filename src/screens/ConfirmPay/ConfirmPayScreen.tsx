@@ -57,6 +57,8 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const [currentGuest, setCurrentGuest] = useState<Guest | null>(null);
   const [editedGuest, setEditedGuest] = useState<Guest | null>(null);
   const [showValidation, setShowValidation] = useState(false);
+  const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   
   // Payment methods data
   const paymentMethods = useMemo<PaymentMethod[]>(() => [
@@ -107,6 +109,19 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   };
   
   const handleBookNow = () => {
+    // Validate guest information
+    const incompleteGuests = guests.filter(guest => 
+      !guest.name || guest.name.trim() === '' || 
+      !guest.title || 
+      guest.phoneNumber.length <= 3
+    );
+    
+    if (incompleteGuests.length > 0) {
+      setErrorMessage('Mohon lengkapi informasi semua tamu terlebih dahulu.');
+      setIsErrorModalVisible(true);
+      return;
+    }
+    
     // Handle booking logic here
     console.log('Booking confirmed');
   };
@@ -435,6 +450,39 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         </View>
       </ScrollView>
       
+      {/* Error Modal */}
+      <Modal
+        visible={isErrorModalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setIsErrorModalVisible(false)}
+      >
+        <View style={styles.errorModalOverlay}>
+          <View style={[styles.errorModalContainer]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Perhatian</Text>
+              <TouchableOpacity onPress={() => setIsErrorModalVisible(false)} style={styles.modalCloseButton}>
+                <Ionicons name="close-outline" size={24} color="#000" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalContent}>
+              <View style={styles.errorIconContainer}>
+                <Ionicons name="alert-circle" size={48} color="#FF5A5F" />
+              </View>
+              <Text style={styles.errorMessage}>{errorMessage}</Text>
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.saveButton} 
+              onPress={() => setIsErrorModalVisible(false)}
+            >
+              <Text style={styles.saveButtonText}>Mengerti</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      
       {/* Book Now Button */}
       <View style={styles.bookButtonContainer}>
         <TouchableOpacity style={styles.bookButton} onPress={handleBookNow}>
@@ -632,6 +680,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#FFFFFF',
+  },
+  errorModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorModalContainer: {
+    width: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingBottom: 16,
+  },
+  errorIconContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  errorMessage: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   header: {
     flexDirection: 'row',
@@ -953,10 +1024,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   termsText: {
-    fontSize: 14,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
-    lineHeight: 20,
   },
   termsLink: {
     color: '#0066CC',
