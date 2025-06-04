@@ -3,12 +3,14 @@ import {
   View,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
   Image,
   Dimensions,
-  FlatList
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Animated,
+  Pressable,
+  StatusBar,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -24,6 +26,31 @@ const { width } = Dimensions.get('window');
 
 // Use StackScreenProps to properly type the component props
 type TripDetailScreenProps = StackScreenProps<SearchStackParamList, 'TripDetail'>;
+
+// Pickup area data constant
+const PICKUP_AREAS = [
+  {
+    id: '1',
+    area: 'Kuta',
+    locations: 'Kuta, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu',
+    address: 'Ubud, Bali, 80572',
+    isDefault: true,
+  },
+  {
+    id: '2',
+    area: 'Canggu',
+    locations: 'Canggu, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu',
+    address: 'Canggu, Bali, 80572',
+    isDefault: false,
+  },
+  {
+    id: '3',
+    area: 'Denpasar',
+    locations: 'Denpasar, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu',
+    address: 'Denpasar, Bali, 80572',
+    isDefault: false,
+  },
+];
 
 // Timeline data constant with day grouping
 const TIMELINE_DATA = [
@@ -74,6 +101,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({});
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
   
   // ref for bottom sheet modal
   const dateBottomSheetRef = useRef<DateBottomSheetRef>(null);
@@ -271,9 +299,25 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           {/* Location section */}
           <View>
             <Text style={styles.sectionTitle}>Meeting Point</Text>
-            <Text style={styles.sectionSubtitle}>Pick up area available:</Text>
-            <Text style={styles.sectionContent}>Kuta, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu</Text>
-            <Text style={styles.locationAddress}>Ubud, Bali, 80572</Text>
+            <FlashList
+              data={PICKUP_AREAS.filter(item => item.isDefault || showMoreOptions)}
+              renderItem={({ item }) => (
+                <View>
+                  <Text style={styles.sectionSubtitle}>Pick up area {item.area}</Text>
+                  <Text style={styles.sectionContent}>{item.locations}</Text>
+                  <Text style={styles.locationAddress}>{item.address}</Text>
+                </View>
+              )}
+              estimatedItemSize={80}
+              keyExtractor={item => item.id}
+            />
+            
+            <Text 
+              style={[styles.locationAddress, styles.toggleOption]} 
+              onPress={() => setShowMoreOptions(!showMoreOptions)}
+            >
+              {showMoreOptions ? 'Hide Options' : 'More Options'}
+            </Text>
           </View>
           
           <View style={styles.divider} />
@@ -558,16 +602,23 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 16,
-    fontFamily: FONTS.SATOSHI_MEDIUM,
+    fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginTop: 10,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 12,
   },
   locationAddress: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#777777',
     marginBottom: 16,
+  },
+  toggleOption: {
+    color: '#222',
+    fontWeight: '500',
+    marginVertical: 5,
+  },
+  pickupAreaItem: {
   },
   amenitiesContainer: {
     flexDirection: 'row',
