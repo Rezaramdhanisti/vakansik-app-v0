@@ -137,7 +137,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     }
   };
   
-  const handleTitleChange = (title: 'Tuan' | 'Nyonya' | 'Nona') => {
+  const handleTitleChange = (title: 'Tuan' | 'Nona') => {
     if (editedGuest) {
       setEditedGuest({...editedGuest, title});
     }
