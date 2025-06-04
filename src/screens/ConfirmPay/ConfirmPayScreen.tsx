@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Switch, SafeAreaView, ScrollView, Dimensions } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, Switch, SafeAreaView, ScrollView, Dimensions, Modal, TextInput } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -23,6 +23,14 @@ interface ConfirmPayScreenProps {
   };
 }
 
+// Define guest interface
+interface Guest {
+  id: string;
+  name: string;
+  title: 'Tuan' | 'Nyonya' | 'Nona';
+  phoneNumber: string;
+}
+
 // Define payment method types
 type PaymentMethodType = 'card' | 'gopay' | 'other';
 
@@ -39,6 +47,16 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const navigation = useNavigation();
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card-1');
+  
+  // Guest state management
+  const [guests, setGuests] = useState<Guest[]>([
+    { id: '1', name: '', title: 'Tuan', phoneNumber: '+62' },
+    { id: '2', name: '', title: 'Tuan', phoneNumber: '+62' },
+  ]);
+  const [isGuestModalVisible, setIsGuestModalVisible] = useState(false);
+  const [currentGuest, setCurrentGuest] = useState<Guest | null>(null);
+  const [editedGuest, setEditedGuest] = useState<Guest | null>(null);
+  const [showValidation, setShowValidation] = useState(false);
   
   // Payment methods data
   const paymentMethods = useMemo<PaymentMethod[]>(() => [
@@ -93,14 +111,127 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     console.log('Booking confirmed');
   };
   
+  // Guest modal functions
+  const openGuestModal = (guest: Guest) => {
+    setCurrentGuest(guest);
+    setEditedGuest({...guest});
+    setIsGuestModalVisible(true);
+    setShowValidation(false);
+  };
+  
+  const closeGuestModal = () => {
+    setIsGuestModalVisible(false);
+    setCurrentGuest(null);
+    setEditedGuest(null);
+    setShowValidation(false);
+  };
+  
+  const handleSaveGuest = () => {
+    setShowValidation(true);
+    
+    if (editedGuest && currentGuest && editedGuest.name && editedGuest.phoneNumber.length > 3) {
+      setGuests(guests.map(guest => 
+        guest.id === currentGuest.id ? editedGuest : guest
+      ));
+      closeGuestModal();
+    }
+  };
+  
+  const handleTitleChange = (title: 'Tuan' | 'Nyonya' | 'Nona') => {
+    if (editedGuest) {
+      setEditedGuest({...editedGuest, title});
+    }
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
+      {/* Guest Details Modal */}
+      <Modal
+        visible={isGuestModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeGuestModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              
+              <Text style={styles.modalTitle}>Detail Pengunjung</Text>
+              <TouchableOpacity onPress={closeGuestModal} style={styles.modalCloseButton}>
+                <Ionicons name="close-outline" size={24} color="#000" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalContent}>
+              <Text style={styles.modalSubtitle}>Pastikan mengisi detail pengunjung dengan benar untuk kelancaran acara.</Text>
+              
+              {/* Title Selection */}
+              <View style={styles.titleSelectionContainer}>
+                <TouchableOpacity 
+                  style={[styles.titleOption]}
+                  onPress={() => handleTitleChange('Tuan')}
+                >
+                  <View style={[styles.radioButton, editedGuest?.title === 'Tuan' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]} />
+                  <Text style={styles.titleText}>Tuan</Text>
+                </TouchableOpacity>
+                
+                
+                <TouchableOpacity 
+                  style={[styles.titleOption, {marginLeft: 16}]}
+                  onPress={() => handleTitleChange('Nona')}
+                >
+                  <View style={[styles.radioButton, editedGuest?.title === 'Nona' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]} />
+                  <Text style={styles.titleText}>Nona</Text>
+                </TouchableOpacity>
+              </View>
+              {showValidation && !editedGuest?.title && <Text style={styles.inputLabel}>Pilih titel.</Text>}
+              
+              {/* Name Input */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nama lengkap"
+                  placeholderTextColor="#CCC"
+                  value={editedGuest?.name}
+                  onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, name: text})}
+                />
+              </View>
+              {showValidation && (!editedGuest?.name || editedGuest.name.trim() === '') && <Text style={styles.inputLabel}>Isi nama pengunjung dulu, ya.</Text>}
+              
+              {/* Phone Input */}
+              <View style={styles.phoneInputContainer}>
+                <View style={styles.countryCodeContainer}>
+                  <Image 
+                    source={require('../../../assets/images/lovina-1.jpg')} 
+                    style={styles.flagIcon} 
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.countryCode}>+62</Text>
+                </View>
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder="Nomor Ponsel"
+                  placeholderTextColor="#CCC"
+                  value={editedGuest?.phoneNumber.replace('+62', '')}
+                  onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, phoneNumber: '+62' + text})}
+                  keyboardType="phone-pad"
+                />
+              </View>
+              {showValidation && (!editedGuest?.phoneNumber || editedGuest.phoneNumber.length <= 3) && <Text style={styles.inputLabel}>Isi nomor ponsel dulu, ya.</Text>}
+            </View>
+            
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveGuest}>
+              <Text style={styles.saveButtonText}>Simpan</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+        <View style={styles.placeholder} />
+        <Text style={styles.headerTitle}>Select a time</Text>
+        <TouchableOpacity onPress={handleGoBack} style={styles.closeButton}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Confirm and pay</Text>
-        <View style={styles.placeholder} />
       </View>
       
       <ScrollView
@@ -139,6 +270,33 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
             <Text style={styles.sectionTitle}>Guests</Text>
           </View>
           <Text style={styles.sectionContent}>{tripDetails.guestCount} adults</Text>
+          
+          {/* Guest List */}
+          <View style={styles.guestListContainer}>
+            {guests.map((guest, index) => (
+              <TouchableOpacity 
+                key={guest.id} 
+                style={styles.guestItem}
+                onPress={() => openGuestModal(guest)}
+              >
+                <View style={styles.guestItemContent}>
+                  <Text style={styles.guestItemTitle}>
+                    Guest {index + 1}{guest.name ? `: ${guest.name}` : ''}
+                  </Text>
+                  {guest.name ? (
+                    <Text style={styles.guestItemSubtitle}>
+                      {guest.title} • {guest.phoneNumber}
+                    </Text>
+                  ) : (
+                    <Text style={styles.guestItemSubtitle}>
+                      Tap to add details
+                    </Text>
+                  )}
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#888" />
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
         
         <View style={styles.divider} />
@@ -221,11 +379,11 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                       )}
                     </View>
                     {item.isSelected ? (
-                      <View style={styles.radioButton}>
-                        <View style={styles.radioButtonInner} />
+                      <View style={styles.paymentRadioButton}>
+                        <View style={styles.paymentRadioButtonInner} />
                       </View>
                     ) : (
-                      <View style={styles.radioButtonEmpty} />
+                      <View style={styles.paymentRadioButtonEmpty} />
                     )}
                   </TouchableOpacity>
                   
@@ -289,6 +447,187 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  // Guest list styles
+  guestListContainer: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    borderRadius: 8,
+  },
+  guestItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  guestItemContent: {
+    flex: 1,
+  },
+  guestItemTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#000',
+    marginBottom: 4,
+  },
+  guestItemSubtitle: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#888',
+  },
+  
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 34, // Safe area bottom padding
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+  },
+  modalContent: {
+    padding: 16,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#555',
+    marginBottom: 20,
+  },
+  
+  // Title selection
+  titleSelectionContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  titleOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  titleOptionSelected: {
+    backgroundColor: '#F8F8F8',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CCCCCC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  radioButtonEmpty: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CCCCCC',
+    marginRight: 8,
+  },
+  radioButtonSelected: {
+    borderColor: '#FF5A5F',
+  },
+  modalRadioButtonSelected: {
+    borderColor: '#FF5A5F',
+  },
+  radioButtonInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#FF5A5F',
+  },
+  titleText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#000',
+  },
+  
+  // Input styles
+  inputLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#FF5A5F',
+    marginBottom: 16,
+  },
+  inputContainer: {
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  input: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#000',
+  },
+  phoneInputContainer: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  countryCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    borderRightWidth: 1,
+    borderRightColor: '#DDDDDD',
+  },
+  flagIcon: {
+    width: 20,
+    height: 14,
+    marginRight: 4,
+  },
+  countryCode: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#000',
+  },
+  phoneInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#000',
+  },
+  
+  // Save button
+  saveButton: {
+    backgroundColor: '#FF385C',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    margin: 16,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#FFFFFF',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -298,13 +637,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
   },
-  backButton: {
+  closeButton: {
     padding: 4,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
+    flex: 1,
+    textAlign: 'center',
   },
   placeholder: {
     width: 24,
@@ -457,7 +802,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
   },
-  radioButton: {
+  paymentRadioButton: {
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -466,13 +811,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioButtonInner: {
+  paymentRadioButtonInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
     backgroundColor: '#000',
   },
-  radioButtonEmpty: {
+  paymentRadioButtonEmpty: {
     width: 24,
     height: 24,
     borderRadius: 12,
