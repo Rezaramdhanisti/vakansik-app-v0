@@ -384,6 +384,17 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
                 <Text style={styles.infoText}>Cancel at least 1 day before the start time for a full refund.</Text>
               </View>
             </View>
+            
+            {/* Price includes/excludes */}
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="cash-outline" size={24} color="#333" />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Price details</Text>
+                <Text style={styles.infoText}>Price includes transportation. Gratuities (tipping) are not included.</Text>
+              </View>
+            </View>
           </View>
         </View>
       </ScrollView>
