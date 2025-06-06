@@ -27,7 +27,7 @@ type Property = {
 // Define the type for the search stack navigation
 export type SearchStackParamList = {
   SearchMain: undefined;
-  TripDetail: { property: Property };
+  TripDetail: { property: Property; guestCount?: number };
   ConfirmPay: {
     tripDetails: {
       title: string;

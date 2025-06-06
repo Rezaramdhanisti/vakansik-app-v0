@@ -50,11 +50,30 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card-1');
   
-  // Guest state management
-  const [guests, setGuests] = useState<Guest[]>([
-    { id: '1', name: '', title: 'Tuan', phoneNumber: '+62', idCardNumber: '' },
-    { id: '2', name: '', title: 'Tuan', phoneNumber: '+62', idCardNumber: '' },
-  ]);
+  // Default trip details if not provided through route params
+  const tripDetails = route.params?.tripDetails || {
+    title: 'Explore Bali Highlights -Customized Full day Tour',
+    image: require('../../../assets/images/lovina-1.jpg'),
+    rating: 4.9,
+    reviewCount: 5098,
+    date: 'Saturday, Jun 28, 2025',
+    timeSlot: '3:30 AM – 11:45 AM',
+    price: 'Rp780,000',
+    guestCount: 2,
+    requiredIdCard: true
+  };
+  
+  // Guest state management - initialize based on guestCount from route params
+  const [guests, setGuests] = useState<Guest[]>(() => {
+    const count = tripDetails.guestCount || 2;
+    return Array.from({ length: count }, (_, index) => ({
+      id: (index + 1).toString(),
+      name: '',
+      title: 'Tuan',
+      phoneNumber: '+62',
+      idCardNumber: ''
+    }));
+  });
   const [isGuestModalVisible, setIsGuestModalVisible] = useState(false);
   const [currentGuest, setCurrentGuest] = useState<Guest | null>(null);
   const [editedGuest, setEditedGuest] = useState<Guest | null>(null);
@@ -89,20 +108,6 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const handleSelectPaymentMethod = (id: string) => {
     setSelectedPaymentMethod(id);
   };
-  
-  // Default trip details if not provided through route params
-  const tripDetails = route.params?.tripDetails || {
-    title: 'Explore Bali Highlights -Customized Full day Tour',
-    image: require('../../../assets/images/lovina-1.jpg'),
-    rating: 4.9,
-    reviewCount: 5098,
-    date: 'Saturday, Jun 28, 2025',
-    timeSlot: '3:30 AM – 11:45 AM',
-    price: 'Rp780,000',
-    guestCount: 2,
-    requiredIdCard: true
-  };
-  
   
   const togglePrivateBooking = () => {
     setIsPrivate(!isPrivate);
@@ -250,21 +255,20 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
               {showValidation && (!editedGuest?.phoneNumber || editedGuest.phoneNumber.length <= 3) && <Text style={styles.inputLabel}>Isi nomor ponsel dulu, ya.</Text>}
               
               {/* ID Card Number Input - Temporarily always visible for debugging */}
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Nomor KTP"
-                      placeholderTextColor="#CCC"
-                      value={editedGuest?.idCardNumber}
-                      onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, idCardNumber: text})}
-                      keyboardType="number-pad"
-                    />
-                  </View>
-                  <Text style={styles.infoText}>Nomor KTP diperlukan untuk berlabuh menggunakan kapal sesuai dengan peraturan pelayaran.</Text>
-                  {showValidation && (!editedGuest?.idCardNumber || editedGuest.idCardNumber.trim() === '') && 
-                    <Text style={styles.inputLabel}>Isi nomor KTP dulu, ya.</Text>
-                  }
-              )}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nomor KTP"
+                  placeholderTextColor="#CCC"
+                  value={editedGuest?.idCardNumber}
+                  onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, idCardNumber: text})}
+                  keyboardType="number-pad"
+                />
+              </View>
+              <Text style={styles.infoText}>Nomor KTP diperlukan untuk berlabuh menggunakan kapal sesuai dengan peraturan pelayaran.</Text>
+              {showValidation && (!editedGuest?.idCardNumber || editedGuest.idCardNumber.trim() === '') && 
+                <Text style={styles.inputLabel}>Isi nomor KTP dulu, ya.</Text>
+              }
             </View>
             
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveGuest}>

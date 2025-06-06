@@ -17,6 +17,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 export interface DateBottomSheetProps {
   price?: string;
   onDismiss?: () => void;
+  initialGuestCount?: number;
 }
 
 export interface DateBottomSheetRef {
@@ -24,7 +25,7 @@ export interface DateBottomSheetRef {
   dismiss: () => void;
 }
 
-const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss }, ref) => {
+const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss, initialGuestCount = 2 }, ref) => {
   // Get navigation with proper typing
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   // ref for bottom sheet modal
@@ -45,8 +46,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     }
   }));
   
-  // State for guest count
-  const [adultCount, setAdultCount] = useState(2);
+  // State for guest count, initialized with the value from props or default to 2
+  const [adultCount, setAdultCount] = useState(initialGuestCount);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   

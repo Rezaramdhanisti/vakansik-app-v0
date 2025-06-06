@@ -97,7 +97,7 @@ const TIMELINE_DATA = [
 ];
 
 function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.JSX.Element {
-  const { property } = route.params;
+  const { property, guestCount = 2 } = route.params; // Default to 2 guests if not provided
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({});
@@ -464,6 +464,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
         <DateBottomSheet 
           ref={dateBottomSheetRef} 
           onDismiss={handleSheetDismiss}
+          initialGuestCount={guestCount} // Pass the guest count from the previous screen
         />
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
