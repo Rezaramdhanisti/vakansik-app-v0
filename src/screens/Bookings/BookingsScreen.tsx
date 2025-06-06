@@ -1,16 +1,29 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Image, FlatList, ScrollView } from 'react-native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type BookingsScreenProps = {
   navigation: any;
 };
 
 function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element {
-  // Mock data for bookings - empty for now to show the empty state
-  const bookings = [];
+  // Mock data for bookings
+  const bookings = [
+    {
+      id: '1',
+      destination: 'Nusa Penida',
+      title: 'Nusa Penida Day Tour With Snorkeling',
+      date: 'Jun 18',
+      time: '06:00',
+      host: 'I Dewa Made',
+      status: 'canceled',
+      image: require('../../../assets/images/lovina-1.jpg'),
+    },
+    // You can add more mock bookings here
+  ];
 
   const handleStartSearching = () => {
     navigation.navigate('Explore');
@@ -39,10 +52,32 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={styles.bookingsContainer}>
-          {/* Bookings list would go here when there are bookings */}
-          <Text>Your bookings will appear here</Text>
-        </View>
+        <ScrollView style={styles.bookingsContainer}>
+          <View>
+            <Text style={styles.destinationTitle}>{bookings[0].destination}</Text>
+            
+            {bookings.map((booking) => (
+              <TouchableOpacity 
+                key={booking.id}
+                style={styles.bookingCard}
+                onPress={() => navigation.navigate('DetailBooking', { booking })}
+              >
+                <View style={styles.bookingContent}>
+                  <Image source={booking.image} style={styles.bookingImage} />
+                  <View style={styles.bookingDetails}>
+                    <Text style={styles.bookingTitle}>{booking.title}</Text>
+                    <Text style={styles.bookingInfo}>
+                      {booking.date} · {booking.time} · Hosted by {booking.host}
+                    </Text>
+                    {booking.status === 'canceled' && (
+                      <Text style={styles.canceledText}>Canceled</Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -54,14 +89,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
-    padding: 16,
-    paddingTop: 24,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 0,
   },
   title: {
     fontSize: 28,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    height: 150
+    marginBottom: 10,
+    height: 50
   },
   emptyStateContainer: {
     flex: 1,
@@ -115,7 +152,76 @@ const styles = StyleSheet.create({
   },
   bookingsContainer: {
     flex: 1,
+    paddingHorizontal: 16,
+  },
+  destinationTitle: {
+    fontSize: 22,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#333',
+    marginBottom: 10,
+    marginTop: 5,
+  },
+  bookingCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 16,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  bookingContent: {
+    flexDirection: 'row',
+  },
+  bookingImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  bookingDetails: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  bookingTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#333',
+    marginBottom: 4,
+  },
+  bookingInfo: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+    marginBottom: 4,
+  },
+  canceledText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#FF5E57',
+  },
+  pastTripsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
     padding: 16,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  pastTripsText: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+  },
+  luggageIcon: {
+    width: 36,
+    height: 36,
+    position: 'absolute',
+    right: 24,
   },
 });
 
