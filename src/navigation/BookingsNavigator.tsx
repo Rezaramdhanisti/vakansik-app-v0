@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 // Import screens
 import BookingsScreen from '../screens/Bookings/BookingsScreen';
-import DetailBookingScreen from '../screens/Bookings/DetailBookinScreen';
+import DetailBookingScreen from '../screens/Bookings/DetailBookingScreen';
 
 // Define the type for the booking object
 type Booking = {

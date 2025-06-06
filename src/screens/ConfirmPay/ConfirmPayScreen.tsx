@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Image, Switch, SafeAreaView, ScrollView, Dimensions, Modal, TextInput } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 
@@ -118,21 +118,51 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   };
   
   const handleBookNow = () => {
-    // Validate guest information
-    const incompleteGuests = guests.filter(guest => 
-      !guest.name || guest.name.trim() === '' || 
-      !guest.title || 
-      guest.phoneNumber.length <= 3
-    );
+    // Check if all guests have been filled out
+    const allGuestsFilled = guests.every(guest => {
+      const nameValid = guest.name.trim() !== '';
+      const phoneValid = guest.phoneNumber.trim() !== '' && guest.phoneNumber.trim() !== '+62';
+      const idCardValid = !tripDetails.requiredIdCard || (guest.idCardNumber && guest.idCardNumber.trim() !== '');
+      return nameValid && phoneValid && idCardValid;
+    });
     
-    if (incompleteGuests.length > 0) {
-      setErrorMessage('Mohon lengkapi informasi semua tamu terlebih dahulu.');
+    if (!allGuestsFilled) {
+      setErrorMessage('Please fill out all guest information before booking.');
       setIsErrorModalVisible(true);
       return;
     }
     
-    // Handle booking logic here
-    console.log('Booking confirmed');
+    // Create a booking object from the current trip details and guest information
+    const booking = {
+      id: Math.random().toString(36).substring(2, 10), // Generate a random ID
+      destination: tripDetails.title.split('-')[0].trim(),
+      title: tripDetails.title,
+      date: tripDetails.date,
+      time: tripDetails.timeSlot,
+      host: 'Local Guide',
+      status: 'Upcoming',
+      image: tripDetails.image,
+    };
+    
+    // Navigate to the Bookings tab and then to DetailBookingScreen
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          { name: 'Bookings' },
+        ],
+      })
+    );
+    
+    // Add a small delay to ensure the tab navigation completes before navigating to the detail screen
+    setTimeout(() => {
+      navigation.dispatch({
+        ...CommonActions.navigate('Bookings', {
+          screen: 'DetailBooking',
+          params: { booking },
+        }),
+      });
+    }, 100);
   };
   
   // Guest modal functions
