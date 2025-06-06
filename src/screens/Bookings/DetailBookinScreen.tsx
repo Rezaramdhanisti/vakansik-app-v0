@@ -60,6 +60,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             source={require('../../../assets/images/lovina-1.jpg')} 
             style={styles.mainImage} 
             resizeMode="cover" 
+            borderRadius={16}
           />
           {booking.status === 'canceled' && (
             <View style={styles.cancelledBadge}>
@@ -72,51 +73,59 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
         <View style={styles.contentContainer}>
           <Text style={styles.tourTitle}>{booking.title}</Text>
           <Text style={styles.tourInfo}>
-            {startTime} · {booking.date} hours · Hosted by {booking.host}
+            {startTime} · {booking.date} 
           </Text>
-          
-          {/* Time Section */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Starts</Text>
-            <View style={styles.timeContainer}>
-              <Text style={styles.dateText}>Wed, {booking.date}</Text>
-              <Text style={styles.timeText}>{startTime}</Text>
-            </View>
-          </View>
-          
-          <View style={[styles.sectionContainer, styles.borderTop]}>
-            <Text style={styles.sectionTitle}>Ends</Text>
-            <View style={styles.timeContainer}>
-              <Text style={styles.dateText}>Wed, {booking.date}</Text>
-              <Text style={styles.timeText}>{endTime}</Text>
+          {/* Time Section - Card with Start and End */}
+          <View style={styles.timeCardContainer}>
+            <View style={styles.timeCard}>
+              <View style={styles.timeSection}>
+                <Text style={styles.timeSectionTitle}>Starts</Text>
+                <Text style={styles.dateText}>Wed, {booking.date}</Text>
+                <Text style={styles.timeText}>{startTime}</Text>
+              </View>
+              
+              <View style={styles.divider} />
+              
+              <View style={styles.timeSection}>
+                <Text style={[styles.timeSectionTitle, {textAlign: 'right'}]}>Ends</Text>
+                <Text style={[styles.dateText, {textAlign: 'right'}]}>Wed, {booking.date}</Text>
+                <Text style={[styles.timeText, {textAlign: 'right'}]}>{endTime}</Text>
+              </View>
             </View>
           </View>
           
           {/* Meeting Point */}
           <View style={[styles.sectionContainer, styles.borderTop]}>
             <View style={styles.iconTextContainer}>
-              <Ionicons name="location-outline" size={22} color="#333" style={styles.sectionIcon} />
-              <Text style={styles.sectionTitle}>Where to meet</Text>
+              <Ionicons name="location-outline" size={28} color="#333" style={styles.sectionIcon} />
+              <View>
+                <Text style={styles.sectionTitle}>Where to meet</Text>
+                <Text style={styles.locationText}>{meetingPoint}</Text>
+              </View>
             </View>
-            <Text style={styles.locationText}>{meetingPoint}</Text>
           </View>
           
           {/* What You'll Do */}
           <View style={[styles.sectionContainer, styles.borderTop]}>
             <View style={styles.iconTextContainer}>
-              <MaterialIcons name="event-note" size={22} color="#333" style={styles.sectionIcon} />
-              <Text style={styles.sectionTitle}>What you'll do</Text>
+              <MaterialIcons name="event-note" size={28} color="#333" style={styles.sectionIcon} />
+              <View>
+                <Text style={styles.sectionTitle}>What you'll do</Text>
+                <Text style={styles.descriptionText}>How you'll spend your time</Text>
+              </View>
             </View>
-            <Text style={styles.descriptionText}>How you'll spend your time</Text>
           </View>
           
           {/* Your Experience */}
           <View style={[styles.sectionContainer, styles.borderTop]}>
             <View style={styles.iconTextContainer}>
-              <Ionicons name="boat-outline" size={22} color="#333" style={styles.sectionIcon} />
+              <Ionicons name="boat-outline" size={28} color="#333" style={styles.sectionIcon} />
+              <View>
               <Text style={styles.sectionTitle}>Your experience</Text>
+              <Text style={styles.descriptionText}>Nusa Penida Day Tour With Snorkeling</Text>
+
+              </View>
             </View>
-            <Text style={styles.descriptionText}>Nusa Penida Day Tour With Snorkeling</Text>
           </View>
         </View>
       </ScrollView>
@@ -135,7 +144,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
-    zIndex: 10,
   },
   headerButton: {
     width: 40,
@@ -154,13 +162,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imageContainer: {
-    width: '100%',
-    height: 250,
-    position: 'relative',
+    height: 220,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    marginTop: 12
   },
   mainImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 16
   },
   cancelledBadge: {
     position: 'absolute',
@@ -183,13 +193,38 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginBottom: 8,
+    height: 60
   },
   tourInfo: {
     fontSize: 16,
-    fontFamily: FONTS.SATOSHI_REGULAR,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#666',
-    marginBottom: 24,
+    marginBottom: 30,
+  },
+  timeCardContainer: {
+    marginBottom: 16,
+  },
+  timeCard: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  timeSection: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+  },
+  timeSectionTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#333',
+    marginBottom: 6,
+  },
+  divider: {
+    width: 1,
+    backgroundColor: '#E0E0E0',
+    marginVertical: 20
   },
   sectionContainer: {
     paddingVertical: 16,
@@ -199,10 +234,10 @@ const styles = StyleSheet.create({
     borderTopColor: '#EEEEEE',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -210,12 +245,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateText: {
-    fontSize: 16,
-    fontFamily: FONTS.SATOSHI_REGULAR,
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#333',
   },
   timeText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#333',
   },
