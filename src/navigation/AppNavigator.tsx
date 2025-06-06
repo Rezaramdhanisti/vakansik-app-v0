@@ -7,11 +7,11 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 // Import screens
 import HomeScreen from '../screens/Home/HomeScreen';
-import BookingsScreen from '../screens/Bookings/BookingsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 
 // Import navigators
 import SearchNavigator from './SearchNavigator';
+import BookingsNavigator from './BookingsNavigator';
 
 // Create bottom tab navigator
 const Tab = createBottomTabNavigator();
@@ -72,7 +72,24 @@ function AppNavigator() {
             };
           }}
         />
-        <Tab.Screen name="Bookings" component={BookingsScreen} />
+        <Tab.Screen 
+          name="Bookings" 
+          component={BookingsNavigator}
+          options={({ route }) => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+            const hideOnScreens = ['DetailBooking'];
+            const isTabBarHidden = hideOnScreens.includes(routeName);
+            
+            return {
+              tabBarStyle: {
+                height: 60,
+                paddingBottom: 8,
+                paddingTop: 4,
+                display: isTabBarHidden ? 'none' : 'flex',
+              }
+            };
+          }}
+        />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
     </NavigationContainer>
