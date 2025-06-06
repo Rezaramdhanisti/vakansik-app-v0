@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Switch, SafeAreaView, ScrollView, Dimensions, Modal, TextInput } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, Switch, SafeAreaView, ScrollView, Dimensions, Modal, TextInput, ActivityIndicator } from 'react-native';
+import LottieView from 'lottie-react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
@@ -49,6 +50,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const navigation = useNavigation();
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card-1');
+  const [isLoading, setIsLoading] = useState(false);
   
   // Default trip details if not provided through route params
   const tripDetails = route.params?.tripDetails || {
@@ -132,6 +134,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       return;
     }
     
+    // Set loading state to true
+    setIsLoading(true);
+    
     // Create a booking object from the current trip details and guest information
     const booking = {
       id: Math.random().toString(36).substring(2, 10), // Generate a random ID
@@ -144,25 +149,31 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       image: tripDetails.image,
     };
     
-    // Navigate to the Bookings tab and then to DetailBookingScreen
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          { name: 'Bookings' },
-        ],
-      })
-    );
-    
-    // Add a small delay to ensure the tab navigation completes before navigating to the detail screen
+    // Add a 5-second delay before navigating
     setTimeout(() => {
-      navigation.dispatch({
-        ...CommonActions.navigate('Bookings', {
-          screen: 'DetailBooking',
-          params: { booking },
-        }),
-      });
-    }, 100);
+      // Reset loading state
+      setIsLoading(false);
+      
+      // Navigate to the Bookings tab and then to DetailBookingScreen
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: 'Bookings' },
+          ],
+        })
+      );
+      
+      // Add a small delay to ensure the tab navigation completes before navigating to the detail screen
+      setTimeout(() => {
+        navigation.dispatch({
+          ...CommonActions.navigate('Bookings', {
+            screen: 'DetailBooking',
+            params: { booking },
+          }),
+        });
+      }, 100);
+    }, 5000); // 5 seconds delay
   };
   
   // Guest modal functions
@@ -548,10 +559,29 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       
       {/* Book Now Button */}
       <View style={styles.bookButtonContainer}>
-        <TouchableOpacity style={styles.bookButton} onPress={handleBookNow}>
+        <TouchableOpacity 
+          style={styles.bookButton} 
+          onPress={handleBookNow}
+          disabled={isLoading}
+        >
           <Text style={styles.bookButtonText}>Book now</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingIndicatorContainer}>
+            <LottieView
+              source={require('../../../assets/lottie/loading-lottie.json')}
+              autoPlay
+              loop
+              style={styles.lottieAnimation}
+            />
+            <Text style={styles.loadingOverlayText}>Processing your booking...</Text>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -560,6 +590,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingIndicatorContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  lottieAnimation: {
+    width: 150,
+    height: 150,
+  },
+  loadingOverlayText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#000',
   },
   // Guest list styles
   guestListContainer: {
