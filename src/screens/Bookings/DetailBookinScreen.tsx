@@ -131,25 +131,6 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           {/* Section Divider */}
           <View style={styles.sectionDivider} />
           
-          {/* Reservation Details Section */}
-          <View style={styles.reservationContainer}>
-            <Text style={styles.reservationTitle}>Reservation details</Text>
-            
-            <View style={styles.confirmationContainer}>
-              <Text style={styles.confirmationLabel}>Confirmation code</Text>
-              <Text style={styles.confirmationCode}>TAZHPCAS</Text>
-            </View>
-            
-            <TouchableOpacity style={styles.receiptButton}>
-              <Ionicons name="receipt-outline" size={22} color="#333" style={styles.receiptIcon} />
-              <Text style={styles.receiptText}>Get receipts</Text>
-              <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
-            </TouchableOpacity>
-          </View>
-          
-          {/* Section Divider */}
-          <View style={styles.sectionDivider} />
-          
           {/* Where to Meet Section */}
           <View style={styles.meetingContainer}>
             <Text style={styles.meetingTitle}>Where to meet</Text>
@@ -168,7 +149,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             </View>
             
             <View style={styles.locationActions}>
-              <TouchableOpacity style={styles.locationActionButton}>
+              <TouchableOpacity style={styles.locationActionButtonAlt}>
                 <Ionicons name="copy-outline" size={22} color="#333" style={styles.locationActionIcon} />
                 <Text style={styles.locationActionText}>Copy address</Text>
                 <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
@@ -185,23 +166,26 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           {/* Section Divider */}
           <View style={styles.sectionDivider} />
           
-          {/* Payment Info Section */}
-          <View style={styles.paymentContainer}>
-            <Text style={styles.paymentTitle}>Payment info</Text>
+          {/* Reservation Details Section */}
+          <View style={styles.reservationContainer}>
+            <Text style={styles.reservationTitle}>Reservation details</Text>
             
+            <View style={styles.confirmationContainer}>
+              <Text style={styles.confirmationLabel}>Confirmation code</Text>
+              <Text style={styles.confirmationCode}>TAZHPCAS</Text>
+            </View>
             <View style={styles.costContainer}>
               <Text style={styles.costLabel}>Total cost</Text>
               <Text style={styles.costAmount}>Rp0.00 IDR</Text>
             </View>
             
-            <TouchableOpacity style={styles.receiptButtonAlt}>
+            <TouchableOpacity style={styles.receiptButton}>
               <Ionicons name="receipt-outline" size={22} color="#333" style={styles.receiptIcon} />
               <Text style={styles.receiptText}>Get receipts</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
             </TouchableOpacity>
           </View>
-          
-          {/* Section Divider */}
+                    {/* Section Divider */}
           <View style={styles.sectionDivider} />
           
           {/* Support Section */}
@@ -210,12 +194,12 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             <Text style={styles.supportDescription}>If you need help, we're available 24/7 from anywhere in the world.</Text>
             
             <TouchableOpacity style={styles.supportButton}>
-              <Ionicons name="logo-airbnb" size={22} color="#333" style={styles.supportIcon} />
+              <Ionicons name="help-circle-outline" size={22} color="#333" style={styles.supportIcon} />
               <Text style={styles.supportButtonText}>Contact Airbnb Support</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.supportButton}>
+            <TouchableOpacity style={styles.supportButtonAlt}>
               <Ionicons name="help-circle-outline" size={22} color="#333" style={styles.supportIcon} />
               <Text style={styles.supportButtonText}>Visit the Help Center</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
@@ -281,10 +265,11 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   contentContainer: {
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   tourTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     height: 60
@@ -373,10 +358,10 @@ const styles = StyleSheet.create({
   sectionDivider: {
     height: 8,
     backgroundColor: '#E9E9E9',
-    marginHorizontal: -20
+    marginHorizontal: -24
   },
   reservationTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 24,
@@ -415,7 +400,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   meetingTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 24,
@@ -456,10 +441,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
+  },
+  locationActionButtonAlt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
     borderColor: '#EEEEEE',
     marginBottom: -1, // Overlap borders
+    borderBottomWidth: 1,
   },
   locationActionIcon: {
     marginRight: 12,
@@ -474,10 +463,11 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   paymentTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginBottom: 24,
+    marginBottom: 18,
+    height: 26
   },
   costContainer: {
     marginBottom: 24,
@@ -489,7 +479,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   costAmount: {
-    fontSize: 20,
+    fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
   },
@@ -506,10 +496,11 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   supportTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
+    height: 28
   },
   supportDescription: {
     fontSize: 16,
@@ -522,8 +513,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
+    borderColor: '#EEEEEE',
+    marginBottom: -1, // Overlap borders
+  },
+  supportButtonAlt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
     borderTopWidth: 1,
-    borderBottomWidth: 1,
     borderColor: '#EEEEEE',
     marginBottom: -1, // Overlap borders
   },
