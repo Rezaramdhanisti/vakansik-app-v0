@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView, Modal, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useRef } from 'react';
+import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import Text from '../../components/Text';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import GuestBottomSheet, { GuestBottomSheetRef, GuestData } from '../../components/GuestBottomSheet';
 import { FONTS } from '../../config/fonts';
 
 interface ConfirmPayScreenProps {
@@ -30,7 +32,7 @@ interface Guest {
   name: string;
   title: 'Tuan' | 'Nona' | '';
   phoneNumber: string;
-  idCardNumber?: string;
+  idCardNumber: string; // Changed from optional to required to match GuestData
 }
 
 // Define payment method types
@@ -70,7 +72,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     return Array.from({ length: count }, (_, index) => ({
       id: (index + 1).toString(),
       name: '',
-      title: 'Tuan',
+      title: 'Tuan' as const, // Use const assertion to ensure type compatibility
       phoneNumber: '+62',
       idCardNumber: ''
     }));
@@ -175,148 +177,64 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     }, 5000); // 5 seconds delay
   };
   
+  // Reference to the guest bottom sheet
+  const guestBottomSheetRef = useRef<GuestBottomSheetRef>(null);
+  
   // Guest modal functions
   const openGuestModal = (guest: Guest) => {
     console.log('Opening guest modal, requiredIdCard:', tripDetails.requiredIdCard);
     setCurrentGuest(guest);
     setEditedGuest({...guest});
-    setIsGuestModalVisible(true);
     setShowValidation(false);
+    guestBottomSheetRef.current?.present();
   };
   
   const closeGuestModal = () => {
-    setIsGuestModalVisible(false);
+    guestBottomSheetRef.current?.dismiss();
     setCurrentGuest(null);
     setEditedGuest(null);
     setShowValidation(false);
   };
   
-  const handleSaveGuest = () => {
-    setShowValidation(true);
-    
-    // Check if ID card is required and validate accordingly
-    const isIdCardValid = !tripDetails.requiredIdCard || 
-      (editedGuest?.idCardNumber && editedGuest.idCardNumber.trim() !== '');
-    
-    if (editedGuest && currentGuest && 
-        editedGuest.name && 
-        editedGuest.phoneNumber.length > 3 && 
-        isIdCardValid) {
+  const handleSaveGuest = (guestData: GuestData) => {
+    if (currentGuest) {
+      // Convert GuestData to Guest type with the current ID
+      const updatedGuest: Guest = {
+        ...guestData,
+        id: currentGuest.id,
+        title: guestData.title as 'Tuan' | 'Nona' | '' // Ensure type compatibility
+      };
+      
+      // Update the guests array
       setGuests(guests.map(guest => 
-        guest.id === currentGuest.id ? editedGuest : guest
+        guest.id === currentGuest.id ? updatedGuest : guest
       ));
+      
+      // Close the bottom sheet after saving
       closeGuestModal();
-    }
-  };
-  
-  const handleTitleChange = (title: 'Tuan' | 'Nona') => {
-    if (editedGuest) {
-      setEditedGuest({...editedGuest, title});
     }
   };
   
   return (
     <SafeAreaView style={styles.container}>
-      {/* Guest Details Modal */}
-      <Modal
-        visible={isGuestModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeGuestModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              
-              <Text style={styles.modalTitle}>Detail Pengunjung</Text>
-              <TouchableOpacity onPress={closeGuestModal} style={styles.modalCloseButton}>
-                <Ionicons name="close-outline" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.modalContent}>
-              <Text style={styles.modalSubtitle}>Pastikan mengisi detail pengunjung dengan benar untuk kelancaran acara.</Text>
-              
-              {/* Title Selection */}
-              <View style={styles.titleSelectionContainer}>
-                <TouchableOpacity 
-                  style={[styles.titleOption]}
-                  onPress={() => handleTitleChange('Tuan')}
-                >
-                  <View style={[styles.radioButton, editedGuest?.title === 'Tuan' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]}>
-                    {editedGuest?.title === 'Tuan' && <View style={styles.radioButtonInner} />}
-                  </View>
-                  <Text style={styles.titleText}>Tuan</Text>
-                </TouchableOpacity>
-                
-                
-                <TouchableOpacity 
-                  style={[styles.titleOption, {marginLeft: 16}]}
-                  onPress={() => handleTitleChange('Nona')}
-                >
-                  <View style={[styles.radioButton, editedGuest?.title === 'Nona' ? styles.modalRadioButtonSelected : styles.radioButtonEmpty]}>
-                    {editedGuest?.title === 'Nona' && <View style={styles.radioButtonInner} />}
-                  </View>
-                  <Text style={styles.titleText}>Nona</Text>
-                </TouchableOpacity>
-              </View>
-              
-              {/* Name Input */}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nama lengkap"
-                  placeholderTextColor="#CCC"
-                  value={editedGuest?.name}
-                  onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, name: text})}
-                />
-              </View>
-              {showValidation && (!editedGuest?.name || editedGuest.name.trim() === '') && <Text style={styles.inputLabel}>Isi nama pengunjung dulu, ya.</Text>}
-              
-              {/* Phone Input */}
-              <View style={styles.phoneInputContainer}>
-                <View style={styles.countryCodeContainer}>
-                  <Image 
-                    source={require('../../../assets/images/lovina-1.jpg')} 
-                    style={styles.flagIcon} 
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.countryCode}>+62</Text>
-                </View>
-                <TextInput
-                  style={styles.phoneInput}
-                  placeholder="Nomor Ponsel"
-                  placeholderTextColor="#CCC"
-                  value={editedGuest?.phoneNumber.replace('+62', '')}
-                  onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, phoneNumber: '+62' + text})}
-                  keyboardType="phone-pad"
-                />
-              </View>
-              {showValidation && (!editedGuest?.phoneNumber || editedGuest.phoneNumber.length <= 3) && <Text style={styles.inputLabel}>Isi nomor ponsel dulu, ya.</Text>}
-              
-              {/* ID Card Number Input - Temporarily always visible for debugging */}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nomor KTP"
-                  placeholderTextColor="#CCC"
-                  value={editedGuest?.idCardNumber}
-                  onChangeText={(text) => editedGuest && setEditedGuest({...editedGuest, idCardNumber: text})}
-                  keyboardType="number-pad"
-                />
-              </View>
-              <Text style={styles.infoText}>Nomor KTP diperlukan untuk berlabuh menggunakan kapal sesuai dengan peraturan pelayaran.</Text>
-              {showValidation && (!editedGuest?.idCardNumber || editedGuest.idCardNumber.trim() === '') && 
-                <Text style={styles.inputLabel}>Isi nomor KTP dulu, ya.</Text>
-              }
-            </View>
-            
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveGuest}>
-              <Text style={styles.saveButtonText}>Simpan</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <BottomSheetModalProvider>
+      {/* Guest Bottom Sheet */}
+      <GuestBottomSheet
+        ref={guestBottomSheetRef}
+        onDismiss={closeGuestModal}
+        onSave={handleSaveGuest}
+        initialGuestData={editedGuest ? {
+          title: editedGuest.title,
+          name: editedGuest.name,
+          phoneNumber: editedGuest.phoneNumber,
+          idCardNumber: editedGuest.idCardNumber || ''
+        } : {
+          title: 'Tuan',
+          name: '',
+          phoneNumber: '+62',
+          idCardNumber: ''
+        }}
+      />
       <View style={styles.header}>
         <View style={styles.placeholder} />
         <Text style={styles.headerTitle}>Confirm and pay</Text>
@@ -488,84 +406,49 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
               scrollEnabled={false}
             />
           </View>
+        </View>
           
-         
-          
-          {/* Coupons Section */}
-          <View style={[styles.sectionContainer]}>
-            <Text style={styles.sectionTitle}>Coupons</Text>
-            <TouchableOpacity style={styles.couponButton}>
-              <Text style={styles.couponButtonText}>Enter a coupon</Text>
-              <Ionicons name="chevron-forward" size={24} color="#000" />
-            </TouchableOpacity>
+        {/* Coupons Section */}
+        <View style={[styles.sectionContainer]}>
+          <Text style={styles.sectionTitle}>Coupons</Text>
+          <TouchableOpacity style={styles.couponButton}>
+            <Text style={styles.couponButtonText}>Enter a coupon</Text>
+            <Ionicons name="chevron-forward" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        
+        {/* Price Details */}
+        <View style={[styles.sectionContainer, { marginTop: 24 }]}>
+          <Text style={styles.sectionTitle}>Price details</Text>
+          <View style={styles.priceDetailsRow}>
+            <Text style={styles.priceDetailsText}>Rp390,000.00 x 2 adults</Text>
+            <Text style={styles.priceDetailsValue}>Rp780,000.00</Text>
           </View>
-          
-          {/* Price Details */}
-          <View style={[styles.sectionContainer, { marginTop: 24 }]}>
-            <Text style={styles.sectionTitle}>Price details</Text>
-            <View style={styles.priceDetailsRow}>
-              <Text style={styles.priceDetailsText}>Rp390,000.00 x 2 adults</Text>
-              <Text style={styles.priceDetailsValue}>Rp780,000.00</Text>
-            </View>
-            <View style={styles.priceDivider} />
-            <View style={styles.priceDetailsRow}>
-              <Text style={styles.totalText}>Total <Text style={styles.totalCurrency}>IDR</Text></Text>
-              <Text style={styles.totalValue}>Rp780,000.00</Text>
-            </View>
-          </View>
-          
-          {/* Terms and Conditions */}
-          <View style={styles.termsContainer}>
-            <Text style={styles.termsText}>
-              By selecting the button, I agree to the <Text style={styles.termsLink}>booking terms</Text>, <Text style={styles.termsLink}>release and waiver</Text> and <Text style={styles.termsLink}>updated Terms of Service</Text>. View <Text style={styles.termsLink}>Privacy Policy</Text>.
-            </Text>
+          <View style={styles.priceDivider} />
+          <View style={styles.priceDetailsRow}>
+            <Text style={styles.totalText}>Total <Text style={styles.totalCurrency}>IDR</Text></Text>
+            <Text style={styles.totalValue}>Rp780,000.00</Text>
           </View>
         </View>
-      </ScrollView>
-      
-      {/* Error Modal */}
-      <Modal
-        visible={isErrorModalVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setIsErrorModalVisible(false)}
-      >
-        <View style={styles.errorModalOverlay}>
-          <View style={[styles.errorModalContainer]}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Perhatian</Text>
-              <TouchableOpacity onPress={() => setIsErrorModalVisible(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close-outline" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.modalContent}>
-              <View style={styles.errorIconContainer}>
-                <Ionicons name="alert-circle" size={48} color="#FF5A5F" />
-              </View>
-              <Text style={styles.errorMessage}>{errorMessage}</Text>
-            </View>
-            
-            <TouchableOpacity 
-              style={styles.saveButton} 
-              onPress={() => setIsErrorModalVisible(false)}
-            >
-              <Text style={styles.saveButtonText}>Mengerti</Text>
-            </TouchableOpacity>
-          </View>
+        
+        {/* Terms and Conditions */}
+        <View style={styles.termsContainer}>
+          <Text style={styles.termsText}>
+            By selecting the button, I agree to the <Text style={styles.termsLink}>booking terms</Text>, <Text style={styles.termsLink}>release and waiver</Text> and <Text style={styles.termsLink}>updated Terms of Service</Text>. View <Text style={styles.termsLink}>Privacy Policy</Text>.
+          </Text>
         </View>
-      </Modal>
-      
-      {/* Book Now Button */}
-      <View style={styles.bookButtonContainer}>
-        <TouchableOpacity 
-          style={styles.bookButton} 
-          onPress={handleBookNow}
-          disabled={isLoading}
-        >
-          <Text style={styles.bookButtonText}>Book now</Text>
-        </TouchableOpacity>
-      </View>
+        </ScrollView>
+        
+        {/* Book Now Button */}
+        <View style={styles.bookButtonContainer}>
+          <TouchableOpacity 
+            style={styles.bookButton} 
+            onPress={handleBookNow}
+            disabled={isLoading}
+          >
+            <Text style={styles.bookButtonText}>Book now</Text>
+          </TouchableOpacity>
+        </View>
       
       {/* Loading Overlay */}
       {isLoading && (
@@ -580,6 +463,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           </View>
         </View>
       )}
+      </BottomSheetModalProvider>
     </SafeAreaView>
   );
 };
