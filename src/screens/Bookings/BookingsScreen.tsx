@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, Image, FlatList, ScrollView } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView } from 'react-native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { FlashList } from '@shopify/flash-list';
 
 type BookingsScreenProps = {
   navigation: any;
@@ -52,32 +53,36 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView style={styles.bookingsContainer}>
-          <View>
-            <Text style={styles.destinationTitle}>{bookings[0].destination}</Text>
-            
-            {bookings.map((booking) => (
-              <TouchableOpacity 
-                key={booking.id}
-                style={styles.bookingCard}
-                onPress={() => navigation.navigate('DetailBooking', { booking })}
-              >
-                <View style={styles.bookingContent}>
-                  <Image source={booking.image} style={styles.bookingImage} />
-                  <View style={styles.bookingDetails}>
-                    <Text style={styles.bookingTitle}>{booking.title}</Text>
-                    <Text style={styles.bookingInfo}>
-                      {booking.date} · {booking.time} · Hosted by {booking.host}
-                    </Text>
-                    {booking.status === 'canceled' && (
-                      <Text style={styles.canceledText}>Canceled</Text>
-                    )}
+        <View style={styles.bookingsContainer}>
+          <Text style={styles.destinationTitle}>{bookings[0].destination}</Text>
+          
+          <View style={styles.flashListContainer}>
+            <FlashList
+              data={bookings}
+              renderItem={({ item: booking }) => (
+                <TouchableOpacity 
+                  style={styles.bookingCard}
+                  onPress={() => navigation.navigate('DetailBooking', { booking })}
+                >
+                  <View style={styles.bookingContent}>
+                    <Image source={booking.image} style={styles.bookingImage} />
+                    <View style={styles.bookingDetails}>
+                      <Text style={styles.bookingTitle}>{booking.title}</Text>
+                      <Text style={styles.bookingInfo}>
+                        {booking.date} · {booking.time} · Hosted by {booking.host}
+                      </Text>
+                      {booking.status === 'canceled' && (
+                        <Text style={styles.canceledText}>Canceled</Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              estimatedItemSize={100}
+            />
           </View>
-        </ScrollView>
+        </View>
       )}
     </SafeAreaView>
   );
@@ -153,6 +158,11 @@ const styles = StyleSheet.create({
   bookingsContainer: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  flashListContainer: {
+    flex: 1,
+    height: '100%',
+    marginBottom: 16,
   },
   destinationTitle: {
     fontSize: 22,
