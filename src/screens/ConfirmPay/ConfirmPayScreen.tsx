@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Switch, SafeAreaView, ScrollView, Dimensions, Modal, TextInput, ActivityIndicator } from 'react-native';
-import LottieView from 'lottie-react-native';
+import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
@@ -572,10 +571,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingIndicatorContainer}>
-            <LottieView
-              source={require('../../../assets/lottie/loading-lottie.json')}
-              autoPlay
-              loop
+            <ActivityIndicator
+              size="large"
+              color="#0066CC"
               style={styles.lottieAnimation}
             />
             <Text style={styles.loadingOverlayText}>Processing your booking...</Text>
@@ -615,8 +613,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   lottieAnimation: {
-    width: 150,
-    height: 150,
+    width: 50,
+    height: 50,
   },
   loadingOverlayText: {
     marginTop: 10,
