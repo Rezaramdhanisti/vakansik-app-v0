@@ -122,6 +122,9 @@ const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
         backgroundStyle={styles.bottomSheetBackground}
         handleIndicatorStyle={styles.bottomSheetIndicator}
         backdropComponent={renderBackdrop}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        android_keyboardInputMode="adjustResize"
       >
         <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
           <View style={styles.modalHeader}>
