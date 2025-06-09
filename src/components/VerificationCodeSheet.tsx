@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useState, useCallback, useMemo, forwardRef, useImperativeHandle, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -29,6 +29,7 @@ export interface VerificationCodeSheetRef {
 const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationCodeSheetProps>(
   ({ email, onVerificationComplete, onDismiss }, ref) => {
     const [verificationCode, setVerificationCode] = useState<string[]>(Array(6).fill(''));
+    const [isCodeIncorrect, setIsCodeIncorrect] = useState(false);
     const inputRefs = useRef<Array<TextInput | null>>(Array(6).fill(null));
     
     // ref for bottom sheet modal
@@ -41,6 +42,10 @@ const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationC
     useImperativeHandle(ref, () => ({
       present: () => {
         bottomSheetModalRef.current?.present();
+        // Focus on the first input after a short delay
+        setTimeout(() => {
+          inputRefs.current[0]?.focus();
+        }, 300);
       },
       dismiss: () => {
         bottomSheetModalRef.current?.dismiss();
@@ -50,6 +55,11 @@ const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationC
     const handleSheetChanges = useCallback((index: number) => {
       if (index === -1 && onDismiss) {
         onDismiss();
+      } else if (index === 0) {
+        // Focus on the first input when the sheet is opened
+        setTimeout(() => {
+          inputRefs.current[0]?.focus();
+        }, 300); // Small delay to ensure the sheet is fully opened
       }
     }, [onDismiss]);
 
@@ -75,22 +85,46 @@ const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationC
     const handleCodeChange = (text: string, index: number) => {
       // Only allow numbers
       if (!/^\d*$/.test(text)) return;
-
+      
       const newCode = [...verificationCode];
       newCode[index] = text;
       setVerificationCode(newCode);
-
-      // Auto-focus next input
-      if (text !== '' && index < 5) {
+      
+      // Auto-advance to next input
+      if (text && index < 5) {
         inputRefs.current[index + 1]?.focus();
-      }
-
-      // Check if code is complete
-      if (newCode.every(digit => digit !== '') && newCode.join('').length === 6) {
+      } else if (text && index === 5) {
+        // Last digit entered
         Keyboard.dismiss();
-        onVerificationComplete(newCode.join(''));
       }
     };
+    
+    // Define handleCodeComplete before using it in useEffect
+    const handleCodeComplete = useCallback(() => {
+      const code = verificationCode.join('');
+      if (code.length === 6) {
+        // Validate the code - correct code is 111111
+        if (code === '111111') {
+          setIsCodeIncorrect(false);
+          onVerificationComplete(code);
+        } else {
+          setIsCodeIncorrect(true);
+          // Reset the code fields
+          setVerificationCode(Array(6).fill(''));
+          // Focus on the first input field
+          setTimeout(() => {
+            inputRefs.current[0]?.focus();
+          }, 100);
+        }
+      }
+    }, [verificationCode, onVerificationComplete]);
+    
+    // Watch for complete code
+    useEffect(() => {
+      if (verificationCode.every(digit => digit !== '') && verificationCode.join('').length === 6) {
+        handleCodeComplete();
+      }
+    }, [verificationCode, handleCodeComplete]);
 
     const handleKeyPress = (e: any, index: number) => {
       // Handle backspace
@@ -101,7 +135,8 @@ const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationC
 
     const handleResendCode = () => {
       // Implement resend code logic here
-      console.log('Resending verification code to', email);
+      // Reset error state when resending code
+      setIsCodeIncorrect(false);
     };
 
     return (
@@ -125,6 +160,13 @@ const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationC
           <Text style={styles.subtitle}>
             Enter the code we emailed to {email}.
           </Text>
+          
+          {isCodeIncorrect ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle-outline" size={20} color="#C43E00" />
+              <Text style={styles.errorText}>The code you provided is incorrect. Please try again.</Text>
+            </View>
+          ) : null}
           
           <View style={styles.codeContainer}>
             {Array(6).fill(0).map((_, index) => (
@@ -184,22 +226,35 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#484848',
-    marginBottom: 32,
+    color: '#666',
+    marginBottom: 24,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFEFEA',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#C43E00',
+    marginLeft: 8,
+    fontSize: 14,
   },
   codeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 32,
+    marginBottom: 24,
   },
   codeInput: {
-    width: 48,
-    height: 48,
+    width: 50,
+    height: 50,
     borderWidth: 1,
     borderColor: '#DDDDDD',
-    borderRadius: 8,
+    borderRadius: 12,
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '500',
   },
   codeInputFilled: {
@@ -211,7 +266,9 @@ const styles = StyleSheet.create({
     borderColor: '#000',
   },
   resendContainer: {
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
   },
   resendText: {
     fontSize: 16,
