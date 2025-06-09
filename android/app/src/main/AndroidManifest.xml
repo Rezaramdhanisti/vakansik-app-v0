@@ -30,6 +30,13 @@
             <!-- Accepts URIs that begin with "com.vakansik.capy://auth" -->
             <data android:scheme="com.vakansik.capy" android:host="auth" />
         </intent-filter>
+        <!-- Additional intent filter for auth/callback path specifically -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="com.vakansik.capy" android:host="auth" android:pathPattern="/callback" />
+        </intent-filter>
       </activity>
     </application>
 </manifest>
