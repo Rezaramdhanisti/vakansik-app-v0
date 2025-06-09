@@ -114,11 +114,11 @@ function HomeScreen(): React.JSX.Element {
     const getIcon = () => {
       if (isContinent) {
         switch(item.name) {
-          case 'Asia': return <FontAwesome name="globe" size={24} color="#FF5E57" />;
-          case 'Oceania': return <FontAwesome name="ship" size={24} color="#FF5E57" />;
-          case 'Europe': return <FontAwesome name="building" size={24} color="#FF5E57" />;
-          case 'North America': return <FontAwesome name="tree" size={24} color="#FF5E57" />;
-          default: return <FontAwesome name="map-marker" size={24} color="#FF5E57" />;
+          case 'Asia': return <FontAwesome name="globe" size={24} color="#FF7E5F" />;
+          case 'Oceania': return <FontAwesome name="ship" size={24} color="#FF7E5F" />;
+          case 'Europe': return <FontAwesome name="building" size={24} color="#FF7E5F" />;
+          case 'North America': return <FontAwesome name="tree" size={24} color="#FF7E5F" />;
+          default: return <FontAwesome name="map-marker" size={24} color="#FF7E5F" />;
         }
       } else {
         switch(item.name) {
@@ -154,7 +154,7 @@ function HomeScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#FF5E57" />
+      <StatusBar barStyle="light-content" backgroundColor="#FF7E5F" />
       
       <ScrollView 
         contentInsetAdjustmentBehavior="automatic"
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    backgroundColor: '#FF5E57',
+    backgroundColor: '#FF7E5F',
     padding: 20,
     paddingTop: 40,
     borderBottomLeftRadius: 0,
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   gridPriceValue: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
-    color: '#FF5E57',
+    color: '#FF7E5F',
   },
   gridPaxText: {
     fontSize: 10,

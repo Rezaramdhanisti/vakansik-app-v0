@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   continueButton: {
-    backgroundColor: '#E61E4D',
+    backgroundColor: '#FF7E5F',
     height: 48,
     borderRadius: 8,
     justifyContent: 'center',
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontSize: 16,
-    color: '#E61E4D',
+    color: '#FF7E5F',
     fontWeight: '600',
   },
 });

@@ -130,7 +130,7 @@ function ProfileScreen(): React.JSX.Element {
                 </Text>
               </View>
               {isLoggingOut && (
-                <ActivityIndicator size="small" color="#FF5E57" />
+                <ActivityIndicator size="small" color="#FF7E5F" />
               )}
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FF5E57',
+    backgroundColor: '#FF7E5F',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
