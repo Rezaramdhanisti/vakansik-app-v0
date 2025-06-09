@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { AuthContext } from '../../navigation/AppNavigator';
 
 function ProfileScreen(): React.JSX.Element {
+  const navigation = useNavigation();
+  const { isLoggedIn, logout } = useContext(AuthContext);
+  
+  const handleLoginPress = () => {
+    navigation.navigate('Auth' as never);
+  };
+  
+  const handleLogoutPress = () => {
+    logout();
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -80,20 +92,28 @@ function ProfileScreen(): React.JSX.Element {
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="people-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Refer a frined</Text>
+              <Text style={styles.menuItemText}>Refer a friend</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
           
-         
-          
-         
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="log-out-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Log out</Text>
-            </View>
-          </TouchableOpacity>
+          {/* Login/Logout Button */}
+          {isLoggedIn ? (
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogoutPress}>
+              <View style={styles.menuItemLeft}>
+                <Ionicons name="log-out-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>Log out</Text>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.menuItem} onPress={handleLoginPress}>
+              <View style={styles.menuItemLeft}>
+                <Ionicons name="log-in-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>Log in</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </SafeAreaView>

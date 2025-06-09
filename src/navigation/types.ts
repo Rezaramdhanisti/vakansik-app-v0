@@ -1,3 +1,20 @@
+export type AuthStackParamList = {
+  Login: undefined;
+  // Add other auth screens as needed (Register, ForgotPassword, etc.)
+};
+
+export type MainStackParamList = {
+  Main: undefined;
+  Auth: undefined;
+};
+
+export type TabStackParamList = {
+  Home: undefined;
+  Explore: undefined;
+  Bookings: undefined;
+  Profile: undefined;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   TripDetail: { id: string };
