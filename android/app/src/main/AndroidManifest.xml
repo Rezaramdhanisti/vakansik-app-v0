@@ -22,6 +22,14 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <!-- Deep linking for Supabase authentication -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <!-- Accepts URIs that begin with "com.vakansik.capy://auth" -->
+            <data android:scheme="com.vakansik.capy" android:host="auth" />
+        </intent-filter>
       </activity>
     </application>
 </manifest>

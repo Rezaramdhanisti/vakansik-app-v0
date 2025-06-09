@@ -1,22 +1,41 @@
-import React, { useContext } from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../../navigation/AppNavigator';
+import { supabase } from '../../../lib/supabase';
 
 function ProfileScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const { isLoggedIn, logout } = useContext(AuthContext);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLoginPress = () => {
     navigation.navigate('Auth' as never);
   };
   
-  const handleLogoutPress = () => {
-    logout();
+  const handleLogoutPress = async () => {
+    try {
+      setIsLoggingOut(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error);
+        Alert.alert('Logout Failed', error.message);
+        return;
+      }
+      
+      // Successfully logged out, update the auth context
+      logout();
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      Alert.alert('Logout Failed', 'An unexpected error occurred during logout');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -99,11 +118,21 @@ function ProfileScreen(): React.JSX.Element {
           
           {/* Login/Logout Button */}
           {isLoggedIn ? (
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogoutPress}>
+            <TouchableOpacity 
+              style={styles.menuItem} 
+              onPress={handleLogoutPress}
+              disabled={isLoggingOut}
+            >
               <View style={styles.menuItemLeft}>
                 <Ionicons name="log-out-outline" size={24} color="#333" />
-                <Text style={styles.menuItemText}>Log out</Text>
+                <Text style={styles.menuItemText}>
+                  {isLoggingOut ? 'Logging out...' : 'Log out'}
+                </Text>
               </View>
+              {isLoggingOut && (
+                <ActivityIndicator size="small" color="#FF5E57" />
+              )}
+              <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={styles.menuItem} onPress={handleLoginPress}>

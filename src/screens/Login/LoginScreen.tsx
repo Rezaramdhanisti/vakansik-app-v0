@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -16,31 +17,57 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../../navigation/AppNavigator';
 import { AuthStackParamList } from '../../navigation/types';
+import { supabase } from '../../../lib/supabase';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const { login } = useContext(AuthContext);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // Reset error message
+    setErrorMessage(null);
+    
     // Basic email validation
     if (!email || !email.includes('@')) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
+      setErrorMessage('Please enter a valid email address');
       return;
     }
     
     // Basic password validation
     if (!password || password.length < 6) {
-      Alert.alert('Invalid Password', 'Password must be at least 6 characters');
+      setErrorMessage('Password must be at least 6 characters');
       return;
     }
     
-    // Perform login logic here
-    console.log('Logging in with:', email, password);
-    login(); // Update auth context
-    navigation.goBack(); // Return to previous screen
+    try {
+      setLoading(true);
+      
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('Login error:', error.message);
+        setErrorMessage(error.message);
+        return;
+      }
+      
+      console.log('Login successful:', data);
+      login(); // Update auth context
+      navigation.goBack(); // Return to previous screen
+    } catch (error) {
+      console.error('Unexpected login error:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -96,11 +123,22 @@ const LoginScreen = () => {
             </View>
           </View>
 
+          {errorMessage && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          )}
+          
           <TouchableOpacity 
-            style={styles.continueButton}
+            style={[styles.continueButton, loading && styles.disabledButton]}
             onPress={handleContinue}
+            disabled={loading}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.continueButtonText}>Continue</Text>
+            )}
           </TouchableOpacity>
           
           <View style={styles.divider}>
@@ -189,6 +227,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabledButton: {
+    backgroundColor: '#f5a5b5',
+  },
+  errorContainer: {
+    backgroundColor: '#FFF8F6',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#FFCDD2',
+  },
+  errorText: {
+    color: '#C43E00',
+    fontSize: 14,
   },
   divider: {
     flexDirection: 'row',

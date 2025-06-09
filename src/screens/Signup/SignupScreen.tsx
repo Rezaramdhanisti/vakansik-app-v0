@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -19,6 +20,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../../navigation/types';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { supabase } from '../../../lib/supabase';
 
 type SignupScreenProps = {
   route: RouteProp<AuthStackParamList, 'Signup'>;
@@ -28,11 +30,12 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
   const { email = '' } = route.params || {};
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const [firstName, setFirstName] = useState('');
-  const [birthday, setBirthday] = useState('');
+  const [phone, setPhone] = useState('');
   const [userEmail, setUserEmail] = useState(email);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Reference to the bottom sheet
   const verificationSheetRef = useRef<VerificationCodeSheetRef>(null);
@@ -47,12 +50,11 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
     verificationSheetRef.current?.dismiss();
   }, []);
 
-  // Function to handle verification completion
-  const handleVerificationComplete = useCallback((code: string) => {
-    console.log('Verification completed with code:', code);
+  // Function to handle continue button press in the verification sheet
+  const handleContinue = useCallback(() => {
+    console.log('User continued from verification screen');
     verificationSheetRef.current?.dismiss();
-    // TODO: Handle verification logic
-    // Navigate back to login after successful verification
+    // Navigate back to login after dismissing the verification popup
     navigation.navigate('Login');
   }, [navigation]);
 
@@ -63,21 +65,44 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
     navigation.navigate('Login');
   };
 
-  const handleSignup = () => {
-    
+  const handleSignup = async () => {
     // Validate form fields
-    if (!firstName || !userEmail || !password) {
+    if (!firstName || !userEmail || !password || !phone) {
       Alert.alert('Missing Information', 'Please fill in all fields');
       return;
     }
-
-    // if (!agreeToTerms) {
-    //   Alert.alert('Terms Agreement', 'You must agree to the terms to continue');
-    //   return;
-    // }
-
-    // Show verification code bottom sheet
-    handlePresentModalPress();
+    
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: userEmail,
+        password,
+        options: {
+          emailRedirectTo: 'com.vakansik.capy://auth/callback', // your deep link with correct package name
+          data: {
+            fullname: firstName,
+            phone,
+          },
+        },
+      });
+      
+      if (error) {
+        Alert.alert('Error', error.message);
+        return;
+      }
+      
+      console.log('Signup successful:', data);
+      
+      // Show verification code bottom sheet
+      handlePresentModalPress();
+      
+    } catch (error) {
+      console.error('Signup error:', error);
+      Alert.alert('Error', 'An unexpected error occurred during signup');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -118,8 +143,9 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
               <TextInput
                 style={styles.input}
                 placeholder="Nomor HP"
-                value={birthday}
-                onChangeText={setBirthday}
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
               />
            
             </View>
@@ -166,20 +192,25 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
             </View>
             
             <TouchableOpacity 
-              style={styles.continueButton}
+              style={[styles.continueButton, loading && styles.disabledButton]}
               onPress={handleSignup}
+              disabled={loading}
             >
-              <Text style={styles.continueButtonText}>Agree and continue</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text style={styles.continueButtonText}>Agree and continue</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>
         </KeyboardAvoidingView>
         
-        {/* Verification Code Bottom Sheet */}
+        {/* Verification Success Bottom Sheet */}
         <VerificationCodeSheet
           ref={verificationSheetRef}
           email={userEmail}
-          onVerificationComplete={handleVerificationComplete}
+          onContinue={handleContinue}
           onDismiss={handleDismissModalPress}
         />
       </SafeAreaView>
@@ -290,6 +321,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabledButton: {
+    backgroundColor: '#f5a5b5',
   },
 });
 
