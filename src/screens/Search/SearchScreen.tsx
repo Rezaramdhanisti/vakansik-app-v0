@@ -94,8 +94,8 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
 
   // Categories data
   const categories = [
-    { id: '1', name: 'Budget', icon: 'star' },
-    { id: '2', name: 'Extreme', icon: 'tree' },
+    { id: '1', name: 'Budget', icon: 'chicken-piggy.webp', isImage: true },
+    { id: '2', name: 'Extreme', icon: 'extreme.webp', isImage: true },
     { id: '3', name: 'Bandung', icon: 'castle' },
     { id: '4', name: 'Jakarta', icon: 'home-modern' },
     { id: '5', name: 'Yogyakarta', icon: 'tree' },
@@ -182,11 +182,17 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   ];
 
   // Render a category item
-  const renderCategoryItem = (item: { id: string; name: string; icon: string }) => {
+  const renderCategoryItem = (item: { id: string; name: string; icon: string; isImage?: boolean }) => {
     const isActive = activeCategory === item.name;
     
     const getIcon = () => {
-      if (item.icon === 'campground') {
+      if (item.isImage) {
+        if (item.name === 'Budget') {
+          return <Image source={require('../../../assets/images/chicken-piggy.webp')} style={{ width: 64, height: 64, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Extreme') {
+          return <Image source={require('../../../assets/images/extreme.webp')} style={{ width: 64, height: 64, resizeMode: 'contain' }} />;
+        }
+      } else if (item.icon === 'campground') {
         return <FontAwesome name={item.icon} size={34} color={isActive ? '#000' : '#999'} />;
       } else {
         return <MaterialCommunityIcons name={item.icon} size={34} color={isActive ? '#000' : '#999'} />;
