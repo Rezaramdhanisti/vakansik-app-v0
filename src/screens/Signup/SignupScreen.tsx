@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,13 @@ import {
   Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import VerificationCodeSheet, { VerificationCodeSheetRef } from '../../components/VerificationCodeSheet';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { AuthContext } from '../../navigation/AppNavigator';
 import { AuthStackParamList } from '../../navigation/types';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 type SignupScreenProps = {
   route: RouteProp<AuthStackParamList, 'Signup'>;
@@ -26,38 +28,66 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
   const { email = '' } = route.params || {};
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [userEmail, setUserEmail] = useState(email);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
+  // Reference to the bottom sheet
+  const verificationSheetRef = useRef<VerificationCodeSheetRef>(null);
+
+  // Function to handle opening the bottom sheet
+  const handlePresentModalPress = useCallback(() => {
+    verificationSheetRef.current?.present();
+  }, []);
+
+  // Function to handle dismissing the bottom sheet
+  const handleDismissModalPress = useCallback(() => {
+    verificationSheetRef.current?.dismiss();
+  }, []);
+
+  // Function to handle verification completion
+  const handleVerificationComplete = useCallback((code: string) => {
+    console.log('Verification completed with code:', code);
+    verificationSheetRef.current?.dismiss();
+    // TODO: Handle verification logic
+    // Navigate back to login after successful verification
+    navigation.navigate('Login');
+  }, [navigation]);
+
+  // Function to complete the signup process
+  const completeSignup = () => {
+    console.log('Signup completed with:', { firstName, userEmail, password });
+    // Update auth context or navigate to the main app
+    navigation.navigate('Login');
+  };
+
   const handleSignup = () => {
+    
     // Validate form fields
-    if (!firstName || !lastName || !birthday || !userEmail || !password) {
+    if (!firstName || !userEmail || !password) {
       Alert.alert('Missing Information', 'Please fill in all fields');
       return;
     }
 
-    if (!agreeToTerms) {
-      Alert.alert('Terms Agreement', 'You must agree to the terms to continue');
-      return;
-    }
+    // if (!agreeToTerms) {
+    //   Alert.alert('Terms Agreement', 'You must agree to the terms to continue');
+    //   return;
+    // }
 
-    // Handle signup logic here
-    console.log('Signup with:', { firstName, lastName, birthday, userEmail, password });
-    // Navigate to home or login screen after signup
-    navigation.navigate('Login');
-    // You might want to add login logic here or navigate to the main app
+    // Show verification code bottom sheet
+    handlePresentModalPress();
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidView}
-      >
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidView}
+        >
         <ScrollView style={styles.scrollView}>
           <TouchableOpacity 
             style={styles.backButton}
@@ -146,8 +176,18 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+        
+        {/* Verification Code Bottom Sheet */}
+        <VerificationCodeSheet
+          ref={verificationSheetRef}
+          email={userEmail}
+          onVerificationComplete={handleVerificationComplete}
+          onDismiss={handleDismissModalPress}
+        />
+      </SafeAreaView>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 };
 
