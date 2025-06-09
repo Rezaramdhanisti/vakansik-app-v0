@@ -31,7 +31,7 @@ const VerificationCodeSheet = forwardRef<VerificationCodeSheetRef, VerificationC
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     
     // variables for bottom sheet modal
-    const snapPoints = useMemo(() => ['50%'], []);
+    const snapPoints = useMemo(() => ['60%'], []);
     
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   continueButton: {
-    backgroundColor: '#FF7E5F',
+    backgroundColor: '#FF6B6B',
     height: 48,
     borderRadius: 8,
     justifyContent: 'center',

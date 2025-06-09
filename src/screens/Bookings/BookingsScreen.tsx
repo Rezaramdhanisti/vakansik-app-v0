@@ -39,7 +39,7 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
       {bookings.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name="hand-wave" size={32} color="#FF7E5F" />
+            <MaterialCommunityIcons name="hand-wave" size={32} color="#F66161" />
           </View>
           <Text style={styles.emptyStateTitle}>No bookings booked...yet!</Text>
           <Text style={styles.emptyStateSubtitle}>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     maxWidth: '80%',
   },
   startSearchingButton: {
-    backgroundColor: '#FF7E5F',
+    backgroundColor: '#F66161',
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 30,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   canceledText: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_MEDIUM,
-    color: '#FF7E5F',
+    color: '#F66161',
   },
   pastTripsButton: {
     flexDirection: 'row',
