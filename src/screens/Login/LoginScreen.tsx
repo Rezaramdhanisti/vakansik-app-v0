@@ -19,6 +19,8 @@ import { AuthStackParamList } from '../../navigation/types';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const { login } = useContext(AuthContext);
 
@@ -29,8 +31,16 @@ const LoginScreen = () => {
       return;
     }
     
-    // Navigate to signup screen with email
-    navigation.navigate('Signup', { email });
+    // Basic password validation
+    if (!password || password.length < 6) {
+      Alert.alert('Invalid Password', 'Password must be at least 6 characters');
+      return;
+    }
+    
+    // Perform login logic here
+    console.log('Logging in with:', email, password);
+    login(); // Update auth context
+    navigation.goBack(); // Return to previous screen
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -54,7 +64,7 @@ const LoginScreen = () => {
         </TouchableOpacity>
         
         <View style={styles.content}>
-          <Text style={styles.title}>Log in or sign up to Airbnb</Text>
+          <Text style={styles.title}>Log in</Text>
           
           <View style={styles.inputContainer}>
             <TextInput
@@ -67,6 +77,25 @@ const LoginScreen = () => {
             />
           </View>
           
+          <View style={styles.inputContainer}>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="#717171" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <TouchableOpacity 
             style={styles.continueButton}
             onPress={handleContinue}
@@ -76,7 +105,7 @@ const LoginScreen = () => {
           
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
+            <Text style={styles.dividerText}>Log in lebih cepat dengan</Text>
             <View style={styles.dividerLine} />
           </View>
           
@@ -89,6 +118,12 @@ const LoginScreen = () => {
             <Text style={styles.socialButtonText}>Continue with Google</Text>
           </TouchableOpacity>
           
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Belum punya akun? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Signup', {})}>
+              <Text style={styles.signupLink}>Daftar, yuk!</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -128,6 +163,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  passwordInput: {
+    height: 56,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    flex: 1,
+  },
+  eyeIcon: {
+    padding: 10,
+  },
   continueButton: {
     backgroundColor: '#E61E4D',
     height: 48,
@@ -135,6 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+    marginTop: 10
   },
   continueButtonText: {
     color: '#fff',
@@ -169,6 +218,21 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 16,
     fontWeight: '500',
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  signupText: {
+    fontSize: 16,
+    color: '#717171',
+  },
+  signupLink: {
+    fontSize: 16,
+    color: '#E61E4D',
+    fontWeight: '600',
   },
 });
 

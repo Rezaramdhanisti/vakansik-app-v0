@@ -134,9 +134,6 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
-              <Text style={styles.helperText}>
-                We'll email you a reservation confirmation.
-              </Text>
             </View>
             
             <View style={styles.formSection}>
