@@ -1,4 +1,4 @@
-package com.mytravel
+package com.vakansik.capy
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

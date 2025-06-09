@@ -1,4 +1,4 @@
-package com.mytravel
+package com.vakansik.capy
 
 import android.app.Application
 import com.facebook.react.PackageList

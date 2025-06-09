@@ -80,22 +80,7 @@ const LoginScreen = () => {
             <View style={styles.dividerLine} />
           </View>
           
-          <TouchableOpacity 
-            style={styles.socialButton}
-            onPress={() => handleSocialLogin('Phone')}
-          >
-            <Ionicons name="phone-portrait-outline" size={22} color="#000" />
-            <Text style={styles.socialButtonText}>Continue with Phone</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.socialButton}
-            onPress={() => handleSocialLogin('Facebook')}
-          >
-            <FontAwesome name="facebook" size={22} color="#1877F2" />
-            <Text style={styles.socialButtonText}>Continue with Facebook</Text>
-          </TouchableOpacity>
-          
+       
           <TouchableOpacity 
             style={styles.socialButton}
             onPress={() => handleSocialLogin('Google')}
@@ -104,13 +89,6 @@ const LoginScreen = () => {
             <Text style={styles.socialButtonText}>Continue with Google</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity 
-            style={styles.socialButton}
-            onPress={() => handleSocialLogin('Apple')}
-          >
-            <FontAwesome name="apple" size={22} color="#000" />
-            <Text style={styles.socialButtonText}>Continue with Apple</Text>
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

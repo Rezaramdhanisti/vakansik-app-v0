@@ -84,7 +84,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.mytravel"
+    namespace "com.vakansik.capy"
     
     // Add the following line for react-native-vector-icons
     packagingOptions {
@@ -94,7 +94,7 @@ android {
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
     }
     defaultConfig {
-        applicationId "com.mytravel"
+        applicationId "com.vakansik.capy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
