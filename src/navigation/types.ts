@@ -1,17 +1,30 @@
 export type AuthStackParamList = {
-  Login: undefined;
-  Signup: { email?: string };
+  Login: { 
+    returnToScreen?: keyof RootStackParamList;
+    returnParams?: any;
+  } | undefined;
+  Signup: { 
+    email?: string;
+    returnToScreen?: keyof RootStackParamList;
+    returnParams?: any;
+  };
   // Add other auth screens as needed (Register, ForgotPassword, etc.)
 };
 
 export type MainStackParamList = {
   Main: undefined;
-  Auth: undefined;
+  Auth: {
+    screen?: keyof AuthStackParamList;
+    params?: any;
+  } | undefined;
 };
 
 export type TabStackParamList = {
   Home: undefined;
-  Explore: undefined;
+  Explore: {
+    screen?: string;
+    params?: any;
+  } | undefined;
   Bookings: undefined;
   Profile: undefined;
 };

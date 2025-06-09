@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState } from 'react';
+import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState, useContext } from 'react';
 import { View, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
@@ -7,9 +7,13 @@ import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps
 } from '@gorhom/bottom-sheet';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
+import { CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RootStackParamList, MainStackParamList, AuthStackParamList, TabStackParamList } from '../navigation/types';
+import { SearchStackParamList } from '../navigation/SearchNavigator';
+import { AuthContext } from '../navigation/AppNavigator';
 import Text from './Text';
 import { FONTS } from '../config/fonts';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -27,7 +31,22 @@ export interface DateBottomSheetRef {
 
 const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss, initialGuestCount = 2 }, ref) => {
   // Get navigation with proper typing
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  type NavigationProp = CompositeNavigationProp<
+    StackNavigationProp<RootStackParamList>,
+    CompositeNavigationProp<
+      StackNavigationProp<MainStackParamList>,
+      CompositeNavigationProp<
+        BottomTabNavigationProp<TabStackParamList>,
+        StackNavigationProp<SearchStackParamList>
+      >
+    >
+  >;
+  const navigation = useNavigation<NavigationProp>();
+  // Get authentication context
+  const { isLoggedIn } = useContext(AuthContext);
+  
+  // Store trip details for returning after login
+  const [pendingTripDetails, setPendingTripDetails] = useState<any>(null);
   // ref for bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const calendarBottomSheetRef = useRef<BottomSheetModal>(null);
@@ -336,23 +355,39 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                 <TouchableOpacity 
                   style={styles.nextButton}
                   onPress={() => {
-                    // Navigate to the Confirm and Pay screen with trip details
-                    navigation.navigate('ConfirmPay', {
-                      tripDetails: {
-                        title: 'Explore Bali Highlights -Customized Full day Tour',
-                        image: require('../../assets/images/lovina-1.jpg'),
-                        rating: 4.9,
-                        reviewCount: 5098,
-                        date: `${selectedDate}`,
-                        timeSlot: dateTimeData.find(item => 
-                          item.type === 'timeSlot' && 
-                          item.date === selectedDate && 
-                          item.slotId === selectedTimeSlot
-                        )?.time || '3:30 AM – 11:45 AM',
-                        price: 'Rp780,000',
-                        guestCount: adultCount
-                      }
-                    });
+                    // Create trip details object
+                    const tripDetails = {
+                      title: 'Explore Bali Highlights -Customized Full day Tour',
+                      image: require('../../assets/images/lovina-1.jpg'),
+                      rating: 4.9,
+                      reviewCount: 5098,
+                      date: `${selectedDate}`,
+                      timeSlot: dateTimeData.find(item => 
+                        item.type === 'timeSlot' && 
+                        item.date === selectedDate && 
+                        item.slotId === selectedTimeSlot
+                      )?.time || '3:30 AM – 11:45 AM',
+                      price: 'Rp780,000',
+                      guestCount: adultCount
+                    };
+                    
+                    // Check if user is logged in
+                    if (isLoggedIn) {
+                      // User is logged in, proceed to confirmation page
+                      // Navigate to ConfirmPay through the Explore tab
+                      navigation.navigate('Explore', {
+                        screen: 'ConfirmPay',
+                        params: { tripDetails }
+                      });
+                    } else {
+                      // Store trip details for later use
+                      setPendingTripDetails(tripDetails);
+                      
+                      // Navigate to Auth screen with return parameters
+                      navigation.navigate('Auth', {
+                        screen: 'Login',
+                      });
+                    }
                   }}
                 >
                   <Text style={styles.nextButtonText}>Next</Text>

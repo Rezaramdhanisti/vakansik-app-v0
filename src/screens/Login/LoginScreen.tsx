@@ -13,10 +13,12 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, RouteProp, useRoute, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { AuthContext } from '../../navigation/AppNavigator';
-import { AuthStackParamList } from '../../navigation/types';
+import { AuthStackParamList, RootStackParamList, MainStackParamList, TabStackParamList } from '../../navigation/types';
+import { SearchStackParamList } from '../../navigation/SearchNavigator';
 import { supabase } from '../../../lib/supabase';
 
 const LoginScreen = () => {
@@ -25,7 +27,22 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
+  
+  // Get navigation and route params with proper typing
+  type NavigationProp = CompositeNavigationProp<
+    StackNavigationProp<AuthStackParamList>,
+    CompositeNavigationProp<
+      StackNavigationProp<MainStackParamList>,
+      CompositeNavigationProp<
+        BottomTabNavigationProp<TabStackParamList>,
+        StackNavigationProp<SearchStackParamList>
+      >
+    >
+  >;
+  const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
+  const { returnToScreen, returnParams } = route.params || {};
+  
   const { login } = useContext(AuthContext);
 
   const handleContinue = async () => {
@@ -61,7 +78,8 @@ const LoginScreen = () => {
       
       console.log('Login successful:', data);
       login(); // Update auth context
-      navigation.goBack(); // Return to previous screen
+        // Otherwise just go back to the previous screen
+        navigation.goBack();
     } catch (error) {
       console.error('Unexpected login error:', error);
       setErrorMessage('An unexpected error occurred. Please try again.');
