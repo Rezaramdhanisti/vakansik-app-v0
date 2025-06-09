@@ -55,7 +55,7 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
     console.log('User continued from verification screen');
     verificationSheetRef.current?.dismiss();
     // Navigate back to login after dismissing the verification popup
-    navigation.navigate('Login');
+    navigation.goBack();
   }, [navigation]);
 
   // Function to complete the signup process
