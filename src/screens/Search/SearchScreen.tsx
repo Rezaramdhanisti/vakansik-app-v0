@@ -96,9 +96,9 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const categories = [
     { id: '1', name: 'Budget', icon: 'chicken-piggy.webp', isImage: true },
     { id: '2', name: 'Extreme', icon: 'extreme.webp', isImage: true },
-    { id: '3', name: 'Bandung', icon: 'castle' },
-    { id: '4', name: 'Jakarta', icon: 'home-modern' },
-    { id: '5', name: 'Yogyakarta', icon: 'tree' },
+    { id: '3', name: 'Bandung', icon: 'bandung.webp', isImage: true },
+    { id: '4', name: 'Jakarta', icon: 'jakarta.webp', isImage: true },
+    { id: '5', name: 'Yogyakarta', icon: 'yogyakarta.webp', isImage: true },
   ];
 
   // Convert price string to number for sorting
@@ -188,9 +188,15 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     const getIcon = () => {
       if (item.isImage) {
         if (item.name === 'Budget') {
-          return <Image source={require('../../../assets/images/chicken-piggy.webp')} style={{ width: 64, height: 64, resizeMode: 'contain' }} />;
+          return <Image source={require('../../../assets/images/chicken-piggy.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
         } else if (item.name === 'Extreme') {
-          return <Image source={require('../../../assets/images/extreme.webp')} style={{ width: 64, height: 64, resizeMode: 'contain' }} />;
+          return <Image source={require('../../../assets/images/extreme.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Bandung') {
+          return <Image source={require('../../../assets/images/bandung.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Jakarta') {
+          return <Image source={require('../../../assets/images/jakarta.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Yogyakarta') {
+          return <Image source={require('../../../assets/images/yogyakarta.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
         }
       } else if (item.icon === 'campground') {
         return <FontAwesome name={item.icon} size={34} color={isActive ? '#000' : '#999'} />;
