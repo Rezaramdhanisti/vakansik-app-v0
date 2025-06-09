@@ -13,11 +13,13 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthContext } from '../../navigation/AppNavigator';
+import { AuthStackParamList } from '../../navigation/types';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const { login } = useContext(AuthContext);
 
   const handleContinue = () => {
@@ -27,10 +29,8 @@ const LoginScreen = () => {
       return;
     }
     
-    // Handle login logic here
-    console.log('Login with email:', email);
-    login(); // Update auth context
-    navigation.goBack(); // Return to previous screen
+    // Navigate to signup screen with email
+    navigation.navigate('Signup', { email });
   };
 
   const handleSocialLogin = (provider: string) => {

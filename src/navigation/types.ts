@@ -1,5 +1,6 @@
 export type AuthStackParamList = {
   Login: undefined;
+  Signup: { email?: string };
   // Add other auth screens as needed (Register, ForgotPassword, etc.)
 };
 
