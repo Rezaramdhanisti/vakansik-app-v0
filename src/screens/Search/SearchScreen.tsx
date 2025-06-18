@@ -9,9 +9,12 @@ import {
   Dimensions,
   StatusBar,
   Image,
-  Switch
+  Switch,
+  NativeSyntheticEvent,
+  NativeScrollEvent
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { fetchDestinations, Destination } from '../../services/destinationsService';
 import Text from '../../components/Text';
 import { FONTS,FONT_WEIGHT } from '../../config/fonts';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -67,15 +70,18 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   // Define property listing type
   type PropertyListing = {
     id: string;
-    title: string;
+    name: string;
     description: string;
     price: string;
     rating: string;
     reviews: string;
+    image_urls?: string[];
     isFavorite: boolean;
   };
   
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
+  const [destinations, setDestinations] = useState<PropertyListing[]>([]);
+  const [currentImageIndices, setCurrentImageIndices] = useState<{[key: string]: number}>({});
   
   // Search suggestions data - divided into cities and activities
   const citySuggestions = [
@@ -110,7 +116,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
 
   // Apply filters and sorting to property listings
   useEffect(() => {
-    let sorted = [...propertyListings];
+    let sorted = [...destinations];
     
     if (sortByHighestPrice) {
       sorted.sort((a, b) => getPriceValue(b.price) - getPriceValue(a.price));
@@ -119,67 +125,43 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     }
     
     setFilteredListings(sorted);
-  }, [sortByHighestPrice, sortByLowestPrice]);
+  }, [sortByHighestPrice, sortByLowestPrice, destinations]);
 
-  // Property listings data
-  const propertyListings = [
-    {
-      id: '1',
-      location: 'Bujra, India',
-      title: "Explore India",
-      description: "Explore India with a great great tour guide",
-      builtYear: '2020',
-      dateRange: 'Jun 1 - 6',
-      price: 'Rp 350,000',
-      rating: '4.93',
-      reviews: '1,844 reviews',
-      isFavorite: false
-    },
-    {
-      id: '2',
-      title: "Explore India",
-      description: "Explore India with a great great tour guide",
-      price: 'Rp 275,000',
-      rating: '4.87',
-      reviews: '956 reviews',
-      isFavorite: true
-    },
-    {
-      id: '3',
-      title: "Explore India",
-      description: "Explore India with a great great tour guide",
-      price: 'Rp 425,000',
-      rating: '4.95',
-      reviews: '2,103 reviews',
-      isFavorite: false
-    },{
-      id: '4',
-      title: "Explore India",
-      description: "Explore India with a great great tour guide",
-      price: 'Rp 350,000',
-      rating: '4.93',
-      reviews: '1,844 reviews',
-      isFavorite: false
-    },
-    {
-      id: '5',
-      title: "Explore India",
-      description: "Explore India with a great great tour guide",
-      price: 'Rp 275,000',
-      rating: '4.87',
-      reviews: '956 reviews',
-      isFavorite: true
-    },
-    {
-      id: '6',
-      title: "Explore India",
-      description: "Explore India with a great great tour guide",
-      price: 'Rp 425,000',
-      rating: '4.95',
-      reviews: '2,103 reviews',
-      isFavorite: false
-    },
-  ];
+  // Load destinations from Supabase
+  useEffect(() => {
+    const loadDestinations = async () => {
+      console.log('Starting to load destinations...');
+      try {
+        console.log('Fetching destinations data...');
+        const data = await fetchDestinations();
+        console.log('Destinations fetched successfully:', data ? data : 'No data');
+        
+        // Transform the data to match our PropertyListing type
+        const formattedData = data.map((item, index) => ({
+          id: String(index + 1),
+          name: item.name,
+          description: item.description,
+          price: `Rp ${item.price.toLocaleString()}`,
+          rating: item.rating.toString(),
+          reviews: `${item.reviews.toLocaleString()} reviews`,
+          image_urls: item.image_urls,
+          isFavorite: false
+        }));
+        console.log('Data transformation complete, setting state with', formattedData.length, 'items');
+        setDestinations(formattedData);
+        setFilteredListings(formattedData);
+        console.log('Destinations loaded successfully');
+      } catch (error) {
+        console.error('Error fetching destinations:', error);
+        // Fallback to empty array if fetch fails
+        setDestinations([]);
+        setFilteredListings([]);
+        console.log('Failed to load destinations, using empty arrays as fallback');
+      }
+    };
+
+    loadDestinations();
+  }, []);
 
   // Render a category item
   const renderCategoryItem = (item: { id: string; name: string; icon: string; isImage?: boolean }) => {
@@ -228,10 +210,28 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       activeOpacity={0.9}
     >
       <View style={styles.propertyImageContainer}>
-        <View style={styles.propertyImage} />
+        {item.image_urls && item.image_urls.length > 0 ? (
+          <FlashList
+            data={item.image_urls}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index: number) => `image-${item.id}-${index}`}
+            renderItem={({ item: imageUrl }: { item: string }) => (
+              <Image 
+                source={{ uri: imageUrl }} 
+                style={styles.propertyImage} 
+                resizeMode="cover"
+              />
+            )}
+            
+            scrollEventThrottle={200}
+          />
+        ) : (
+          <View style={styles.propertyImage} />
+        )}
         <TouchableOpacity 
           style={styles.favoriteButton}
-          onPress={(e) => {
+          onPress={(e: any) => {
             e.stopPropagation(); // Prevent triggering the parent TouchableOpacity
             // Toggle favorite logic would go here
           }}
@@ -245,18 +245,26 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
         
         {/* Image pagination dots */}
         <View style={styles.paginationContainer}>
-          {[1, 2, 3, 4, 5].map((dot, index) => (
-            <View 
-              key={index} 
-              style={[styles.paginationDot, index === 0 && styles.activePaginationDot]} 
-            />
-          ))}
+          {item.image_urls && item.image_urls.length > 0 ? (
+            item.image_urls.map((_: any, index: number) => {
+              // Get the current image index for this property, default to 0
+              const currentIndex = currentImageIndices[item.id] || 0;
+              return (
+                <View 
+                  key={index} 
+                  style={[styles.paginationDot, index === currentIndex && styles.activePaginationDot]} 
+                />
+              );
+            })
+          ) : (
+            <View style={styles.paginationDot} />
+          )}
         </View>
       </View>
       
       <View style={styles.propertyDetails}>
-        <Text style={styles.propertyLocation}>{item.title}</Text>
-        <Text style={styles.propertyInfo}>{item.description}</Text>
+        <Text style={styles.propertyLocation}>{item.name}</Text>
+        <Text style={styles.propertyInfo} numberOfLines={2} ellipsizeMode="tail">{item.description}</Text>
         <View style={styles.priceContainer}>
           <Text style={styles.propertyPrice}>{item.price}</Text>
           <Text style={styles.propertyRating}> • {item.rating} • </Text>
@@ -347,7 +355,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       {/* Property Listings */}
       <View style={styles.flashListContainer}>
         <FlashList
-          data={filteredListings.length > 0 ? filteredListings : propertyListings}
+          data={filteredListings}
           renderItem={renderPropertyItem}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
@@ -584,7 +592,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   propertyImage: {
-    width: '100%',
+    width: width, // Full width
     height: '100%',
     backgroundColor: '#E0E0E0',
     borderRadius: 12,
