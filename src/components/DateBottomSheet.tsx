@@ -208,6 +208,14 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     { name: 'December 2025', days: 31, startDay: 0 }
   ], []);
   
+  // Function to check if a day is a weekend (Friday, Saturday, Sunday)
+  const isWeekendDay = useCallback((monthStartDay: number, dayNumber: number) => {
+    // Calculate the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const dayOfWeek = (monthStartDay + dayNumber - 1) % 7;
+    // Return true if the day is Friday (5), Saturday (6), or Sunday (0)
+    return dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0;
+  }, []);
+
   // Generate calendar data
   const generateCalendarData = useCallback(() => {
     const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -222,7 +230,13 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
       
       // Add actual days
       for (let i = 1; i <= month.days; i++) {
-        days.push({ day: i.toString(), empty: false });
+        // Check if the day is a weekend day
+        const isWeekend = isWeekendDay(month.startDay, i);
+        days.push({ 
+          day: i.toString(), 
+          empty: false,
+          isWeekend: isWeekend // Add flag to indicate if it's a weekend day
+        });
       }
       
       return {
@@ -231,7 +245,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
         days
       };
     });
-  }, [months]);
+  }, [months, isWeekendDay]);
   
   const calendarData = useMemo(() => generateCalendarData(), [generateCalendarData]);
   
@@ -448,10 +462,21 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                       >
                         {!dayObj.empty && (
                           <Pressable
-                            style={[styles.calendarDayButton, isSelected && styles.selectedDayButton, isToday && styles.todayButton]}
+                            style={[
+                              styles.calendarDayButton, 
+                              isSelected && styles.selectedDayButton, 
+                              isToday && styles.todayButton,
+                              !dayObj.isWeekend && styles.disabledDayButton
+                            ]}
                             onPress={() => handleSelectCalendarDate(monthData.name, dayObj.day)}
+                            disabled={!dayObj.isWeekend}
                           >
-                            <Text style={[styles.calendarDayText, isSelected && styles.selectedDayText, isToday && styles.todayText]}>
+                            <Text style={[
+                              styles.calendarDayText, 
+                              isSelected && styles.selectedDayText, 
+                              isToday && styles.todayText,
+                              !dayObj.isWeekend && styles.disabledDayText
+                            ]}>
                               {dayObj.day}
                             </Text>
                           </Pressable>
@@ -712,6 +737,12 @@ const styles = StyleSheet.create({
   },
   todayText: {
     fontFamily: FONTS.SATOSHI_BOLD,
+  },
+  disabledDayButton: {
+    backgroundColor: '#F5F5F5',
+  },
+  disabledDayText: {
+    color: '#AAAAAA',
   },
 });
 
