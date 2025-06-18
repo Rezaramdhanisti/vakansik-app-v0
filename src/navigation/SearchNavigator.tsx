@@ -6,22 +6,40 @@ import SearchScreen from '../screens/Search/SearchScreen';
 import TripDetailScreen from '../screens/TripDetail/TripDetailScreen';
 import ConfirmPayScreen from '../screens/ConfirmPay/ConfirmPayScreen';
 
+// Define the type for the activity in the itinerary
+type Activity = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+// Define the type for a day in the itinerary
+type ItineraryDay = {
+  day: string;
+  activities: Activity[];
+};
+
 // Define the type for the property object
 type Property = {
   id: string;
-  title: string;
+  name?: string;  // Added name field from SearchScreen data
+  title?: string; // Made optional since we might use name instead
   description: string;
   price: string;
   rating: string;
   reviews: string;
   location?: string;
-  images?: string[];
+  image_urls?: string[]; // Added image_urls from SearchScreen data
+  images?: string[];     // Keep original images field for backward compatibility
   features?: {
     bedrooms: number;
     beds: number;
     bathrooms: string;
   };
   isFavorite: boolean;
+  price_information?: string; // Added price_information from API
+  itinerary?: ItineraryDay[]; // Added itinerary from API
+  meeting_point?: string;     // Added meeting_point from API
 };
 
 // Define the type for the search stack navigation

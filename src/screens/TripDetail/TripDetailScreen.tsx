@@ -52,49 +52,7 @@ const PICKUP_AREAS = [
   },
 ];
 
-// Timeline data constant with day grouping
-const TIMELINE_DATA = [
-  {
-    day: 'Day 1',
-    activities: [
-      {
-        title: 'Pick up from stay',
-        description: 'Meet between 8-8:30am for pick up from your stay',
-        icon: 'car-outline'
-      },
-      {
-        title: 'Meet the instructors',
-        description: 'Get a full safety briefing and preparation for rafting adventure',
-        icon: 'people-outline'
-      },
-      {
-        title: 'Get rafting',
-        description: 'Enjoy two-hour white-water rafting trip at Ayung river',
-        icon: 'boat-outline'
-      },
-      {
-        title: 'Enjoy lunch',
-        description: 'Take a break and enjoy a buffet-style delicious lunch',
-        icon: 'restaurant-outline'
-      },
-    ]
-  },
-  {
-    day: 'Day 2',
-    activities: [
-      {
-        title: 'Visit coffee farm',
-        description: 'Explore a local coffee plantation before returning to your accommodation',
-        icon: 'cafe-outline'
-      },
-      {
-        title: 'Drop off from stay',
-        description: 'Meet between 8-8:30am for drop off from your stay',
-        icon: 'car-outline'
-      },
-    ]
-  }
-];
+
 
 function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.JSX.Element {
   const { property, guestCount = 2 } = route.params; // Default to 2 guests if not provided
@@ -102,16 +60,19 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({});
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
   
   // ref for bottom sheet modal
   const dateBottomSheetRef = useRef<DateBottomSheetRef>(null);
 
-  // Images for the gallery
-  const images = [
-    require('../../../assets/images/lovina-1.jpg'),
-    require('../../../assets/images/lovina-2.jpg'),
-    require('../../../assets/images/lovina-3.jpg'),
-  ];
+  // Use image_urls from the property data if available, otherwise use fallback images
+  const images = property.image_urls && property.image_urls.length > 0 
+    ? property.image_urls 
+    : [
+        require('../../../assets/images/lovina-1.jpg'),
+        require('../../../assets/images/lovina-2.jpg'),
+        require('../../../assets/images/lovina-3.jpg'),
+      ];
 
   // Features data
   const features = property.features || {
@@ -167,12 +128,22 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
     setIsBottomSheetVisible(false);
   };
 
-  const renderImageItem = ({ item, index }: { item: any; index: number }) => (
-    <View style={styles.imageContainer}>
-      <Image source={item} style={styles.image} resizeMode="cover" />
-      <Text style={styles.imageCounter}>{index + 1} / {images.length}</Text>
-    </View>
-  );
+  const renderImageItem = ({ item, index }: { item: any; index: number }) => {
+    // Handle both require() images and URL strings
+    const imageSource = typeof item === 'string' ? { uri: item } : item;
+    
+    return (
+      <View style={styles.imageContainer}>
+        <Image
+          source={imageSource}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        <Text style={styles.imageCounter}>{index + 1} / {images.length}</Text>
+      </View>
+    );
+  };
+  console.log('property',property);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -220,8 +191,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
         
         {/* Trip Title and Location */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.tripTitle}>{property.title}</Text>
-          <Text style={styles.tripDescription}>{property.description}</Text>
+          <Text style={styles.tripTitle}>{property.name}</Text>
           
           
           {/* Rating */}
@@ -236,62 +206,84 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           <View style={styles.divider} />
           
           {/* Description */}
-          <View >
+          <View>
             <Text style={styles.sectionTitle}>About this trip</Text>
-            <Text style={styles.sectionContent}>{property.description}</Text>
+            <Text 
+              style={styles.sectionContent} 
+              numberOfLines={showFullDescription ? undefined : 2}
+              ellipsizeMode="tail"
+            >
+              {property.description}
+            </Text>
+            <TouchableOpacity 
+              onPress={() => setShowFullDescription(!showFullDescription)}
+              style={styles.viewMoreButton}
+            >
+              <Text style={styles.viewMoreText}>
+                {showFullDescription ? 'Read less' : 'Read more'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.divider} />
+          
           {/* What you'll do */}
           <View>
             <Text style={styles.sectionTitle}>What you'll do</Text>
-            <View style={styles.timelineContainer}>
-              {TIMELINE_DATA.map((dayData, dayIndex) => {
-                const isCollapsed = collapsedDays[dayIndex] || false;
-                
-                return (
-                  <View key={dayIndex} style={styles.dayContainer}>
-                    <TouchableOpacity 
-                      style={styles.dayTitleContainer}
-                      onPress={() => setCollapsedDays({...collapsedDays, [dayIndex]: !isCollapsed})}
-                    >
-                      <Text style={styles.dayTitle}>{dayData.day}</Text>
-                      <Ionicons 
-                        name={isCollapsed ? 'chevron-down-outline' : 'chevron-up-outline'} 
-                        size={20} 
-                        color="#000" 
-                      />
-                    </TouchableOpacity>
-                    
-                    {!isCollapsed && (
-                        <FlashList
-                          data={dayData.activities}
-                          estimatedItemSize={80}
-                          renderItem={({ item, index }) => {
-                            const isLastItem = index === dayData.activities.length - 1;
-                            return (
-                              <View style={styles.timelineItem}>
-                                <View style={styles.timelineIconContainer}>
-                                  <View style={styles.timelineIcon}>
-                                    <Ionicons name={item.icon} size={24} color="#000" />
-                                  </View>
-                                  {!isLastItem && <View style={styles.timelineConnector} />}
-                                </View>
-                                <View style={styles.timelineContent}>
-                                  <Text style={styles.timelineTitle}>{item.title}</Text>
-                                  <Text style={styles.timelineDescription}>{item.description}</Text>
-                                </View>
-                              </View>
-                            );
-                          }}
-                          keyExtractor={(item, index) => `${dayIndex}-${index}`}
-                          showsVerticalScrollIndicator={false}
+            
+            {property.itinerary && property.itinerary.length > 0 ? (
+              <View style={styles.timelineContainer}>
+                {property.itinerary.map((dayData, dayIndex) => {
+                  const isCollapsed = collapsedDays[dayIndex] || false;
+                  
+                  return (
+                    <View key={dayIndex} style={styles.dayContainer}>
+                      <TouchableOpacity 
+                        style={styles.dayTitleContainer}
+                        onPress={() => setCollapsedDays({...collapsedDays, [dayIndex]: !isCollapsed})}
+                      >
+                        <Text style={styles.dayTitle}>{dayData.day}</Text>
+                        <Ionicons 
+                          name={isCollapsed ? 'chevron-down-outline' : 'chevron-up-outline'} 
+                          size={20} 
+                          color="#000" 
                         />
-                    )}
-                  </View>
-                );
-              })}
-            </View>
+                      </TouchableOpacity>
+                      
+                      {!isCollapsed && (
+                          <FlashList
+                            data={dayData.activities}
+                            estimatedItemSize={80}
+                            renderItem={({ item, index }: { item: any, index: number }) => {
+                              const isLastItem = index === dayData.activities.length - 1;
+                              return (
+                                <View style={styles.timelineItem}>
+                                  <View style={styles.timelineIconContainer}>
+                                    <View style={styles.timelineIcon}>
+                                      <Ionicons name={item.icon} size={24} color="#000" />
+                                    </View>
+                                    {!isLastItem && <View style={styles.timelineConnector} />}
+                                  </View>
+                                  <View style={styles.timelineContent}>
+                                    <Text style={styles.timelineTitle}>{item.title}</Text>
+                                    <Text style={styles.timelineDescription}>{item.description}</Text>
+                                  </View>
+                                </View>
+                              );
+                            }}
+                            keyExtractor={(item: any, index: number) => `${dayIndex}-${index}`}
+                            showsVerticalScrollIndicator={false}
+                          />
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            ) : (
+              <View style={styles.noItineraryContainer}>
+                <Text style={styles.noItineraryText}>Itinerary details will be provided upon booking.</Text>
+              </View>
+            )}
           </View>
           
           <View style={styles.divider} />
@@ -299,25 +291,25 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           {/* Location section */}
           <View>
             <Text style={styles.sectionTitle}>Meeting Point</Text>
-            <FlashList
+            {/* <FlashList
               data={PICKUP_AREAS.filter(item => item.isDefault || showMoreOptions)}
-              renderItem={({ item }) => (
+              renderItem={({ item }) => ( */}
                 <View>
-                  <Text style={styles.sectionSubtitle}>Pick up area {item.area}</Text>
-                  <Text style={styles.sectionContent}>{item.locations}</Text>
-                  <Text style={styles.locationAddress}>{item.address}</Text>
+                  <Text style={styles.sectionSubtitle}>Pick up area</Text>
+                  <Text style={styles.sectionContent}>{property.meeting_point}</Text>
+                  {/* <Text style={styles.locationAddress}>{property.meeting_point}</Text> */}
                 </View>
-              )}
-              estimatedItemSize={80}
+              {/* )} */}
+              {/* estimatedItemSize={80}
               keyExtractor={item => item.id}
-            />
+            /> */}
             
-            <Text 
+            {/* <Text 
               style={[styles.locationAddress, styles.toggleOption]} 
               onPress={() => setShowMoreOptions(!showMoreOptions)}
             >
               {showMoreOptions ? 'Hide Options' : 'More Options'}
-            </Text>
+            </Text> */}
           </View>
           
           <View style={styles.divider} />
@@ -436,7 +428,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               </View>
               <View style={styles.infoContent}>
                 <Text style={styles.infoTitle}>Price details</Text>
-                <Text style={styles.infoText}>Price includes transportation. Gratuities (tipping) are not included.</Text>
+                <Text style={styles.infoText}>{property.price_information}</Text>
               </View>
             </View>
           </View>
@@ -546,7 +538,8 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
     marginBottom: 8,
-    textAlign:'center'
+    textAlign:'center',
+    height: 28
   },
   tripDescription: {
     fontSize: 16,
@@ -596,10 +589,45 @@ const styles = StyleSheet.create({
   },
   sectionContent: {
     fontSize: 16,
-    fontFamily: FONTS.SATOSHI_REGULAR,
-    color: '#333',
     lineHeight: 22,
+    color: '#333',
     marginBottom: 8,
+  },
+  viewMoreButton: {
+    marginBottom: 16,
+  },
+  viewMoreText: {
+    color: '#0066CC',
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+  },
+  meetingPointContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: '#F5F5F5',
+    padding: 16,
+    borderRadius: 12,
+  },
+  meetingPointText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+    marginLeft: 12,
+    flex: 1,
+  },
+  noItineraryContainer: {
+    padding: 16,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    marginVertical: 8,
+    alignItems: 'center',
+  },
+  noItineraryText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#666',
+    textAlign: 'center',
   },
   sectionSubtitle: {
     fontSize: 16,

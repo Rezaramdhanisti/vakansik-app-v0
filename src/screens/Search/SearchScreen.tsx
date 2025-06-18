@@ -145,6 +145,10 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           rating: item.rating.toString(),
           reviews: `${item.reviews.toLocaleString()} reviews`,
           image_urls: item.image_urls,
+          // Include the additional fields from the API
+          itinerary: item.itinerary,
+          meeting_point: item.meeting_point,
+          price_information: item.price_information,
           isFavorite: false
         }));
         console.log('Data transformation complete, setting state with', formattedData.length, 'items');
@@ -203,10 +207,14 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   };
 
   // Render a property listing item
-  const renderPropertyItem = ({ item }: { item: any }) => (
+  const renderPropertyItem = ({ item }: { item: any }) => {
+    return (
     <TouchableOpacity 
       style={styles.propertyCard}
-      onPress={() => navigation.navigate('TripDetail', { property: item })}
+      onPress={() => {
+        const propertyData = JSON.parse(JSON.stringify(item));
+        navigation.navigate('TripDetail', { property: propertyData });
+      }}
       activeOpacity={0.9}
     >
       <View style={styles.propertyImageContainer}>
@@ -273,6 +281,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       </View>
     </TouchableOpacity>
   );
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
