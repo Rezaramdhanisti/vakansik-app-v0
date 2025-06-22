@@ -247,7 +247,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           <Ionicons 
             name={item.isFavorite ? 'heart' : 'heart-outline'} 
             size={24} 
-            color={item.isFavorite ? '#F66161' : '#FFF'} 
+            color={item.isFavorite ? '#FF6F00' : '#FFF'} 
           />
         </TouchableOpacity>
         

@@ -41,7 +41,7 @@ const MainNavigator = () => {
               // You can return any component here
               return <Ionicons name={iconName} size={size} color={color} />;
             },
-            tabBarActiveTintColor: '#F66161',
+            tabBarActiveTintColor: '#FF6F00',
             tabBarInactiveTintColor: '#999999',
             tabBarLabelStyle: {
               fontSize: 12,

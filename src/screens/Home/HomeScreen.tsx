@@ -114,11 +114,11 @@ function HomeScreen(): React.JSX.Element {
     const getIcon = () => {
       if (isContinent) {
         switch(item.name) {
-          case 'Asia': return <FontAwesome name="globe" size={24} color="#F66161" />;
-          case 'Oceania': return <FontAwesome name="ship" size={24} color="#F66161" />;
-          case 'Europe': return <FontAwesome name="building" size={24} color="#F66161" />;
-          case 'North America': return <FontAwesome name="tree" size={24} color="#F66161" />;
-          default: return <FontAwesome name="map-marker" size={24} color="#F66161" />;
+          case 'Asia': return <FontAwesome name="globe" size={24} color="#FF6F00" />;
+          case 'Oceania': return <FontAwesome name="ship" size={24} color="#FF6F00" />;
+          case 'Europe': return <FontAwesome name="building" size={24} color="#FF6F00" />;
+          case 'North America': return <FontAwesome name="tree" size={24} color="#FF6F00" />;
+          default: return <FontAwesome name="map-marker" size={24} color="#FF6F00" />;
         }
       } else {
         switch(item.name) {
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    backgroundColor: '#F66161',
+    backgroundColor: '#FF6F00',
     padding: 20,
     paddingTop: 40,
     borderBottomLeftRadius: 0,
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   gridPriceValue: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
-    color: '#F66161',
+    color: '#FF6F00',
   },
   gridPaxText: {
     fontSize: 10,

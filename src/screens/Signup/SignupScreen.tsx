@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   continueButton: {
-    backgroundColor: '#F66161',
+    backgroundColor: '#FF6F00',
     height: 48,
     borderRadius: 8,
     justifyContent: 'center',
