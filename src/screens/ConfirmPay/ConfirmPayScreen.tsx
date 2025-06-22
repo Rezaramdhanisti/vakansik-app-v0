@@ -456,7 +456,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           <View style={styles.loadingIndicatorContainer}>
             <ActivityIndicator
               size="large"
-              color="#FF385C"
+              color="#FF6F00"
               style={styles.lottieAnimation}
             />
             <Text style={styles.loadingOverlayText}>Processing your booking...</Text>
@@ -469,7 +469,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         <View style={styles.errorModalBackdrop}>
           <View style={styles.errorModalContainer}>
             <View style={styles.errorIconContainer}>
-              <Ionicons name="warning-outline" size={48} color="#FF385C" />
+              <Ionicons name="warning-outline" size={48} color="#FF6F00" />
             </View>
             <Text style={styles.errorMessage}>{errorMessage}</Text>
             <TouchableOpacity 
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
   
   // Save button
   saveButton: {
-    backgroundColor: '#FF385C',
+    backgroundColor: '#FF6F00',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
@@ -1089,7 +1089,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#EEEEEE',
   },
   bookButton: {
-    backgroundColor: '#FF385C',
+    backgroundColor: '#FF6F00',
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',

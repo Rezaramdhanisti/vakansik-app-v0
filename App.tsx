@@ -1,9 +1,3 @@
-/**
- * MyTravel App
- *
- * @format
- */
-
 import React, { useEffect } from 'react';
 import { StatusBar, Linking } from 'react-native';
 import { supabase } from './lib/supabase';

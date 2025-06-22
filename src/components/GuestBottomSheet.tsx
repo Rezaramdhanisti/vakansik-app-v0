@@ -35,7 +35,7 @@ const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     
     // variables for bottom sheet modal
-    const snapPoints = useMemo(() => ['70%'], []);
+    const snapPoints = useMemo(() => ['75%'], []);
     
     // State for guest data
     const [editedGuest, setEditedGuest] = useState<GuestData>(initialGuestData || {

@@ -115,6 +115,7 @@ const LoginScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="Email"
+              placeholderTextColor="#9E9E9E"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -127,6 +128,7 @@ const LoginScreen = () => {
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Password"
+                placeholderTextColor="#9E9E9E"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   disabledButton: {
-    backgroundColor: '#f5a5b5',
+    backgroundColor: '#FFBE80',
   },
   errorContainer: {
     backgroundColor: '#FFF8F6',
