@@ -57,7 +57,7 @@ function App(): React.JSX.Element {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#FF7E5F" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <AppNavigator />
     </>
   );

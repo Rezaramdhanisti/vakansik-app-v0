@@ -452,14 +452,32 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       
       {/* Loading Overlay */}
       {isLoading && (
-        <View style={styles.loadingOverlay}>
+        <View style={styles.errorModalBackdrop}>
           <View style={styles.loadingIndicatorContainer}>
             <ActivityIndicator
               size="large"
-              color="#0066CC"
+              color="#FF385C"
               style={styles.lottieAnimation}
             />
             <Text style={styles.loadingOverlayText}>Processing your booking...</Text>
+          </View>
+        </View>
+      )}
+      
+      {/* Error Modal */}
+      {isErrorModalVisible && (
+        <View style={styles.errorModalBackdrop}>
+          <View style={styles.errorModalContainer}>
+            <View style={styles.errorIconContainer}>
+              <Ionicons name="warning-outline" size={48} color="#FF385C" />
+            </View>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+            <TouchableOpacity 
+              style={styles.saveButton} 
+              onPress={() => setIsErrorModalVisible(false)}
+            >
+              <Text style={styles.saveButtonText}>OK</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -703,11 +721,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  errorModalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
   errorModalContainer: {
     width: '85%',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    paddingBottom: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   errorIconContainer: {
     alignItems: 'center',

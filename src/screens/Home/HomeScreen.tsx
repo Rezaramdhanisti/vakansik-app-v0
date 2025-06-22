@@ -154,7 +154,7 @@ function HomeScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#F66161" />
+          <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       <ScrollView 
         contentInsetAdjustmentBehavior="automatic"
