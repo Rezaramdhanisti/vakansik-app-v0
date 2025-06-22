@@ -195,7 +195,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             
             <TouchableOpacity style={styles.supportButton}>
               <Ionicons name="help-circle-outline" size={22} color="#333" style={styles.supportIcon} />
-              <Text style={styles.supportButtonText}>Contact Airbnb Support</Text>
+              <Text style={styles.supportButtonText}>Contact Vakansik Support</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
             </TouchableOpacity>
             

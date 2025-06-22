@@ -130,6 +130,7 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
                 style={[styles.input]}
                 placeholder="Nama lengkap"
                 value={firstName}
+              placeholderTextColor="#9E9E9E"
                 onChangeText={setFirstName}
               />
              
@@ -144,6 +145,7 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
                 style={styles.input}
                 placeholder="Nomor HP"
                 value={phone}
+              placeholderTextColor="#9E9E9E"
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
               />
@@ -155,6 +157,7 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
               <TextInput
                 style={styles.input}
                 placeholder="Email"
+              placeholderTextColor="#9E9E9E"
                 value={userEmail}
                 onChangeText={setUserEmail}
                 keyboardType="email-address"
@@ -170,6 +173,7 @@ const SignupScreen = ({ route }: SignupScreenProps) => {
                   placeholder="Kata sandi"
                   value={password}
                   onChangeText={setPassword}
+              placeholderTextColor="#9E9E9E"
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity 
