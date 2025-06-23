@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Dimensions, Text } from 'react-native';
 import Carousel, { Pagination, ICarouselInstance } from 'react-native-reanimated-carousel';
 import { useSharedValue } from 'react-native-reanimated';
 import { renderItem } from '../utils/render-item';
-import { Dimensions } from 'react-native';
+import { FONTS } from '../config/fonts';
 
 const { width } = Dimensions.get('window');
 
@@ -12,22 +12,26 @@ interface PropertyCarouselProps {
   itemId: string;
   onSnapToItem?: (index: number) => void;
   carouselRefs?: React.MutableRefObject<{[key: string]: ICarouselInstance}>;
+  showCounter?: boolean;
+  fullWidth?: boolean;
 }
 
 const PropertyCarousel: React.FC<PropertyCarouselProps> = ({ 
   images, 
   itemId, 
   onSnapToItem,
-  carouselRefs
+  carouselRefs,
+  fullWidth = false
 }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
   // Create a shared value for this carousel's progress - this is safe here as we're in a component
   const progressValue = useSharedValue(0);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, fullWidth && styles.fullWidthContainer]}>
       <Carousel
         loop={true}
-        width={width - 32} // Adjust based on card padding
+        width={fullWidth ? width : width - 32} // Full width for detail screen, adjusted for card padding otherwise
         height={300}
         autoPlayInterval={0} // Disable autoplay
         data={images}
@@ -40,9 +44,12 @@ const PropertyCarousel: React.FC<PropertyCarouselProps> = ({
           // Update the shared value for this carousel
           progressValue.value = absoluteProgress;
         }}
-        onSnapToItem={onSnapToItem}
+        onSnapToItem={(index) => {
+          setCurrentIndex(index);
+          if (onSnapToItem) onSnapToItem(index);
+        }}
         renderItem={({ item, index }) => {
-          const renderer = renderItem({ rounded: true });
+          const renderer = renderItem({ rounded: !fullWidth });
           return renderer({ item: item as string, index });
         }}
         style={styles.carousel}
@@ -87,6 +94,11 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  fullWidthContainer: {
+    borderRadius: 0,
   },
   carousel: {
     width: '100%',
@@ -99,6 +111,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingBottom: 10,
+  },
+  counterContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  counterText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
   },
 });
 

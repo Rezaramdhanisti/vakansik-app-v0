@@ -12,6 +12,7 @@ import {
   Pressable,
   StatusBar,
 } from 'react-native';
+import PropertyCarousel from '../../components/PropertyCarousel';
 import { FlashList } from '@shopify/flash-list';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -27,37 +28,13 @@ const { width } = Dimensions.get('window');
 // Use StackScreenProps to properly type the component props
 type TripDetailScreenProps = StackScreenProps<SearchStackParamList, 'TripDetail'>;
 
-// Pickup area data constant
-const PICKUP_AREAS = [
-  {
-    id: '1',
-    area: 'Kuta',
-    locations: 'Kuta, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu',
-    address: 'Ubud, Bali, 80572',
-    isDefault: true,
-  },
-  {
-    id: '2',
-    area: 'Canggu',
-    locations: 'Canggu, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu',
-    address: 'Canggu, Bali, 80572',
-    isDefault: false,
-  },
-  {
-    id: '3',
-    area: 'Denpasar',
-    locations: 'Denpasar, Seminyak, Ubud, Nusa Dua, Uluwatu, Sanur, Denpasar, Canggu',
-    address: 'Denpasar, Bali, 80572',
-    isDefault: false,
-  },
-];
-
 
 
 function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.JSX.Element {
   const { property, guestCount = 2 } = route.params; // Default to 2 guests if not provided
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  // Initialize with the first itinerary item expanded and others collapsed
   const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({});
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -73,14 +50,6 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
         require('../../../assets/images/lovina-2.jpg'),
         require('../../../assets/images/lovina-3.jpg'),
       ];
-
-  // Features data
-  const features = property.features || {
-    bedrooms: 8,
-    beds: 8,
-    bathrooms: 'Dedicated bathroom'
-  };
-  
   // Reviews data
   const reviews = [
     {
@@ -113,10 +82,6 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
     },
   ];
 
-  const handleImageChange = (index: number) => {
-    setCurrentImageIndex(index);
-  };
-  
   // Function to open the date bottom sheet
   const handleShowDates = () => {
     setIsBottomSheetVisible(true);
@@ -127,23 +92,6 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   const handleSheetDismiss = () => {
     setIsBottomSheetVisible(false);
   };
-
-  const renderImageItem = ({ item, index }: { item: any; index: number }) => {
-    // Handle both require() images and URL strings
-    const imageSource = typeof item === 'string' ? { uri: item } : item;
-    
-    return (
-      <View style={styles.imageContainer}>
-        <Image
-          source={imageSource}
-          style={styles.image}
-          resizeMode="cover"
-        />
-        <Text style={styles.imageCounter}>{index + 1} / {images.length}</Text>
-      </View>
-    );
-  };
-  console.log('property',property);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -175,17 +123,12 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Trip Images */}
         <View style={styles.imageGalleryWrapper}>
-          <FlatList
-            data={images}
-            renderItem={renderImageItem}
-            keyExtractor={(_, index) => index.toString()}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={(event) => {
-              const newIndex = Math.floor(event.nativeEvent.contentOffset.x / width);
-              setCurrentImageIndex(newIndex);
-            }}
+          <PropertyCarousel
+            images={images}
+            itemId={property.id || 'trip-detail'}
+            onSnapToItem={(index) => setCurrentImageIndex(index)}
+            showCounter={true}
+            fullWidth={true}
           />
         </View>
         
@@ -231,10 +174,11 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           <View>
             <Text style={styles.sectionTitle}>What you'll do</Text>
             
-            {property.itinerary && property.itinerary.length > 0 ? (
+            {property?.itinerary && property?.itinerary.length > 0 ? (
               <View style={styles.timelineContainer}>
-                {property.itinerary.map((dayData, dayIndex) => {
-                  const isCollapsed = collapsedDays[dayIndex] || false;
+                {property?.itinerary.map((dayData, dayIndex) => {
+                  // First item (index 0) is expanded by default, others are collapsed
+                  const isCollapsed = dayIndex === 0 ? false : (collapsedDays[dayIndex] !== false);
                   
                   return (
                     <View key={dayIndex} style={styles.dayContainer}>
@@ -524,7 +468,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: '#FFFFFF',
-    marginTop: -20,
+    marginTop: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
