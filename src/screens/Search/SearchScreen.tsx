@@ -10,13 +10,12 @@ import {
   StatusBar,
   Image,
   Switch,
-  NativeSyntheticEvent,
-  NativeScrollEvent
+  ActivityIndicator
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { fetchDestinations, Destination } from '../../services/destinationsService';
+import { fetchDestinations } from '../../services/destinationsService';
 import Text from '../../components/Text';
-import { FONTS,FONT_WEIGHT } from '../../config/fonts';
+import { FONTS } from '../../config/fonts';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -82,22 +81,8 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
   const [destinations, setDestinations] = useState<PropertyListing[]>([]);
   const [currentImageIndices, setCurrentImageIndices] = useState<{[key: string]: number}>({});
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Search suggestions data - divided into cities and activities
-  const citySuggestions = [
-    { id: 'city-1', name: 'Bali, Indonesia', type: 'city' },
-    { id: 'city-2', name: 'Tokyo, Japan', type: 'city' },
-    { id: 'city-3', name: 'Paris, France', type: 'city' },
-    { id: 'activity-2', name: 'Surfing in Bali', type: 'activity' },
-    { id: 'activity-3', name: 'Snorkeling in Raja Ampat', type: 'activity' },
-    { id: 'activity-4', name: 'Trekking Mount Bromo', type: 'activity' },
-    { id: 'activity-6', name: 'Exploring Borobudur Temple', type: 'activity' },
-  ];
-  
-  // Group suggestions by type
-  const cityOnlySuggestions = citySuggestions.filter(item => item.type === 'city');
-  const activitySuggestions = citySuggestions.filter(item => item.type === 'activity');
-
   // Categories data
   const categories = [
     { id: '1', name: 'Budget', icon: 'chicken-piggy.webp', isImage: true },
@@ -130,11 +115,9 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   // Load destinations from Supabase
   useEffect(() => {
     const loadDestinations = async () => {
-      console.log('Starting to load destinations...');
+      setIsLoading(true);
       try {
-        console.log('Fetching destinations data...');
         const data = await fetchDestinations();
-        console.log('Destinations fetched successfully:', data ? data : 'No data');
         
         // Transform the data to match our PropertyListing type
         const formattedData = data.map((item, index) => ({
@@ -151,16 +134,14 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           price_information: item.price_information,
           isFavorite: false
         }));
-        console.log('Data transformation complete, setting state with', formattedData.length, 'items');
         setDestinations(formattedData);
         setFilteredListings(formattedData);
-        console.log('Destinations loaded successfully');
       } catch (error) {
-        console.error('Error fetching destinations:', error);
         // Fallback to empty array if fetch fails
         setDestinations([]);
         setFilteredListings([]);
-        console.log('Failed to load destinations, using empty arrays as fallback');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -306,49 +287,6 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           />
         </View>
       </View>
-
-      {/* Search Suggestions */}
-      {isSearchFocused && (
-        <View style={styles.suggestionsContainer}>
-          <ScrollView style={styles.suggestionsList} showsVerticalScrollIndicator={false}>
-            {/* Cities Section */}
-            <View style={styles.suggestionSection}>
-              <Text style={styles.sectionHeader}>Cities</Text>
-              {cityOnlySuggestions.map((item) => (
-                <TouchableOpacity 
-                  key={item.id}
-                  style={styles.suggestionItem}
-                  onPress={() => {
-                    setSearchText(item.name);
-                    setIsSearchFocused(false);
-                  }}
-                >
-                  <Icon name="location-on" size={16} color="#666" style={styles.locationIcon} />
-                  <Text style={styles.suggestionText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            
-            {/* Activities Section */}
-            <View style={styles.suggestionSection}>
-              <Text style={styles.sectionHeader}>Activities</Text>
-              {activitySuggestions.map((item) => (
-                <TouchableOpacity 
-                  key={item.id}
-                  style={styles.suggestionItem}
-                  onPress={() => {
-                    setSearchText(item.name);
-                    setIsSearchFocused(false);
-                  }}
-                >
-                  <MaterialCommunityIcons name="hiking" size={16} color="#666" style={styles.locationIcon} />
-                  <Text style={styles.suggestionText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      )}
       
       {/* Categories Section */}
       <View style={styles.categoriesContainer}>
@@ -363,14 +301,20 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       
       {/* Property Listings */}
       <View style={styles.flashListContainer}>
-        <FlashList
-          data={filteredListings}
-          renderItem={renderPropertyItem}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listingsContainer}
-          estimatedItemSize={350}
-        />
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FF6F00" />
+          </View>
+        ) : (
+          <FlashList
+            data={filteredListings}
+            renderItem={renderPropertyItem}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listingsContainer}
+            estimatedItemSize={350}
+          />
+        )}
       </View>
       
       {/* Filter Button */}
@@ -690,6 +634,11 @@ const styles = StyleSheet.create({
   },
   mapIcon: {
     marginLeft: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   // Bottom Sheet styles
   bottomSheetContent: {
