@@ -13,9 +13,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import Carousel, { Pagination, ICarouselInstance } from 'react-native-reanimated-carousel';
-import { useSharedValue, interpolate, Extrapolation } from 'react-native-reanimated';
-import { renderItem } from '../../utils/render-item';
+import { ICarouselInstance } from 'react-native-reanimated-carousel';
 import PropertyCarousel from '../../components/PropertyCarousel';
 import { fetchDestinations } from '../../services/destinationsService';
 import Text from '../../components/Text';
@@ -522,7 +520,7 @@ const styles = StyleSheet.create({
   },
   propertyImageContainer: {
     position: 'relative',
-    height: 250,
+    height: 300,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 12,

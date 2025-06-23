@@ -28,7 +28,7 @@ const PropertyCarousel: React.FC<PropertyCarouselProps> = ({
       <Carousel
         loop={true}
         width={width - 32} // Adjust based on card padding
-        height={250}
+        height={300}
         autoPlayInterval={0} // Disable autoplay
         data={images}
         ref={(ref) => {
