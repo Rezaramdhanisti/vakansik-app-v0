@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image } from 'react-native';
 import 'react-native-gesture-handler';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
@@ -26,20 +26,37 @@ const MainNavigator = () => {
         screenOptions={({ route }) => {
           return {
             tabBarIcon: ({ focused, color, size }) => {
-              let iconName: string = 'help-circle'; // Default icon
-
-              if (route.name === 'Home') {
-                iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Explore') {
-                iconName = focused ? 'search' : 'search-outline';
+              // Use custom image icons based on the route name and focused state
+              if (route.name === 'Explore') {
+                return (
+                  <Image
+                    source={focused ? require('../../assets/images/search.png') : require('../../assets/images/search-inactive.png')}
+                    style={{ width: size, height: size }}
+                  />
+                );
               } else if (route.name === 'Bookings') {
-                iconName = focused ? 'calendar' : 'calendar-outline';
+                return (
+                  <Image
+                    source={focused ? require('../../assets/images/calendar.png') : require('../../assets/images/calendar-inactive.png')}
+                    style={{ width: size, height: size }}
+                  />
+                );
               } else if (route.name === 'Profile') {
-                iconName = focused ? 'person' : 'person-outline';
+                return (
+                  <Image
+                    source={focused ? require('../../assets/images/profile.png') : require('../../assets/images/profile-inactive.png')}
+                    style={{ width: size, height: size }}
+                  />
+                );
               }
-
-              // You can return any component here
-              return <Ionicons name={iconName} size={size} color={color} />;
+              
+              // Default icon (should not reach here in normal operation)
+              return (
+                <Image
+                  source={require('../../assets/images/search.png')}
+                  style={{ width: size, height: size }}
+                />
+              );
             },
             tabBarActiveTintColor: '#FF6F00',
             tabBarInactiveTintColor: '#999999',
