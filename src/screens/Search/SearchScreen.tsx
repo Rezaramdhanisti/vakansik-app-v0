@@ -13,8 +13,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { ICarouselInstance } from 'react-native-reanimated-carousel';
-import PropertyCarousel from '../../components/PropertyCarousel';
+// Removed carousel imports as we're using a single image
 import { fetchDestinations } from '../../services/destinationsService';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
@@ -82,9 +81,9 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
   const [destinations, setDestinations] = useState<PropertyListing[]>([]);
-  const [currentImageIndices, setCurrentImageIndices] = useState<{[key: string]: number}>({});
+  // Removed currentImageIndices state as we're using a single image
   // Create a ref to store carousel instances
-  const carouselRefs = useRef<{[key: string]: ICarouselInstance}>({});
+  // Removed carouselRefs as we're using a single image
   const [isLoading, setIsLoading] = useState(false);
   
   // Categories data
@@ -204,13 +203,10 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     >
       <View style={styles.propertyImageContainer}>
         {item.image_urls && item.image_urls.length > 0 ? (
-          <PropertyCarousel 
-            images={item.image_urls} 
-            itemId={item.id}
-            onSnapToItem={(index: number) => {
-              setCurrentImageIndices(prev => ({ ...prev, [item.id]: index }));
-            }}
-            carouselRefs={carouselRefs}
+          <Image 
+            source={{ uri: item.image_urls[0] }}
+            style={styles.propertyImage}
+            resizeMode="cover"
           />
         ) : (
           <View style={styles.propertyImage} />
