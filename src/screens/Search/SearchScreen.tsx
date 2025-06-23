@@ -13,6 +13,10 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import Carousel, { Pagination, ICarouselInstance } from 'react-native-reanimated-carousel';
+import { useSharedValue, interpolate, Extrapolation } from 'react-native-reanimated';
+import { renderItem } from '../../utils/render-item';
+import PropertyCarousel from '../../components/PropertyCarousel';
 import { fetchDestinations } from '../../services/destinationsService';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
@@ -81,6 +85,8 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
   const [destinations, setDestinations] = useState<PropertyListing[]>([]);
   const [currentImageIndices, setCurrentImageIndices] = useState<{[key: string]: number}>({});
+  // Create a ref to store carousel instances
+  const carouselRefs = useRef<{[key: string]: ICarouselInstance}>({});
   const [isLoading, setIsLoading] = useState(false);
   
   // Categories data
@@ -200,20 +206,13 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     >
       <View style={styles.propertyImageContainer}>
         {item.image_urls && item.image_urls.length > 0 ? (
-          <FlashList
-            data={item.image_urls}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(_, index: number) => `image-${item.id}-${index}`}
-            renderItem={({ item: imageUrl }: { item: string }) => (
-              <Image 
-                source={{ uri: imageUrl }} 
-                style={styles.propertyImage} 
-                resizeMode="cover"
-              />
-            )}
-            
-            scrollEventThrottle={200}
+          <PropertyCarousel 
+            images={item.image_urls} 
+            itemId={item.id}
+            onSnapToItem={(index: number) => {
+              setCurrentImageIndices(prev => ({ ...prev, [item.id]: index }));
+            }}
+            carouselRefs={carouselRefs}
           />
         ) : (
           <View style={styles.propertyImage} />
@@ -232,23 +231,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           />
         </TouchableOpacity>
         
-        {/* Image pagination dots */}
-        <View style={styles.paginationContainer}>
-          {item.image_urls && item.image_urls.length > 0 ? (
-            item.image_urls.map((_: any, index: number) => {
-              // Get the current image index for this property, default to 0
-              const currentIndex = currentImageIndices[item.id] || 0;
-              return (
-                <View 
-                  key={index} 
-                  style={[styles.paginationDot, index === currentIndex && styles.activePaginationDot]} 
-                />
-              );
-            })
-          ) : (
-            <View style={styles.paginationDot} />
-          )}
-        </View>
+        {/* Pagination dots are now handled inside the PropertyCarousel component */}
       </View>
       
       <View style={styles.propertyDetails}>
@@ -539,7 +522,7 @@ const styles = StyleSheet.create({
   },
   propertyImageContainer: {
     position: 'relative',
-    height: 300,
+    height: 250,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 12,
