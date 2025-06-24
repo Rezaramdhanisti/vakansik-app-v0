@@ -77,6 +77,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     reviews: string;
     image_urls?: string[];
     isFavorite: boolean;
+    budget_band?: string; // Add budget_band property
   };
   
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
@@ -104,16 +105,22 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
 
   // Apply filters and sorting to property listings
   useEffect(() => {
-    let sorted = [...destinations];
+    let filtered = [...destinations];
     
-    if (sortByHighestPrice) {
-      sorted.sort((a, b) => getPriceValue(b.price) - getPriceValue(a.price));
-    } else if (sortByLowestPrice) {
-      sorted.sort((a, b) => getPriceValue(a.price) - getPriceValue(b.price));
+    // Filter by active category
+    if (activeCategory === 'Budget') {
+      filtered = filtered.filter(item => item.budget_band === 'budget');
     }
     
-    setFilteredListings(sorted);
-  }, [sortByHighestPrice, sortByLowestPrice, destinations]);
+    // Apply sorting
+    if (sortByHighestPrice) {
+      filtered.sort((a, b) => getPriceValue(b.price) - getPriceValue(a.price));
+    } else if (sortByLowestPrice) {
+      filtered.sort((a, b) => getPriceValue(a.price) - getPriceValue(b.price));
+    }
+    
+    setFilteredListings(filtered);
+  }, [sortByHighestPrice, sortByLowestPrice, destinations, activeCategory]);
 
   // Load destinations from Supabase
   useEffect(() => {
@@ -135,6 +142,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           itinerary: item.itinerary,
           meeting_point: item.meeting_point,
           price_information: item.price_information,
+          budget_band: item.budget_band, // Add budget_band from API
           isFavorite: false
         }));
         setDestinations(formattedData);

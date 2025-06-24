@@ -361,7 +361,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               </View>
               <View style={styles.infoContent}>
                 <Text style={styles.infoTitle}>Cancellation policy</Text>
-                <Text style={styles.infoText}>Cancel at least 1 day before the start time for a full refund.</Text>
+                <Text style={styles.infoText}>Cancel at least 7 day before the start time for a full refund.</Text>
               </View>
             </View>
             

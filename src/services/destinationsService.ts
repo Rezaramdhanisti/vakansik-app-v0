@@ -23,12 +23,13 @@ export interface Destination {
   price_information?: string;
   itinerary?: ItineraryDay[];
   meeting_point?: string;
+  budget_band?: string;
 }
 
 export async function fetchDestinations() {
   const { data, error } = await supabase
     .from('destinations')
-    .select('name, description, price, rating, reviews, image_urls, price_information, itinerary, meeting_point');
+    .select('name, description, price, rating, reviews, image_urls, price_information, itinerary, meeting_point, budget_band');
 
   if (error) throw error;
   return data as Destination[];
