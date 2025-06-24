@@ -90,10 +90,13 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   // Categories data
   const categories = [
     { id: '1', name: 'Budget', icon: 'chicken-piggy.webp', isImage: true },
-    { id: '2', name: 'Extreme', icon: 'extreme.webp', isImage: true },
-    { id: '3', name: 'Bandung', icon: 'bandung.webp', isImage: true },
-    { id: '4', name: 'Jakarta', icon: 'jakarta.webp', isImage: true },
-    { id: '5', name: 'Yogyakarta', icon: 'yogyakarta.webp', isImage: true },
+    { id: '2', name: 'Beach', icon: 'extreme.webp', isImage: true },
+    { id: '3', name: 'Mountain', icon: 'bandung.webp', isImage: true },
+    { id: '4', name: 'Nature', icon: 'jakarta.webp', isImage: true },
+    { id: '5', name: 'Heritage', icon: 'yogyakarta.webp', isImage: true },
+    { id: '6', name: 'Jakarta', icon: 'yogyakarta.webp', isImage: true },
+    { id: '7', name: 'Bandung', icon: 'yogyakarta.webp', isImage: true },
+    { id: '8', name: 'Yogyakarta', icon: 'yogyakarta.webp', isImage: true },
   ];
 
   // Convert price string to number for sorting
@@ -167,12 +170,18 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       if (item.isImage) {
         if (item.name === 'Budget') {
           return <Image source={require('../../../assets/images/chicken-piggy.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
-        } else if (item.name === 'Extreme') {
-          return <Image source={require('../../../assets/images/extreme.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
-        } else if (item.name === 'Bandung') {
-          return <Image source={require('../../../assets/images/bandung.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Beach') {
+          return <Image source={require('../../../assets/images/beach.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Mountain') {
+          return <Image source={require('../../../assets/images/mountain.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Nature') {
+          return <Image source={require('../../../assets/images/nature.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Heritage') {
+          return <Image source={require('../../../assets/images/heritage.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
         } else if (item.name === 'Jakarta') {
           return <Image source={require('../../../assets/images/jakarta.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
+        } else if (item.name === 'Bandung') {
+          return <Image source={require('../../../assets/images/bandung.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
         } else if (item.name === 'Yogyakarta') {
           return <Image source={require('../../../assets/images/yogyakarta.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
         }
@@ -498,6 +507,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#999',
+    marginTop: 4
   },
   activeCategoryText: {
     color: '#000',
