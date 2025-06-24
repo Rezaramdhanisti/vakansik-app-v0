@@ -77,7 +77,9 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     reviews: string;
     image_urls?: string[];
     isFavorite: boolean;
-    budget_band?: string; // Add budget_band property
+    budget_band?: string;
+    category?: string;
+    location?: string;
   };
   
   const [filteredListings, setFilteredListings] = useState<PropertyListing[]>([]);
@@ -90,9 +92,9 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   // Categories data
   const categories = [
     { id: '1', name: 'Budget', icon: 'chicken-piggy.webp', isImage: true },
-    { id: '2', name: 'Beach', icon: 'extreme.webp', isImage: true },
-    { id: '3', name: 'Mountain', icon: 'bandung.webp', isImage: true },
-    { id: '4', name: 'Nature', icon: 'jakarta.webp', isImage: true },
+    { id: '2', name: 'Pantai', icon: 'extreme.webp', isImage: true },
+    { id: '3', name: 'Gunung', icon: 'bandung.webp', isImage: true },
+    { id: '4', name: 'Alam', icon: 'jakarta.webp', isImage: true },
     { id: '5', name: 'Heritage', icon: 'yogyakarta.webp', isImage: true },
     { id: '6', name: 'Jakarta', icon: 'yogyakarta.webp', isImage: true },
     { id: '7', name: 'Bandung', icon: 'yogyakarta.webp', isImage: true },
@@ -113,6 +115,23 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     // Filter by active category
     if (activeCategory === 'Budget') {
       filtered = filtered.filter(item => item.budget_band === 'budget');
+    } else if (activeCategory === 'Pantai') {
+      filtered = filtered.filter(item => item.category === 'Pantai');
+    } else if (activeCategory === 'Gunung') {
+      filtered = filtered.filter(item => item.category === 'Pegunungan');
+    } else if (activeCategory === 'Alam') {
+      filtered = filtered.filter(item => item.category === 'Alam');
+    } else if (activeCategory === 'Heritage') {
+      filtered = filtered.filter(item => item.category === 'Heritage');
+    } else if (activeCategory === 'Jakarta') {
+      // filtered = filtered.filter(item => item.location === 'jakarta');
+      filtered = filtered.filter(item => item.category === 'jakarta');
+    } else if (activeCategory === 'Bandung') {
+      // filtered = filtered.filter(item => item.location === 'bandung');
+      filtered = filtered.filter(item => item.category === 'Bandung');
+    } else if (activeCategory === 'Yogyakarta') {
+      // filtered = filtered.filter(item => item.location === 'yogyakarta');
+      filtered = filtered.filter(item => item.category === 'Yogyakarta');
     }
     
     // Apply sorting
@@ -145,7 +164,9 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           itinerary: item.itinerary,
           meeting_point: item.meeting_point,
           price_information: item.price_information,
-          budget_band: item.budget_band, // Add budget_band from API
+          budget_band: item.budget_band,
+          category: item.category,
+          location: item.location,
           isFavorite: false
         }));
         setDestinations(formattedData);
@@ -170,11 +191,11 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       if (item.isImage) {
         if (item.name === 'Budget') {
           return <Image source={require('../../../assets/images/chicken-piggy.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
-        } else if (item.name === 'Beach') {
+        } else if (item.name === 'Pantai') {
           return <Image source={require('../../../assets/images/beach.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
-        } else if (item.name === 'Mountain') {
+        } else if (item.name === 'Gunung') {
           return <Image source={require('../../../assets/images/mountain.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
-        } else if (item.name === 'Nature') {
+        } else if (item.name === 'Alam') {
           return <Image source={require('../../../assets/images/nature.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
         } else if (item.name === 'Heritage') {
           return <Image source={require('../../../assets/images/heritage.webp')} style={{ width: 60, height: 60, resizeMode: 'contain' }} />;
@@ -299,7 +320,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FF6F00" />
           </View>
-        ) : (
+        ) : filteredListings.length > 0 ? (
           <FlashList
             data={filteredListings}
             renderItem={renderPropertyItem}
@@ -308,10 +329,16 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
             contentContainerStyle={styles.listingsContainer}
             estimatedItemSize={350}
           />
+        ) : (
+          <View style={styles.emptyStateContainer}>
+            <Image source={require('../../../assets/images/coming-soon.webp')} style={{ width: 360, height: 360, resizeMode: 'contain' }} />
+            <Text style={styles.emptyStateText}>Coming soon</Text>
+          </View>
         )}
       </View>
       
       {/* Filter Button */}
+      {filteredListings.length > 0 && 
       <View style={styles.mapButtonContainer}>
         <TouchableOpacity 
           style={styles.mapButton}
@@ -321,6 +348,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           <MaterialCommunityIcons name="filter-outline" size={18} color="#FFF" style={styles.mapIcon} />
         </TouchableOpacity>
       </View>
+      }
       
       {/* Bottom Sheet */}
       <BottomSheet
@@ -401,6 +429,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#666',
+    marginTop: -40
   },
   header: {
     padding: 16,
