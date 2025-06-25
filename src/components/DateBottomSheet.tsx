@@ -1,5 +1,6 @@
-import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState, useContext } from 'react';
+import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState, useContext, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
+import dayjs from 'dayjs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   BottomSheetModal,
@@ -84,17 +85,19 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     }
   };
   
-  // Sample dates and time slots combined for the flat list
+  // Generate dates for the next 30 days for the date time data
   const dateTimeData = useMemo(() => {
-    const dates = [
-      { day: 'Saturday', date: 'June 28' },
-      { day: 'Sunday', date: 'June 29' },
-      { day: 'Saturday', date: 'June 30' },
-      { day: 'Sunday', date: 'June 31' },
-      { day: 'Saturday', date: 'June 32' },
-      { day: 'Sunday', date: 'June 33' },
-      { day: 'Saturday', date: 'June 34' },
-    ];
+    const dates = [];
+    const today = dayjs();
+    
+    // Generate next 30 days
+    for (let i = 0; i < 30; i++) {
+      const currentDate = today.add(i, 'day');
+      dates.push({
+        day: currentDate.format('dddd'),
+        date: currentDate.format('MMMM D')
+      });
+    }
     
     const timeSlots = [
       { id: '1', time: '8:00 AM – 3:15 PM', price: price, spotsLeft: 10 },
@@ -155,15 +158,15 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   }, [onDismiss]);
   
   // Select a date
-  const handleSelectDate = (date: string) => {
+  const handleSelectDate = useCallback((date: string) => {
     setSelectedDate(date);
     setSelectedTimeSlot(null); // Reset time slot when date changes
-  };
+  }, []);
   
   // Select a time slot
-  const handleSelectTimeSlot = (slotId: string) => {
+  const handleSelectTimeSlot = useCallback((slotId: string) => {
     setSelectedTimeSlot(slotId);
-  };
+  }, []);
   
   // Backdrop component for the bottom sheet
   const renderBackdrop = useCallback(
@@ -192,27 +195,52 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   }, []);
   
   // State for selected date and month
-  const [selectedMonth, setSelectedMonth] = useState('June 2025');
+  const [selectedMonth, setSelectedMonth] = useState(dayjs().format('MMMM YYYY'));
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
   
-  // Available months
-  const months = useMemo(() => [
-    { name: 'May 2025', days: 31, startDay: 3 }, // 0 = Sunday, so 3 = Wednesday
-    { name: 'June 2025', days: 30, startDay: 6 }, // 6 = Saturday
-    { name: 'July 2025', days: 31, startDay: 1 },
-    { name: 'August 2025', days: 31, startDay: 4 },
-    { name: 'September 2025', days: 30, startDay: 0 },
-    { name: 'October 2025', days: 31, startDay: 2 },
-    { name: 'November 2025', days: 30, startDay: 5 },
-    { name: 'December 2025', days: 31, startDay: 0 }
-  ], []);
+  // Generate available months for 1 year from current date
+  const months = useMemo(() => {
+    const result = [];
+    const today = dayjs();
+    const oneYearFromNow = today.add(1, 'year');
+    
+    // Start from current month
+    let currentMonth = today;
+    
+    // Generate months until we reach one year from now
+    while (currentMonth.isBefore(oneYearFromNow) || currentMonth.isSame(oneYearFromNow, 'month')) {
+      const monthName = currentMonth.format('MMMM YYYY');
+      const daysInMonth = currentMonth.daysInMonth();
+      // Get the day of week for the first day (0 = Sunday, 1 = Monday, etc.)
+      const startDay = currentMonth.startOf('month').day();
+      
+      result.push({
+        name: monthName,
+        days: daysInMonth,
+        startDay: startDay,
+        monthObj: currentMonth
+      });
+      
+      // Move to next month
+      currentMonth = currentMonth.add(1, 'month');
+    }
+    
+    return result;
+  }, []);
   
-  // Function to check if a day is a weekend (Friday, Saturday, Sunday)
-  const isWeekendDay = useCallback((monthStartDay: number, dayNumber: number) => {
+  // Function to check if a day is available (Friday, Saturday, Sunday)
+  const isAvailableDay = useCallback((monthStartDay: number, dayNumber: number) => {
     // Calculate the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
     const dayOfWeek = (monthStartDay + dayNumber - 1) % 7;
     // Return true if the day is Friday (5), Saturday (6), or Sunday (0)
     return dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0;
+  }, []);
+  
+  // Function to check if a date is in the past
+  const isPastDate = useCallback((monthObj: dayjs.Dayjs, day: number) => {
+    const today = dayjs().startOf('day');
+    const dateToCheck = monthObj.date(day).startOf('day');
+    return dateToCheck.isBefore(today);
   }, []);
 
   // Generate calendar data
@@ -229,34 +257,52 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
       
       // Add actual days
       for (let i = 1; i <= month.days; i++) {
-        // Check if the day is a weekend day
-        const isWeekend = isWeekendDay(month.startDay, i);
+        // Check if the day is an available day (Friday, Saturday, Monday)
+        const isAvailable = isAvailableDay(month.startDay, i);
+        // Check if the date is in the past
+        const isPast = isPastDate(month.monthObj, i);
+        
         days.push({ 
           day: i.toString(), 
           empty: false,
-          isWeekend: isWeekend // Add flag to indicate if it's a weekend day
+          isAvailable: isAvailable, // Add flag to indicate if it's an available day
+          isPast: isPast // Add flag to indicate if the date is in the past
         });
       }
       
       return {
         name: month.name,
         weekDays,
-        days
+        days,
+        monthObj: month.monthObj
       };
     });
-  }, [months, isWeekendDay]);
+  }, [months, isAvailableDay, isPastDate]);
   
   const calendarData = useMemo(() => generateCalendarData(), [generateCalendarData]);
   
   // Handle selecting a date
-  const handleSelectCalendarDate = useCallback((month: string, day: string) => {
+  const handleSelectCalendarDate = useCallback((month: string, day: string, monthObj: dayjs.Dayjs) => {
+    // Format the date properly
+    const selectedDate = monthObj.date(parseInt(day, 10));
     const formattedDate = `${month} ${day}`;
     setSelectedCalendarDate(formattedDate);
     setSelectedMonth(month);
     
-    // Just close the calendar sheet without affecting the main sheet
+    // Find a matching date in dateTimeData to select in the main sheet
+    const formattedDayForComparison = selectedDate.format('MMMM D');
+    const matchingDateItem = dateTimeData.find(item => 
+      item.type === 'header' && item.date === formattedDayForComparison
+    );
+    
+    if (matchingDateItem) {
+      // Select this date in the main view
+      handleSelectDate(matchingDateItem.date);
+    }
+    
+    // Close the calendar sheet
     handleCloseCalendar();
-  }, [handleCloseCalendar]);
+  }, [handleCloseCalendar, dateTimeData, handleSelectDate]);
   
   // Calculate total price based on price per guest and guest count
   const calculateTotalPrice = useCallback(() => {
@@ -469,7 +515,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                 <View style={styles.calendarDaysContainer}>
                   {monthData.days.map((dayObj, index) => {
                     const isSelected = selectedCalendarDate === `${monthData.name} ${dayObj.day}`;
-                    const isToday = monthData.name === 'May 2025' && dayObj.day === '27';
+                    const isToday = dayjs().format('MMMM YYYY') === monthData.name && 
+                                    dayjs().date().toString() === dayObj.day;
                     
                     return (
                       <View 
@@ -477,25 +524,26 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                         style={[styles.calendarDayCell, dayObj.empty && styles.emptyDayCell]}
                       >
                         {!dayObj.empty && (
-                          <Pressable
+                          <TouchableOpacity
                             style={[
                               styles.calendarDayButton, 
                               isSelected && styles.selectedDayButton, 
                               isToday && styles.todayButton,
-                              !dayObj.isWeekend && styles.disabledDayButton
+                              dayObj.isPast && styles.disabledDay,
+                              !dayObj.isAvailable && !dayObj.isPast && styles.disabledDay
                             ]}
-                            onPress={() => handleSelectCalendarDate(monthData.name, dayObj.day)}
-                            disabled={!dayObj.isWeekend}
+                            onPress={() => handleSelectCalendarDate(monthData.name, dayObj.day, monthData.monthObj)}
+                            disabled={dayObj.isPast || !dayObj.isAvailable}
                           >
                             <Text style={[
                               styles.calendarDayText, 
                               isSelected && styles.selectedDayText, 
                               isToday && styles.todayText,
-                              !dayObj.isWeekend && styles.disabledDayText
+                              (dayObj.isPast || !dayObj.isAvailable) && styles.disabledDayText
                             ]}>
                               {dayObj.day}
                             </Text>
-                          </Pressable>
+                          </TouchableOpacity>
                         )}
                       </View>
                     );
@@ -759,6 +807,9 @@ const styles = StyleSheet.create({
   },
   disabledDayText: {
     color: '#AAAAAA',
+  },
+  disabledDay: {
+    backgroundColor: '#F5F5F5',
   },
 });
 
