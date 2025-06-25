@@ -3,11 +3,21 @@ export type AuthStackParamList = {
     returnToScreen?: keyof RootStackParamList;
     returnParams?: any;
   } | undefined;
+  LoginEmail: {
+    email?: string;
+    returnToScreen?: keyof RootStackParamList;
+    returnParams?: any;
+  } | undefined;
   Signup: { 
     email?: string;
     returnToScreen?: keyof RootStackParamList;
     returnParams?: any;
-  };
+  } | undefined;
+  SignupEmail: { 
+    email?: string;
+    returnToScreen?: keyof RootStackParamList;
+    returnParams?: any;
+  } | undefined;
   // Add other auth screens as needed (Register, ForgotPassword, etc.)
 };
 
