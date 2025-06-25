@@ -63,18 +63,16 @@ const LoginScreenEmail = () => {
       setLoading(true);
       
       // Sign in with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
-        console.error('Login error:', error.message);
         setErrorMessage(error.message);
         return;
       }
       
-      console.log('Login successful:', data);
       login(); // Update auth context
         // Otherwise just go back to the previous screen
       navigation.goBack();

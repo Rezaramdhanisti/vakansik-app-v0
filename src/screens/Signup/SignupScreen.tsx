@@ -102,43 +102,35 @@ const SignupScreen = () => {
       // Check if Google Play Services are available
       await GoogleSignin.hasPlayServices();
       
-      // Sign in with Google
-      const userInfo = await GoogleSignin.signIn();
-      
       // Get the ID token
       const { idToken } = await GoogleSignin.getTokens();
       
       // Check if we have an ID token
       if (idToken) {
-        console.log('Google Sign-In successful');
         
         // Sign in to Supabase with the Google ID token
-        const { data, error } = await supabase.auth.signInWithIdToken({
+        const { error } = await supabase.auth.signInWithIdToken({
           provider: 'google',
           token: idToken,
         });
         
         if (error) {
-          console.error('Supabase Google auth error:', error.message);
           setErrorMessage(error.message);
           return;
         }
         
-        console.log('Supabase Google auth successful:', data);
         login(); // Update auth context
-        navigation.goBack(); // Return to previous screen
+        navigation.goBack(); // Return to previous screen twice
+        navigation.goBack();
       } else {
         throw new Error('No ID token present!');
       }
     } catch (error: any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('Google Sign-In cancelled');
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('Google Sign-In already in progress');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         setErrorMessage('Google Play Services not available or outdated');
       } else {
-        console.error('Google Sign-In error:', error);
         setErrorMessage('Google Sign-In failed: ' + (error.message || 'Unknown error'));
       }
     } finally {
