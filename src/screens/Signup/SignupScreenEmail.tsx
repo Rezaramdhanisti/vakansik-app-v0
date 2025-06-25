@@ -34,7 +34,6 @@ const SignupScreenEmail = ({ route }: SignupScreenProps) => {
   const [userEmail, setUserEmail] = useState(email);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Reference to the bottom sheet
@@ -55,15 +54,9 @@ const SignupScreenEmail = ({ route }: SignupScreenProps) => {
     console.log('User continued from verification screen');
     verificationSheetRef.current?.dismiss();
     // Navigate back to login after dismissing the verification popup
-    navigation.goBack();
+    navigation.pop(2)
   }, [navigation]);
 
-  // Function to complete the signup process
-  const completeSignup = () => {
-    console.log('Signup completed with:', { firstName, userEmail, password });
-    // Update auth context or navigate to the main app
-    navigation.navigate('Login');
-  };
 
   const handleSignup = async () => {
     // Validate form fields
@@ -92,13 +85,10 @@ const SignupScreenEmail = ({ route }: SignupScreenProps) => {
         return;
       }
       
-      console.log('Signup successful:', data);
-      
       // Show verification code bottom sheet
       handlePresentModalPress();
       
     } catch (error) {
-      console.error('Signup error:', error);
       Alert.alert('Error', 'An unexpected error occurred during signup');
     } finally {
       setLoading(false);
