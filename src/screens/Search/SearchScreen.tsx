@@ -10,7 +10,8 @@ import {
   StatusBar,
   Image,
   Switch,
-  ActivityIndicator
+  ActivityIndicator,
+  Platform
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 // Removed carousel imports as we're using a single image
@@ -23,6 +24,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
+import { setupDoubleBackExit } from '../../utils/BackHandler';
 
 const { width } = Dimensions.get('window');
 
@@ -143,7 +145,22 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     
     setFilteredListings(filtered);
   }, [sortByHighestPrice, sortByLowestPrice, destinations, activeCategory]);
-
+  
+  // Setup double back press to exit for Android
+  useEffect(() => {
+    // Only setup the back handler on the main search screen
+    const backHandlerCleanup = setupDoubleBackExit({
+      message: 'Press back again to exit app',
+      resetTimeout: 2000
+    });
+    
+    return () => {
+      // Clean up back handler when component unmounts
+      if (backHandlerCleanup) {
+        backHandlerCleanup();
+      }
+    };
+  }, []);
   // Load destinations from Supabase
   useEffect(() => {
     const loadDestinations = async () => {
