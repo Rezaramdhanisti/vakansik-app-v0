@@ -2,6 +2,7 @@ import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, u
 import { View, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import dayjs from 'dayjs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { FlashList } from '@shopify/flash-list';
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -334,6 +335,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
         backgroundStyle={styles.bottomSheetBackground}
         handleIndicatorStyle={styles.bottomSheetIndicator}
         backdropComponent={renderBackdrop}
+        enableContentPanningGesture={false} 
       >
         <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
           <View style={styles.modalHeader}>
@@ -382,42 +384,44 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
             </TouchableOpacity>
           </View>
           
-          {/* Dates and Time Slots using ScrollView */}
-          <ScrollView 
-            style={styles.scrollViewContainer}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollViewContent}
-          >
-            {dateTimeData.map(item => {
-              if (item.type === 'header') {
-                // Render date header
-                return (
-                  <Text key={item.id} style={styles.dayText}>{item.day}, {item.date}</Text>
-                );
-              } else {
-                // Render time slot
-                return (
-                  <Pressable
-                    key={item.id}
-                    style={[
-                      styles.timeSlotContainer,
-                      selectedDate === item.date && selectedTimeSlot === item.slotId && styles.selectedTimeSlot
-                    ]}
-                    onPress={() => {
-                      handleSelectDate(item.date);
-                      handleSelectTimeSlot(item.slotId || '');
-                    }}
-                  >
-                    <View>
-                      {/* <Text style={styles.timeSlotText}>{item.time}</Text> */}
-                      <Text style={styles.priceText}>{item.price} / guest</Text>
-                    </View>
-                    <Text style={styles.spotsLeftText}>10 spots left</Text>
-                  </Pressable>
-                );
-              }
-            })}
-          </ScrollView>
+          {/* Dates and Time Slots using FlashList */}
+          <View style={styles.scrollViewContainer}>
+            <FlashList
+              data={dateTimeData}
+              estimatedItemSize={70}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollViewContent}
+              renderItem={({ item }) => {
+                if (item.type === 'header') {
+                  // Render date header
+                  return (
+                    <Text style={styles.dayText}>{item.day}, {item.date}</Text>
+                  );
+                } else {
+                  // Render time slot
+                  return (
+                    <Pressable
+                      style={[
+                        styles.timeSlotContainer,
+                        selectedDate === item.date && selectedTimeSlot === item.slotId && styles.selectedTimeSlot
+                      ]}
+                      onPress={() => {
+                        handleSelectDate(item.date);
+                        handleSelectTimeSlot(item.slotId || '');
+                      }}
+                    >
+                      <View>
+                        {/* <Text style={styles.timeSlotText}>{item.time}</Text> */}
+                        <Text style={styles.priceText}>{item.price} / guest</Text>
+                      </View>
+                      <Text style={styles.spotsLeftText}>10 spots left</Text>
+                    </Pressable>
+                  );
+                }
+              }}
+              keyExtractor={(item) => item.id}
+            />
+          </View>
           
           {/* Only show Book Now button when a date and time slot are selected */}
           {selectedDate && selectedTimeSlot && (
