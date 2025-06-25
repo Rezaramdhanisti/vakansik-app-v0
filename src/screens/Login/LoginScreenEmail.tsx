@@ -148,12 +148,7 @@ const LoginScreenEmail = () => {
             </View>
           )}
           
-         <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Lupa password? </Text>
-            <TouchableOpacity onPress={() => {/* TODO: Add ForgotPassword route */}}>
-              <Text style={styles.signupLink}>klik disini</Text>
-            </TouchableOpacity>
-          </View>
+       
          
           <TouchableOpacity 
             style={[styles.continueButton, loading && styles.disabledButton]}
@@ -167,7 +162,12 @@ const LoginScreenEmail = () => {
             )}
           </TouchableOpacity>
           
-         
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Lupa password? </Text>
+            <TouchableOpacity onPress={() => {/* TODO: Add ForgotPassword route */}}>
+              <Text style={styles.signupLink}>klik disini</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -260,8 +260,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
-    marginTop: 10
+    marginBottom: 12,
+    marginTop: 12
   },
   continueButtonText: {
     color: '#fff',
