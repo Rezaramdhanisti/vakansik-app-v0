@@ -77,7 +77,8 @@ const LoginScreenEmail = () => {
       console.log('Login successful:', data);
       login(); // Update auth context
         // Otherwise just go back to the previous screen
-        navigation.goBack();
+      navigation.goBack();
+      navigation.goBack();
     } catch (error) {
       console.error('Unexpected login error:', error);
       setErrorMessage('An unexpected error occurred. Please try again.');
