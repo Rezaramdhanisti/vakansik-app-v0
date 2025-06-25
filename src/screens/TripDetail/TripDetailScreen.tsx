@@ -401,6 +401,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           ref={dateBottomSheetRef} 
           onDismiss={handleSheetDismiss}
           initialGuestCount={guestCount} // Pass the guest count from the previous screen
+          price={property.price} // Pass the price from the property data
         />
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

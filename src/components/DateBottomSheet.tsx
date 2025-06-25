@@ -98,7 +98,6 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     
     const timeSlots = [
       { id: '1', time: '8:00 AM – 3:15 PM', price: price, spotsLeft: 10 },
-      { id: '2', time: '8:30 AM – 4:30 PM', price: price, spotsLeft: 5 },
     ];
     
     // Create a flat array with section headers and time slots
@@ -259,6 +258,23 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     handleCloseCalendar();
   }, [handleCloseCalendar]);
   
+  // Calculate total price based on price per guest and guest count
+  const calculateTotalPrice = useCallback(() => {
+    // Extract numeric value from price string (e.g., 'Rp1,100,000' -> 1100000)
+    const priceString = price.replace(/[^0-9]/g, '');
+    const priceValue = parseInt(priceString, 10);
+    
+    if (isNaN(priceValue)) {
+      return price; // Return original price if parsing fails
+    }
+    
+    // Calculate total price based on guest count
+    const totalPrice = priceValue * adultCount;
+    
+    // Format the total price with 'Rp' prefix and thousand separators
+    return `Rp${totalPrice.toLocaleString('id-ID')}`;
+  }, [price, adultCount]);
+  
 
   
   return (
@@ -347,10 +363,10 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                     }}
                   >
                     <View>
-                      <Text style={styles.timeSlotText}>{item.time}</Text>
+                      {/* <Text style={styles.timeSlotText}>{item.time}</Text> */}
                       <Text style={styles.priceText}>{item.price} / guest</Text>
                     </View>
-                    <Text style={styles.spotsLeftText}>{item.spotsLeft} spots left</Text>
+                    <Text style={styles.spotsLeftText}>10 spots left</Text>
                   </Pressable>
                 );
               }
@@ -362,7 +378,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
             <View style={styles.bookButtonContainer}>
               <View style={styles.bookingBar}>
                 <View style={styles.priceContainer}>
-                  <Text style={styles.totalPriceText}>Rp780,000</Text>
+                  <Text style={styles.totalPriceText}>{calculateTotalPrice()}</Text>
                   <Text style={styles.guestInfoText}>for {adultCount} guests</Text>
                 </View>
                 
@@ -628,7 +644,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   priceText: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
   },
