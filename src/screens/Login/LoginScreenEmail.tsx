@@ -9,12 +9,10 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  Image,
   ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -24,13 +22,6 @@ import { SearchStackParamList } from '../../navigation/SearchNavigator';
 import { supabase } from '../../../lib/supabase';
 
 const LoginScreenEmail = () => {
-  // Configure Google Sign-In on component mount
-  useEffect(() => {
-    GoogleSignin.configure({
-      scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-      webClientId: GOOGLE_WEB_CLIENT_ID_DEV,
-    });
-  }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -95,72 +86,30 @@ const LoginScreenEmail = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      // Check if Google Play Services are available
-      await GoogleSignin.hasPlayServices();
-      
-      // Sign in with Google
-      const userInfo = await GoogleSignin.signIn();
-      
-      // Get the ID token
-      const { idToken } = await GoogleSignin.getTokens();
-      
-      // Check if we have an ID token
-      if (idToken) {
-        console.log('Google Sign-In successful');
-        
-        // Sign in to Supabase with the Google ID token
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: idToken,
-        });
-        
-        if (error) {
-          console.error('Supabase Google auth error:', error.message);
-          setErrorMessage(error.message);
-          return;
-        }
-        
-        console.log('Supabase Google auth successful:', data);
-        login(); // Update auth context
-        navigation.goBack(); // Return to previous screen
-      } else {
-        throw new Error('No ID token present!');
-      }
-    } catch (error: any) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('Google Sign-In cancelled');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('Google Sign-In already in progress');
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        setErrorMessage('Google Play Services not available or outdated');
-      } else {
-        console.error('Google Sign-In error:', error);
-        setErrorMessage('Google Sign-In failed: ' + (error.message || 'Unknown error'));
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidView}
       >
-        <TouchableOpacity 
-          style={styles.closeButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="close" size={24} color="#000" />
-        </TouchableOpacity>
-        
+        <View style={styles.headerContainer}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Log in</Text>
+          <View style={styles.placeholderView} />
+        </View>
+        <View style={styles.logoContainer}>
+          <Image 
+            source={require('../../../assets/images/coming-soon.webp')} 
+            style={styles.logo} 
+            resizeMode="contain"
+          />
+        </View>
         <View style={styles.content}>
-          <Text style={styles.title}>Log in</Text>
-          
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -199,6 +148,13 @@ const LoginScreenEmail = () => {
             </View>
           )}
           
+         <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Lupa password? </Text>
+            <TouchableOpacity onPress={() => {/* TODO: Add ForgotPassword route */}}>
+              <Text style={styles.signupLink}>klik disini</Text>
+            </TouchableOpacity>
+          </View>
+         
           <TouchableOpacity 
             style={[styles.continueButton, loading && styles.disabledButton]}
             onPress={handleContinue}
@@ -207,32 +163,11 @@ const LoginScreenEmail = () => {
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.continueButtonText}>Continue</Text>
+              <Text style={styles.continueButtonText}>Log in</Text>
             )}
           </TouchableOpacity>
           
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Log in lebih cepat dengan</Text>
-            <View style={styles.dividerLine} />
-          </View>
-          
-       
-          <TouchableOpacity 
-            style={styles.socialButton}
-            onPress={handleGoogleLogin}
-            disabled={loading}
-          >
-            <FontAwesome name="google" size={22} color="#4285F4" />
-            <Text style={styles.socialButtonText}>Continue with Google</Text>
-          </TouchableOpacity>
-          
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Belum punya akun? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Signup', {})}>
-              <Text style={styles.signupLink}>Daftar, yuk!</Text>
-            </TouchableOpacity>
-          </View>
+         
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -244,12 +179,33 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  keyboardAvoidView: {
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginTop: 12
+  },
+  backButton: {
+    padding: 5,
+    width: 40,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
     flex: 1,
+  },
+  placeholderView: {
+    width: 40,
   },
   closeButton: {
     padding: 16,
     alignSelf: 'flex-start',
+  },
+  keyboardAvoidView: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -286,6 +242,18 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 10,
   },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logo: {
+    width: 240,
+    height: 240,
+  },
+  logoText: {
+    fontSize: 24,
+    color: '#333',
+    marginTop: -20
+  },
   continueButton: {
     backgroundColor: '#FF6F00',
     height: 48,
@@ -316,9 +284,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   divider: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 14,
+    marginTop: 8
   },
   dividerLine: {
     flex: 1,
@@ -348,7 +316,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 8,
+    marginBottom: 12
   },
   signupText: {
     fontSize: 16,

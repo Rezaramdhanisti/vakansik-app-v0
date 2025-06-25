@@ -3,18 +3,14 @@ import { GOOGLE_WEB_CLIENT_ID_DEV } from '@env';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
-  ActivityIndicator,
   Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -32,9 +28,6 @@ const LoginScreen = () => {
       webClientId: GOOGLE_WEB_CLIENT_ID_DEV,
     });
   }, []);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
@@ -52,49 +45,6 @@ const LoginScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   
   const { login } = useContext(AuthContext);
-
-  const handleContinue = async () => {
-    // Reset error message
-    setErrorMessage(null);
-    
-    // Basic email validation
-    if (!email || !email.includes('@')) {
-      setErrorMessage('Please enter a valid email address');
-      return;
-    }
-    
-    // Basic password validation
-    if (!password || password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      // Sign in with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error('Login error:', error.message);
-        setErrorMessage(error.message);
-        return;
-      }
-      
-      console.log('Login successful:', data);
-      login(); // Update auth context
-        // Otherwise just go back to the previous screen
-        navigation.goBack();
-    } catch (error) {
-      console.error('Unexpected login error:', error);
-      setErrorMessage('An unexpected error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     try {
