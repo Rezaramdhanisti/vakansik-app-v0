@@ -52,6 +52,9 @@ const LoginScreen = () => {
       // Check if Google Play Services are available
       await GoogleSignin.hasPlayServices();
       
+      // Sign in with Google
+      const userInfo = await GoogleSignin.signIn();
+      
       // Get the ID token
       const { idToken } = await GoogleSignin.getTokens();
       

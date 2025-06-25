@@ -102,6 +102,8 @@ const SignupScreen = () => {
       // Check if Google Play Services are available
       await GoogleSignin.hasPlayServices();
       
+      const userInfo = await GoogleSignin.signIn();
+      
       // Get the ID token
       const { idToken } = await GoogleSignin.getTokens();
       
@@ -120,7 +122,7 @@ const SignupScreen = () => {
         }
         
         login(); // Update auth context
-        navigation.goBack(); // Return to previous screen twice
+        navigation.goBack(); // Return
         navigation.goBack();
       } else {
         throw new Error('No ID token present!');
