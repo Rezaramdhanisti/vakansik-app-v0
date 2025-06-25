@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { GOOGLE_WEB_CLIENT_ID_DEV } from '@env';
 import {
   View,
   Text,
@@ -13,15 +14,23 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useNavigation, RouteProp, useRoute, CompositeNavigationProp } from '@react-navigation/native';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { AuthContext } from '../../navigation/AppNavigator';
-import { AuthStackParamList, RootStackParamList, MainStackParamList, TabStackParamList } from '../../navigation/types';
+import { AuthStackParamList, MainStackParamList, TabStackParamList } from '../../navigation/types';
 import { SearchStackParamList } from '../../navigation/SearchNavigator';
 import { supabase } from '../../../lib/supabase';
 
 const LoginScreen = () => {
+  // Configure Google Sign-In on component mount
+  useEffect(() => {
+    GoogleSignin.configure({
+      scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+      webClientId: GOOGLE_WEB_CLIENT_ID_DEV,
+    });
+  }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,8 +49,6 @@ const LoginScreen = () => {
     >
   >;
   const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
-  const { returnToScreen, returnParams } = route.params || {};
   
   const { login } = useContext(AuthContext);
 
@@ -88,11 +95,54 @@ const LoginScreen = () => {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
-    // Handle social login logic
-    login(); // Update auth context
-    navigation.goBack(); // Return to previous screen
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      // Check if Google Play Services are available
+      await GoogleSignin.hasPlayServices();
+      
+      // Sign in with Google
+      const userInfo = await GoogleSignin.signIn();
+      
+      // Get the ID token
+      const { idToken } = await GoogleSignin.getTokens();
+      
+      // Check if we have an ID token
+      if (idToken) {
+        console.log('Google Sign-In successful');
+        
+        // Sign in to Supabase with the Google ID token
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: idToken,
+        });
+        
+        if (error) {
+          console.error('Supabase Google auth error:', error.message);
+          setErrorMessage(error.message);
+          return;
+        }
+        
+        console.log('Supabase Google auth successful:', data);
+        login(); // Update auth context
+        navigation.goBack(); // Return to previous screen
+      } else {
+        throw new Error('No ID token present!');
+      }
+    } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('Google Sign-In cancelled');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Google Sign-In already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setErrorMessage('Google Play Services not available or outdated');
+      } else {
+        console.error('Google Sign-In error:', error);
+        setErrorMessage('Google Sign-In failed: ' + (error.message || 'Unknown error'));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -170,7 +220,8 @@ const LoginScreen = () => {
        
           <TouchableOpacity 
             style={styles.socialButton}
-            onPress={() => handleSocialLogin('Google')}
+            onPress={handleGoogleLogin}
+            disabled={loading}
           >
             <FontAwesome name="google" size={22} color="#4285F4" />
             <Text style={styles.socialButtonText}>Continue with Google</Text>
