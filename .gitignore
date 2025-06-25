@@ -73,3 +73,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+yarn.lock
+
+# Environment variables
+.env
+
+# Package management
+package-lock.json
