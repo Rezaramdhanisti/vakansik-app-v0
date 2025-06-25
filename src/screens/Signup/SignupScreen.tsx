@@ -181,7 +181,7 @@ const SignupScreen = () => {
           {/* Email Sign In Button */}
           <TouchableOpacity 
             style={styles.emailButton}
-            onPress={() => navigation.navigate('LoginEmail', {})}
+            onPress={() => navigation.navigate('SignupEmail', {})}
             disabled={loading}
           >
             <Ionicons name="mail-outline" size={22} color="#000" />
