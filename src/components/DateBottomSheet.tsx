@@ -53,6 +53,17 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   // ref for bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const calendarBottomSheetRef = useRef<BottomSheetModal>(null);
+  // Add ref for the FlashList with proper type definition
+  const flashListRef = useRef<FlashList<{
+    id: string;
+    type: string;
+    day?: string;
+    date: string;
+    slotId?: string;
+    time?: string;
+    price?: string;
+    spotsLeft?: number;
+  }>>(null);
   
   // variables for bottom sheet modal
   const snapPoints = useMemo(() => ['90%'], []);
@@ -71,7 +82,6 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   // State for guest count, initialized with the value from props or default to 2
   const [adultCount, setAdultCount] = useState(initialGuestCount);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   
   // Increase adult count
   const increaseAdultCount = () => {
@@ -86,26 +96,15 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
       setAdultCount(adultCount - 1);
     }
   };
+
+  // Track if we have availability data
+  const hasAvailabilityData = available_dates && Object.keys(available_dates).length > 0;
   
-  // Generate dates for the next 30 days for the date time data
+  // Use available_dates from props directly
+  const availableDates = available_dates || {};
+  
+  // Generate date time data based on available_dates
   const dateTimeData = useMemo(() => {
-    const dates = [];
-    const today = dayjs();
-    
-    // Generate next 30 days
-    for (let i = 0; i < 30; i++) {
-      const currentDate = today.add(i, 'day');
-      dates.push({
-        day: currentDate.format('dddd'),
-        date: currentDate.format('MMMM D')
-      });
-    }
-    
-    const timeSlots = [
-      { id: '1', time: '8:00 AM – 3:15 PM', price: price, spotsLeft: 10 },
-    ];
-    
-    // Create a flat array with section headers and time slots
     const data: Array<{
       id: string;
       type: string;
@@ -117,31 +116,128 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
       spotsLeft?: number;
     }> = [];
     
-    dates.forEach(dateItem => {
-      // Add date header item
-      data.push({
-        id: `header-${dateItem.date}`,
-        type: 'header',
-        day: dateItem.day,
-        date: dateItem.date
-      });
+    // Default time slot - we'll use this for all available dates
+    const defaultTimeSlot = { id: '1', time: '8:00 AM – 3:15 PM', price: price, spotsLeft: 10 };
+    
+    // Track processed dates to avoid duplicates
+    const processedDates = new Set<string>();
+    
+    // If we have availability data, use it to generate our date list
+    if (hasAvailabilityData) {
+      // Collect all available dates first
+      const availableDateObjects: Array<{dateObj: dayjs.Dayjs, formattedDate: {day: string, date: string}}> = [];
       
-      // Add time slots for this date
-      timeSlots.forEach(slot => {
-        data.push({
-          id: `${dateItem.date}-${slot.id}`,
-          type: 'timeSlot',
-          date: dateItem.date,
-          slotId: slot.id,
-          time: slot.time,
-          price: slot.price,
-          spotsLeft: slot.spotsLeft
+      // Iterate through years in available_dates
+      Object.keys(availableDates).forEach(year => {
+        // Iterate through months in this year
+        Object.keys(availableDates[year]).forEach(month => {
+          // Iterate through days in this month
+          availableDates[year][month].forEach(day => {
+            // Create a dayjs object for this date
+            const dateObj = dayjs(`${year}-${month.padStart(2, '0')}-${day.toString().padStart(2, '0')}`);
+            
+            // Skip dates in the past
+            if (dateObj.isBefore(dayjs().startOf('day'))) {
+              return;
+            }
+            
+            // Format the date for display
+            const formattedDate = {
+              day: dateObj.format('dddd'),
+              date: dateObj.format('MMMM D')
+            };
+            
+            // Add to our collection of available dates
+            availableDateObjects.push({ dateObj, formattedDate });
+          });
         });
       });
-    });
+      
+      // Sort dates chronologically
+      availableDateObjects.sort((a, b) => {
+        return a.dateObj.isAfter(b.dateObj) ? 1 : -1;
+      });
+      
+      // Now process the sorted dates
+      availableDateObjects.forEach(({ formattedDate }) => {
+        const dateKey = formattedDate.date;
+        
+        // Skip if we've already processed this date
+        if (processedDates.has(dateKey)) {
+          return;
+        }
+        
+        // Mark this date as processed
+        processedDates.add(dateKey);
+        
+        // Add date header item
+        data.push({
+          id: `header-${dateKey}`,
+          type: 'header',
+          day: formattedDate.day,
+          date: dateKey
+        });
+        
+        // Add time slot for this date (only one per date)
+        data.push({
+          id: `${dateKey}-${defaultTimeSlot.id}`,
+          type: 'timeSlot',
+          date: dateKey,
+          slotId: defaultTimeSlot.id,
+          time: defaultTimeSlot.time,
+          price: defaultTimeSlot.price,
+          spotsLeft: defaultTimeSlot.spotsLeft
+        });
+      });
+    } else {
+      // Fallback to generating dates for the next 30 days if no availability data
+      const dates = [];
+      const today = dayjs();
+      
+      // Generate next 30 days
+      for (let i = 0; i < 30; i++) {
+        const currentDate = today.add(i, 'day');
+        dates.push({
+          day: currentDate.format('dddd'),
+          date: currentDate.format('MMMM D')
+        });
+      }
+      
+      // Process each date
+      dates.forEach(dateItem => {
+        const dateKey = dateItem.date;
+        
+        // Skip if we've already processed this date
+        if (processedDates.has(dateKey)) {
+          return;
+        }
+        
+        // Mark this date as processed
+        processedDates.add(dateKey);
+        
+        // Add date header item
+        data.push({
+          id: `header-${dateKey}`,
+          type: 'header',
+          day: dateItem.day,
+          date: dateKey
+        });
+        
+        // Add time slot for this date (only one per date)
+        data.push({
+          id: `${dateKey}-${defaultTimeSlot.id}`,
+          type: 'timeSlot',
+          date: dateKey,
+          slotId: defaultTimeSlot.id,
+          time: defaultTimeSlot.time,
+          price: defaultTimeSlot.price,
+          spotsLeft: defaultTimeSlot.spotsLeft
+        });
+      });
+    }
     
     return data;
-  }, [price]);
+  }, [price, availableDates, hasAvailabilityData]);
   
   // callbacks for bottom sheet modal
   const handleSheetChanges = useCallback((index: number) => {
@@ -159,16 +255,52 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     }
   }, [onDismiss]);
   
+  // Function to find the index of a date in the dateTimeData array
+  const findDateIndex = useCallback((dateToFind: string) => {
+    // First find the header index
+    const headerIndex = dateTimeData.findIndex(item => 
+      item.type === 'header' && item.date.trim() === dateToFind.trim()
+    );
+    
+    if (headerIndex !== -1) {
+      return headerIndex;
+    }
+    return -1;
+  }, [dateTimeData]);
+  
   // Select a date
   const handleSelectDate = useCallback((date: string) => {
-    setSelectedDate(date);
-    setSelectedTimeSlot(null); // Reset time slot when date changes
-  }, []);
+    // Normalize the date string to avoid comparison issues
+    const normalizedDate = date.trim();
+    setSelectedDate(normalizedDate);
+    
+    // Scroll to the selected date in the list
+    const indexToScroll = findDateIndex(normalizedDate);
+    if (indexToScroll !== -1 && flashListRef.current) {
+      // Add a small delay to ensure the list is ready
+      setTimeout(() => {
+        try {
+          flashListRef.current?.scrollToIndex({
+            index: indexToScroll,
+            animated: true,
+            viewOffset: 20
+          });
+        } catch (error) {
+          console.warn('Error scrolling to index:', error);
+          // Fallback - try to scroll approximately to the position
+          const approximateOffset = indexToScroll * 70; // estimatedItemSize
+          flashListRef.current?.scrollToOffset({
+            offset: approximateOffset,
+            animated: true
+          });
+        }
+      }, 50);
+    }
+    
+    // Don't reset time slot when date changes to allow selecting both date and time slot
+  }, [findDateIndex]);
+
   
-  // Select a time slot
-  const handleSelectTimeSlot = useCallback((slotId: string) => {
-    setSelectedTimeSlot(slotId);
-  }, []);
   
   // Backdrop component for the bottom sheet
   const renderBackdrop = useCallback(
@@ -184,7 +316,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     ),
     []
   );
-  
+  console.log('Selected datexxx', selectedDate);
   // Handle opening the calendar bottom sheet
   const handleOpenCalendar = useCallback(() => {
     // Present the calendar bottom sheet without dismissing the first one
@@ -199,12 +331,6 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   // State for selected date and month
   const [selectedMonth, setSelectedMonth] = useState(dayjs().format('MMMM YYYY'));
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
-  
-  // Track if we have availability data
-  const hasAvailabilityData = available_dates && Object.keys(available_dates).length > 0;
-  
-  // Use available_dates from props directly
-  const availableDates = available_dates || {};
   
   // Generate available months for multiple years
   const months = useMemo(() => {
@@ -303,6 +429,9 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   
   const calendarData = useMemo(() => generateCalendarData(), [generateCalendarData]);
   
+  // Empty content to remove duplicate function declaration
+  
+
   // Handle selecting a date
   const handleSelectCalendarDate = useCallback((month: string, day: string, monthObj: dayjs.Dayjs) => {
     // Only allow selection if the day is available
@@ -327,11 +456,35 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     if (matchingDateItem) {
       // Select this date in the main view
       handleSelectDate(matchingDateItem.date);
+      
+      // Find the index and scroll to it
+      const indexToScroll = findDateIndex(matchingDateItem.date);
+      if (indexToScroll !== -1 && flashListRef.current) {
+        // Add a small delay to ensure the list is ready after the calendar closes
+        setTimeout(() => {
+          try {
+            flashListRef.current?.scrollToIndex({
+              index: indexToScroll,
+              animated: true,
+              // Add viewport offset to position the item better in view
+              viewOffset: 20
+            });
+          } catch (error) {
+            console.warn('Error scrolling to index:', error);
+            // Fallback - try to scroll approximately to the position
+            const approximateOffset = indexToScroll * 70; // estimatedItemSize
+            flashListRef.current?.scrollToOffset({
+              offset: approximateOffset,
+              animated: true
+            });
+          }
+        }, 200); // Slightly longer delay for more reliability
+      }
     }
     
     // Close the calendar sheet
     handleCloseCalendar();
-  }, [handleCloseCalendar, dateTimeData, handleSelectDate, isAvailableDay]);
+  }, [handleCloseCalendar, dateTimeData, handleSelectDate, isAvailableDay, findDateIndex]);
   
   
   // Calculate total price based on price per guest and guest count
@@ -416,10 +569,13 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
           {/* Dates and Time Slots using FlashList */}
           <View style={styles.scrollViewContainer}>
             <FlashList
+              ref={flashListRef}
               data={dateTimeData}
+              extraData={selectedDate} /* Add extraData prop to force re-render when selectedDate changes */
               estimatedItemSize={70}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollViewContent}
+              onBlankArea={() => {/* Required for TypeScript */}}
               renderItem={({ item }) => {
                 if (item.type === 'header') {
                   // Render date header
@@ -432,12 +588,13 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                     <Pressable
                       style={[
                         styles.timeSlotContainer,
-                        selectedDate === item.date && selectedTimeSlot === item.slotId && styles.selectedTimeSlot
+                        selectedDate === item.date.trim() && styles.selectedTimeSlot 
                       ]}
                       onPress={() => {
+                        // Add more detailed logging for debugging
                         handleSelectDate(item.date);
-                        handleSelectTimeSlot(item.slotId || '');
                       }}
+                      android_ripple={{ color: '#DDDDDD' }}
                     >
                       <View>
                         {/* <Text style={styles.timeSlotText}>{item.time}</Text> */}
@@ -453,7 +610,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
           </View>
           
           {/* Only show Book Now button when a date and time slot are selected */}
-          {selectedDate && selectedTimeSlot && (
+          {selectedDate && (
             <View style={styles.bookButtonContainer}>
               <View style={styles.bookingBar}>
                 <View style={styles.priceContainer}>
@@ -473,8 +630,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                       date: `${selectedDate}`,
                       timeSlot: dateTimeData.find(item => 
                         item.type === 'timeSlot' && 
-                        item.date === selectedDate && 
-                        item.slotId === selectedTimeSlot
+                        item.date === selectedDate
                       )?.time || '3:30 AM – 11:45 AM',
                       price: 'Rp780,000',
                       guestCount: adultCount
@@ -717,6 +873,7 @@ const styles = StyleSheet.create({
   selectedTimeSlot: {
     borderColor: '#000',
     borderWidth: 2,
+    opacity: 0.8
   },
   timeSlotText: {
     fontSize: 16,
