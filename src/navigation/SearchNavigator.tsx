@@ -40,6 +40,7 @@ type Property = {
   price_information?: string; // Added price_information from API
   itinerary?: ItineraryDay[]; // Added itinerary from API
   meeting_point?: string;     // Added meeting_point from API
+  available_dates?: Record<string, Record<string, number[]>>; // Added available_dates field for calendar availability
 };
 
 // Define the type for the search stack navigation

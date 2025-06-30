@@ -26,12 +26,13 @@ export interface Destination {
   budget_band?: string;
   location?: string;
   category?: string;
+  available_dates?: Record<string, Record<string, number[]>>; // Added available_dates field
 }
 
 export async function fetchDestinations() {
   const { data, error } = await supabase
     .from('destinations')
-    .select('name, description, price, rating, reviews, image_urls, price_information, itinerary, meeting_point, budget_band, category');
+    .select('name, description, price, rating, reviews, image_urls, price_information, itinerary, meeting_point, budget_band, category, available_dates');
 
   if (error) throw error;
   return data as Destination[];

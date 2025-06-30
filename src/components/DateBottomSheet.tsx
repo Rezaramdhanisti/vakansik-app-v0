@@ -24,6 +24,7 @@ export interface DateBottomSheetProps {
   price?: string;
   onDismiss?: () => void;
   initialGuestCount?: number;
+  available_dates?: Record<string, Record<string, number[]>>; // Changed to accept available_dates directly
 }
 
 export interface DateBottomSheetRef {
@@ -31,7 +32,7 @@ export interface DateBottomSheetRef {
   dismiss: () => void;
 }
 
-const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss, initialGuestCount = 2 }, ref) => {
+const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss, initialGuestCount = 2, available_dates = {} }, ref) => {
   // Get navigation with proper typing
   type NavigationProp = CompositeNavigationProp<
     StackNavigationProp<RootStackParamList>,
@@ -199,17 +200,26 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   const [selectedMonth, setSelectedMonth] = useState(dayjs().format('MMMM YYYY'));
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
   
-  // Generate available months for 1 year from current date
+  // Track if we have availability data
+  const hasAvailabilityData = available_dates && Object.keys(available_dates).length > 0;
+  
+  // Use available_dates from props directly
+  const availableDates = available_dates || {};
+  
+  // Generate available months for multiple years
   const months = useMemo(() => {
     const result = [];
     const today = dayjs();
-    const oneYearFromNow = today.add(1, 'year');
+    // Extend to end of 2026 or the latest year in availableDates
+    const years = Object.keys(availableDates).map(Number);
+    const maxYear = years.length > 0 ? Math.max(...years) : today.year() + 1;
+    const endDate = dayjs(`${maxYear}-12-31`);
     
     // Start from current month
     let currentMonth = today;
     
-    // Generate months until we reach one year from now
-    while (currentMonth.isBefore(oneYearFromNow) || currentMonth.isSame(oneYearFromNow, 'month')) {
+    // Generate months until we reach end date
+    while (currentMonth.isBefore(endDate) || currentMonth.isSame(endDate, 'month')) {
       const monthName = currentMonth.format('MMMM YYYY');
       const daysInMonth = currentMonth.daysInMonth();
       // Get the day of week for the first day (0 = Sunday, 1 = Monday, etc.)
@@ -227,22 +237,33 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     }
     
     return result;
-  }, []);
+  }, [availableDates]);
+    // Function to check if a date is in the past
+    const isPastDate = useCallback((monthObj: dayjs.Dayjs, day: number) => {
+      const today = dayjs().startOf('day');
+      const dateToCheck = monthObj.date(day).startOf('day');
+      return dateToCheck.isBefore(today);
+    }, []);
+
+    
+  // Function to check if a day is available based on the available_dates data
+  const isAvailableDay = useCallback((monthObj: dayjs.Dayjs, dayNumber: number) => {
+    // Skip validation for empty days (padding in calendar)
+    if (!dayNumber) return false;
+    
+    // Check if the date is in the past
+    if (isPastDate(monthObj, dayNumber)) return false;
+    
+    // If no availability data is provided, all future dates are available
+    if (!hasAvailabilityData) return true;
+    
+    // Otherwise, check if this date exists in our available dates
+    const year = monthObj.year().toString();
+    const month = (monthObj.month() + 1).toString(); // dayjs months are 0-indexed
+    
+    return availableDates[year]?.[month]?.includes(dayNumber) || false;
+  }, [availableDates, isPastDate, hasAvailabilityData]);
   
-  // Function to check if a day is available (Friday, Saturday, Sunday)
-  const isAvailableDay = useCallback((monthStartDay: number, dayNumber: number) => {
-    // Calculate the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-    const dayOfWeek = (monthStartDay + dayNumber - 1) % 7;
-    // Return true if the day is Friday (5), Saturday (6), or Sunday (0)
-    return dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0;
-  }, []);
-  
-  // Function to check if a date is in the past
-  const isPastDate = useCallback((monthObj: dayjs.Dayjs, day: number) => {
-    const today = dayjs().startOf('day');
-    const dateToCheck = monthObj.date(day).startOf('day');
-    return dateToCheck.isBefore(today);
-  }, []);
 
   // Generate calendar data
   const generateCalendarData = useCallback(() => {
@@ -258,15 +279,15 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
       
       // Add actual days
       for (let i = 1; i <= month.days; i++) {
-        // Check if the day is an available day (Friday, Saturday, Monday)
-        const isAvailable = isAvailableDay(month.startDay, i);
+        // Check if the day is available based on our Supabase data
+        const isAvailable = isAvailableDay(month.monthObj, i);
         // Check if the date is in the past
         const isPast = isPastDate(month.monthObj, i);
         
         days.push({ 
           day: i.toString(), 
           empty: false,
-          isAvailable: isAvailable, // Add flag to indicate if it's an available day
+          isAvailable: isAvailable, // Using our new availability check
           isPast: isPast // Add flag to indicate if the date is in the past
         });
       }
@@ -284,8 +305,15 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   
   // Handle selecting a date
   const handleSelectCalendarDate = useCallback((month: string, day: string, monthObj: dayjs.Dayjs) => {
+    // Only allow selection if the day is available
+    const dayNumber = parseInt(day, 10);
+    if (!isAvailableDay(monthObj, dayNumber)) {
+      // Day is not available, don't select it
+      return;
+    }
+    
     // Format the date properly
-    const selectedDate = monthObj.date(parseInt(day, 10));
+    const selectedDate = monthObj.date(dayNumber);
     const formattedDate = `${month} ${day}`;
     setSelectedCalendarDate(formattedDate);
     setSelectedMonth(month);
@@ -303,7 +331,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
     
     // Close the calendar sheet
     handleCloseCalendar();
-  }, [handleCloseCalendar, dateTimeData, handleSelectDate]);
+  }, [handleCloseCalendar, dateTimeData, handleSelectDate, isAvailableDay]);
+  
   
   // Calculate total price based on price per guest and guest count
   const calculateTotalPrice = useCallback(() => {

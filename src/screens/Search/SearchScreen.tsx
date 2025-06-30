@@ -184,6 +184,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           budget_band: item.budget_band,
           category: item.category,
           location: item.location,
+          available_dates: item.available_dates, // Add available_dates field
           isFavorite: false
         }));
         setDestinations(formattedData);
