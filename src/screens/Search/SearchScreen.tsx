@@ -307,7 +307,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           <Icon name="search" size={20} style={styles.searchIcon} color="#333" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Start your search"
+            placeholder="Yuk, mulai petualanganmu!"
             placeholderTextColor="#666"
             textAlign="center"
             value={searchText}

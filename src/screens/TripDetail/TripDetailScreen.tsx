@@ -35,7 +35,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   // Initialize with the first itinerary item expanded and others collapsed
-  const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({});
+  const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({0: false});
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   
@@ -55,28 +55,24 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
     {
       id: '1',
       rating: 5,
-      date: '3 days ago',
       text: 'Such a fun and beautiful experience, being fully immersed in the lush green jungle atmosphere. The rafting was incredible, lunch was delicious, ATV was adventurous, our group was fun...',
       reviewer: 'Maria',
     },
     {
       id: '2',
       rating: 5,
-      date: '1 week ago',
       text: 'Amazing experience with professional guides. The views were breathtaking and the entire day was well organized. Highly recommend!',
       reviewer: 'John',
     },
     {
       id: '3',
       rating: 5,
-      date: '2 weeks ago',
       text: 'Great experience! The guides were knowledgeable and friendly. Would definitely recommend to anyone visiting Bali.',
       reviewer: 'Sarah',
     },
     {
       id: '4',
       rating: 5,
-      date: '1 month ago',
       text: 'One of the highlights of our trip to Bali. The rafting was exciting but safe, and the scenery was absolutely stunning.',
       reviewer: 'David',
     },
@@ -150,7 +146,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           
           {/* Description */}
           <View>
-            <Text style={styles.sectionTitle}>About this trip</Text>
+            <Text style={styles.sectionTitle}>Intip perjalanan ini!</Text>
             <Text 
               style={styles.sectionContent} 
               numberOfLines={showFullDescription ? undefined : 2}
@@ -163,7 +159,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               style={styles.viewMoreButton}
             >
               <Text style={styles.viewMoreText}>
-                {showFullDescription ? 'Read less' : 'Read more'}
+                {showFullDescription ? 'Lihat sedikit' : 'Lihat selengkapnya'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -172,13 +168,13 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           
           {/* What you'll do */}
           <View>
-            <Text style={styles.sectionTitle}>What you'll do</Text>
+            <Text style={styles.sectionTitle}>Yang akan kamu lakukan</Text>
             
             {property?.itinerary && property?.itinerary.length > 0 ? (
               <View style={styles.timelineContainer}>
                 {property?.itinerary.map((dayData, dayIndex) => {
-                  // First item (index 0) is expanded by default, others are collapsed
-                  const isCollapsed = dayIndex === 0 ? false : (collapsedDays[dayIndex] !== false);
+                  // Check if the day is collapsed based on collapsedDays state
+                  const isCollapsed = collapsedDays[dayIndex] !== undefined ? collapsedDays[dayIndex] : true;
                   
                   return (
                     <View key={dayIndex} style={styles.dayContainer}>
@@ -239,7 +235,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               data={PICKUP_AREAS.filter(item => item.isDefault || showMoreOptions)}
               renderItem={({ item }) => ( */}
                 <View>
-                  <Text style={styles.sectionSubtitle}>Pick up area</Text>
+                  <Text style={styles.sectionSubtitle}>Area penjemputan</Text>
                   <Text style={styles.sectionContent}>{property.meeting_point}</Text>
                   {/* <Text style={styles.locationAddress}>{property.meeting_point}</Text> */}
                 </View>
@@ -282,16 +278,15 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
                         <Ionicons key={index} name="star" size={14} color="#000" />
                       ))}
                     </View>
-                    <Text style={styles.reviewDate}>· {item.date}</Text>
                   </View>
                   
                   <Text style={styles.reviewText}>
                     {item.text}
                   </Text>
                   
-                  <TouchableOpacity>
+                  {/* <TouchableOpacity>
                     <Text style={styles.showMoreText}>Show more</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   
                   <View style={styles.reviewerInfo}>
                     <View style={styles.reviewerAvatar}>
@@ -309,50 +304,17 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           {/* Things to know section */}
           <View>
             <Text style={styles.sectionTitle}>Things to know</Text>
-            
-            {/* Guest requirements */}
+             {/* Price includes/excludes */}
             <View style={styles.infoItem}>
               <View style={styles.infoIconContainer}>
-                <Ionicons name="people-outline" size={24} color="#333" />
+                <Ionicons name="cash-outline" size={24} color="#333" />
               </View>
               <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Guest requirements</Text>
-                <Text style={styles.infoText}>Guests ages 4 and up can attend, up to 10 guests total.</Text>
+                <Text style={styles.infoTitle}>Price details</Text>
+                <Text style={styles.infoText}>{property.price_information}</Text>
               </View>
             </View>
-            
-            {/* Activity level */}
-            <View style={styles.infoItem}>
-              <View style={styles.infoIconContainer}>
-                <Ionicons name="walk-outline" size={24} color="#333" />
-              </View>
-              <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Activity level</Text>
-                <Text style={styles.infoText}>The activity level for this experience is light and the skill level is beginner.</Text>
-              </View>
-            </View>
-            
-            {/* What to bring */}
-            <View style={styles.infoItem}>
-              <View style={styles.infoIconContainer}>
-                <Ionicons name="calendar-outline" size={24} color="#333" />
-              </View>
-              <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>What to bring</Text>
-                <Text style={styles.infoText}>Change of clothes, Swim suit / sport wear for water activity, Sunscreen</Text>
-              </View>
-            </View>
-            
-            {/* Accessibility */}
-            <View style={styles.infoItem}>
-              <View style={styles.infoIconContainer}>
-                <Ionicons name="accessibility-outline" size={24} color="#333" />
-              </View>
-              <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Accessibility</Text>
-                <Text style={styles.infoText}>Step-free bathroom available, Access provider supported, Entrances wider than 32 inches, Mainly flat or leveled ground, No extreme sensory stimuli</Text>
-              </View>
-            </View>
+          </View>
             
             {/* Cancellation policy */}
             <View style={styles.infoItem}>
@@ -365,17 +327,7 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
               </View>
             </View>
             
-            {/* Price includes/excludes */}
-            <View style={styles.infoItem}>
-              <View style={styles.infoIconContainer}>
-                <Ionicons name="cash-outline" size={24} color="#333" />
-              </View>
-              <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Price details</Text>
-                <Text style={styles.infoText}>{property.price_information}</Text>
-              </View>
-            </View>
-          </View>
+           
         </View>
       </ScrollView>
       
@@ -850,7 +802,7 @@ const styles = StyleSheet.create({
   // Things to know section styles
   infoItem: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginTop: 18
   },
   infoIconContainer: {
     width: 40,
