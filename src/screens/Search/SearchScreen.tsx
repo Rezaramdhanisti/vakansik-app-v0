@@ -169,8 +169,8 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
         const data = await fetchDestinations();
         
         // Transform the data to match our PropertyListing type
-        const formattedData = data.map((item, index) => ({
-          id: String(index + 1),
+        const formattedData = data.map(item => ({
+          id: String(item.id), 
           name: item.name,
           description: item.description,
           price: `Rp ${item.price.toLocaleString()}`,
@@ -184,7 +184,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           budget_band: item.budget_band,
           category: item.category,
           location: item.location,
-          available_dates: item.available_dates, // Add available_dates field
+          available_dates: item.available_dates,
           isFavorite: false
         }));
         setDestinations(formattedData);
