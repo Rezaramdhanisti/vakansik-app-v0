@@ -80,3 +80,4 @@ yarn.lock
 
 # Package management
 package-lock.json
+Podfile.lock
