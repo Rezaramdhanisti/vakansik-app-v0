@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState } from 'react';
+import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Image, TextInput } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
@@ -38,12 +38,35 @@ const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
     const snapPoints = useMemo(() => ['75%'], []);
     
     // State for guest data
-    const [editedGuest, setEditedGuest] = useState<GuestData>(initialGuestData || {
-      title: 'Tuan',
-      name: '',
-      phoneNumber: '+62',
-      idCardNumber: ''
+    const [editedGuest, setEditedGuest] = useState<GuestData>(() => {
+      // Create a deep copy of initialGuestData to prevent reference issues
+      if (initialGuestData) {
+        return {
+          title: initialGuestData.title || 'Tuan',
+          name: initialGuestData.name || '',
+          phoneNumber: initialGuestData.phoneNumber || '+62',
+          idCardNumber: initialGuestData.idCardNumber || ''
+        };
+      }
+      return {
+        title: 'Tuan',
+        name: '',
+        phoneNumber: '+62',
+        idCardNumber: ''
+      };
     });
+    
+    // Update editedGuest when initialGuestData changes
+    useEffect(() => {
+      if (initialGuestData) {
+        setEditedGuest({
+          title: initialGuestData.title || 'Tuan',
+          name: initialGuestData.name || '',
+          phoneNumber: initialGuestData.phoneNumber || '+62',
+          idCardNumber: initialGuestData.idCardNumber || ''
+        });
+      }
+    }, [initialGuestData]);
     
     // State for validation
     const [showValidation, setShowValidation] = useState(false);

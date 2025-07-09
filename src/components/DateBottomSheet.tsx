@@ -21,10 +21,9 @@ import { FONTS } from '../config/fonts';
 import { ScrollView } from 'react-native-gesture-handler';
 
 export interface DateBottomSheetProps {
-  price?: string;
   onDismiss?: () => void;
   initialGuestCount?: number;
-  available_dates?: Record<string, Record<string, number[]>>; // Changed to accept available_dates directly
+  property?: any; // Accept the entire property object
 }
 
 export interface DateBottomSheetRef {
@@ -32,7 +31,14 @@ export interface DateBottomSheetRef {
   dismiss: () => void;
 }
 
-const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ price = 'Rp1,100,000', onDismiss, initialGuestCount = 2, available_dates = {} }, ref) => {
+const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
+  onDismiss, 
+  initialGuestCount = 2, 
+  property = {}
+}, ref) => {
+  // Default values if property is not provided or missing fields
+  const price = property?.price || 'Rp1,100,000';
+  const available_dates = property?.available_dates || {};
   // Get navigation with proper typing
   type NavigationProp = CompositeNavigationProp<
     StackNavigationProp<RootStackParamList>,
@@ -100,8 +106,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
   // Track if we have availability data
   const hasAvailabilityData = available_dates && Object.keys(available_dates).length > 0;
   
-  // Use available_dates from props directly
-  const availableDates = available_dates || {};
+  // Use available_dates from property
+  const availableDates = available_dates;
   
   // Generate date time data based on available_dates
   const dateTimeData = useMemo(() => {
@@ -132,7 +138,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
         // Iterate through months in this year
         Object.keys(availableDates[year]).forEach(month => {
           // Iterate through days in this month
-          availableDates[year][month].forEach(day => {
+          availableDates[year][month].forEach((day: number) => {
             // Create a dayjs object for this date
             const dateObj = dayjs(`${year}-${month.padStart(2, '0')}-${day.toString().padStart(2, '0')}`);
             
@@ -621,18 +627,22 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({ 
                 <TouchableOpacity 
                   style={styles.nextButton}
                   onPress={() => {
-                    // Create trip details object
+                    // Create trip details object with the entire property and selected details
                     const tripDetails = {
-                      title: 'Explore Bali Highlights -Customized Full day Tour',
-                      image: require('../../assets/images/lovina-1.jpg'),
-                      rating: 4.9,
-                      reviewCount: 5098,
+                      property: property, // Pass the entire property object
+                      tripId: property?.id || `trip-${Date.now()}`, // Use property ID or generate a fallback
+                      title: property?.name || 'Explore Bali Highlights -Customized Full day Tour',
+                      image: property?.image_urls && property?.image_urls.length > 0 
+                        ? {uri: property.image_urls[0]} 
+                        : require('../../assets/images/lovina-1.jpg'),
+                      rating: typeof property?.rating === 'string' ? parseFloat(property.rating) : (property?.rating || 4.9),
+                      reviewCount: typeof property?.reviews === 'string' ? parseInt(property.reviews, 10) : (property?.reviews || 5098),
                       date: `${selectedDate}`,
                       timeSlot: dateTimeData.find(item => 
                         item.type === 'timeSlot' && 
                         item.date === selectedDate
                       )?.time || '3:30 AM – 11:45 AM',
-                      price: 'Rp780,000',
+                      price: price,
                       guestCount: adultCount
                     };
                     
