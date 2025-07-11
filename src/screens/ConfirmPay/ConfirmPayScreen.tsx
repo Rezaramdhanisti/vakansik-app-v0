@@ -54,7 +54,7 @@ interface PaymentMethod {
 const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const navigation = useNavigation();
   const [isPrivate, setIsPrivate] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card-1');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('shopee-1');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentNumber, setPaymentNumber] = useState('');
   
@@ -93,16 +93,16 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   // Payment methods data
   const paymentMethods = useMemo<PaymentMethod[]>(() => [
     {
-      id: 'gopay-1',
-      type: 'gopay',
-      title: 'Gopay',
-      isSelected: selectedPaymentMethod === 'gopay-1'
-    },
-    {
       id: 'shopee-1',
       type: 'shopee',
       title: 'Shopee',
       isSelected: selectedPaymentMethod === 'shopee-1'
+    },
+    {
+      id: 'gopay-1',
+      type: 'gopay',
+      title: 'Gopay',
+      isSelected: selectedPaymentMethod === 'gopay-1'
     }
   ], [selectedPaymentMethod]);
   
