@@ -637,7 +637,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
                         : require('../../assets/images/lovina-1.jpg'),
                       rating: typeof property?.rating === 'string' ? parseFloat(property.rating) : (property?.rating || 4.9),
                       reviewCount: typeof property?.reviews === 'string' ? parseInt(property.reviews, 10) : (property?.reviews || 5098),
-                      date: `${selectedDate}`,
+                      date: dayjs(selectedDate, 'MMMM D').format('YYYY-MM-DD'),
                       timeSlot: dateTimeData.find(item => 
                         item.type === 'timeSlot' && 
                         item.date === selectedDate

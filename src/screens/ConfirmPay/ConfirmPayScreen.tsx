@@ -1,17 +1,21 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Alert, Linking } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import Text from '../../components/Text';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import GuestBottomSheet, { GuestBottomSheetRef, GuestData } from '../../components/GuestBottomSheet';
+import PaymentNumberBottomSheet, { PaymentNumberBottomSheetRef } from '../../components/PaymentNumberBottomSheet';
 import { FONTS } from '../../config/fonts';
+import supabase from '../../services/supabaseClient';
 
 interface ConfirmPayScreenProps {
   route: {
     params: {
       tripDetails?: {
+        property?: any; // The entire property object
+        tripId?: string;
         title: string;
         image: any;
         rating: number;
@@ -36,7 +40,7 @@ interface Guest {
 }
 
 // Define payment method types
-type PaymentMethodType = 'card' | 'gopay' | 'other';
+type PaymentMethodType = 'card' | 'gopay' | 'shopee' | 'other';
 
 interface PaymentMethod {
   id: string;
@@ -52,9 +56,11 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card-1');
   const [isLoading, setIsLoading] = useState(false);
+  const [paymentNumber, setPaymentNumber] = useState('');
   
   // Default trip details if not provided through route params
   const tripDetails = route.params?.tripDetails || {
+    tripId: `trip-${Date.now()}`, // Default trip ID using timestamp
     title: 'Explore Bali Highlights -Customized Full day Tour',
     image: require('../../../assets/images/lovina-1.jpg'),
     rating: 4.9,
@@ -87,21 +93,14 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   // Payment methods data
   const paymentMethods = useMemo<PaymentMethod[]>(() => [
     {
-      id: 'card-1',
-      type: 'card',
-      title: '5560',
-      subtitle: 'Mastercard',
-      isSelected: selectedPaymentMethod === 'card-1'
-    },
-    {
       id: 'gopay-1',
       type: 'gopay',
-      title: 'GoPay',
+      title: 'Gopay',
       isSelected: selectedPaymentMethod === 'gopay-1'
     },
     {
       id: 'shopee-1',
-      type: 'gopay',
+      type: 'shopee',
       title: 'Shopee',
       isSelected: selectedPaymentMethod === 'shopee-1'
     }
@@ -120,7 +119,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     navigation.goBack();
   };
   
-  const handleBookNow = () => {
+  const handleBookNow = async () => {
     // Check if all guests have been filled out
     const allGuestsFilled = guests.every(guest => {
       const nameValid = guest.name.trim() !== '';
@@ -135,12 +134,33 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       return;
     }
     
+    // If Shopee or GoPay payment method is selected, show payment number input
+    if (selectedPaymentMethod === 'shopee-1' || selectedPaymentMethod === 'gopay-1') {
+      // Show payment number bottom sheet
+      const paymentMethodName = selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'GoPay';
+      paymentNumberBottomSheetRef.current?.present();
+      return;
+    }
+    
+    // For other payment methods, proceed directly
+    // proceedWithPayment();
+  };
+  
+  // Handle payment number save
+  const handlePaymentNumberSave = (number: string) => {
+    setPaymentNumber(number);
+    // Proceed with payment after getting the number
+    proceedWithPayment(number);
+  };
+ 
+  // Proceed with payment after validation
+  const proceedWithPayment = async (number: string) => {
     // Set loading state to true
     setIsLoading(true);
     
     // Create a booking object from the current trip details and guest information
     const booking = {
-      id: Math.random().toString(36).substring(2, 10), // Generate a random ID
+      id: route.params?.tripDetails?.tripId || (route.params?.tripDetails?.property?.id) || `trip-${Date.now()}`, // Use real trip ID or generate a timestamp-based ID as fallback
       destination: tripDetails.title.split('-')[0].trim(),
       title: tripDetails.title,
       date: tripDetails.date,
@@ -148,43 +168,111 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       host: 'Local Guide',
       status: 'Upcoming',
       image: tripDetails.image,
+      property: route.params?.tripDetails?.property, // Store the entire property object for future reference
     };
     
-    // Add a 5-second delay before navigating
-    setTimeout(() => {
-      // Reset loading state
-      setIsLoading(false);
-      
-      // Navigate to the Bookings tab and then to DetailBookingScreen
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            { name: 'Bookings' },
-          ],
-        })
-      );
-      
-      // Add a small delay to ensure the tab navigation completes before navigating to the detail screen
-      setTimeout(() => {
-        navigation.dispatch({
-          ...CommonActions.navigate('Bookings', {
-            screen: 'DetailBooking',
-            params: { booking },
-          }),
+    try {
+      // If Shopee or GoPay payment method is selected, call the edge function
+      if (selectedPaymentMethod === 'shopee-1' || selectedPaymentMethod === 'gopay-1') {
+        // Format guests data for the API call
+        const joinedUsers = guests.map(guest => ({
+          name: guest.name,
+          phone_number: guest.phoneNumber,
+          id_card_number: guest.idCardNumber || '' // Include KTP number if it exists
+        }));
+        console.log('tripDetails.date',tripDetails.date);
+        
+        // Call the edge function
+        console.log('Calling Supabase edge function for Shopee payment...');
+        const { data, error } = await supabase.functions.invoke('create_payment_request', {
+          body: {
+            trip_id: route.params?.tripDetails?.tripId, // Using the real trip ID
+            trip_date: tripDetails.date,
+            payment_number: number, // Include the payment number
+            payment_method: selectedPaymentMethod === 'shopee-1' ? 'shopee' : 'gopay',
+            joined_users: joinedUsers
+          }
         });
-      }, 100);
-    }, 5000); // 5 seconds delay
+        
+        if (error) {
+          throw new Error(`Payment request failed: ${error.message}`);
+        }
+        
+        console.log('Payment request successful:', data);
+        
+        // Handle the response - open the payment URL if available
+        if (data.actions && data.actions.length > 0) {
+          console.log('Payment actions received:', JSON.stringify(data.actions));
+          
+          // Look for the deeplink URL in the actions array
+          // The action structure has changed - now using type and descriptor
+          const deepLinkAction = data.actions.find(
+            (a: any) => a.type === 'REDIRECT_CUSTOMER' && a.descriptor === 'DEEPLINK_URL'
+          );
+          
+          if (deepLinkAction && deepLinkAction.value) {
+            // Reset loading state
+            setIsLoading(false);
+            
+            console.log('Found deeplink URL:', deepLinkAction.value);
+            
+            Linking.openURL(deepLinkAction.value);
+            return;
+          } else {
+            console.log('No suitable deeplink found in actions');
+          }
+        }
+      }
+      
+      // For other payment methods or if Shopee payment doesn't return a URL, continue with the original flow
+      // Add a 5-second delay before navigating
+      setTimeout(() => {
+        // Reset loading state
+        setIsLoading(false);
+        
+        // Navigate to the Bookings tab and then to DetailBookingScreen
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              { name: 'Bookings' },
+            ],
+          })
+        );
+        
+        // Add a small delay to ensure the tab navigation completes before navigating to the detail screen
+        setTimeout(() => {
+          navigation.dispatch({
+            ...CommonActions.navigate('Bookings', {
+              screen: 'DetailBooking',
+              params: { booking },
+            }),
+          });
+        }, 100);
+      }, 5000); // 5 seconds delay
+    } catch (error: any) {
+      console.error('Error processing payment:', error);
+      setIsLoading(false);
+      Alert.alert('Payment Error', `An error occurred while processing your payment: ${error.message || 'Unknown error'}`);
+    }
   };
   
-  // Reference to the guest bottom sheet
+  // Reference to the bottom sheets
   const guestBottomSheetRef = useRef<GuestBottomSheetRef>(null);
+  const paymentNumberBottomSheetRef = useRef<PaymentNumberBottomSheetRef>(null);
   
   // Guest modal functions
   const openGuestModal = (guest: Guest) => {
     console.log('Opening guest modal, requiredIdCard:', tripDetails.requiredIdCard);
     setCurrentGuest(guest);
-    setEditedGuest({...guest});
+    // Create a deep copy of the guest object to prevent reference issues
+    setEditedGuest({
+      id: guest.id,
+      name: guest.name || '',
+      title: guest.title || 'Tuan',
+      phoneNumber: guest.phoneNumber || '+62',
+      idCardNumber: guest.idCardNumber || ''
+    });
     setShowValidation(false);
     guestBottomSheetRef.current?.present();
   };
@@ -215,6 +303,38 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     }
   };
   
+  // Set up deep link handler for payment success
+  useEffect(() => {
+    // Add event listener for deep links
+    const handleDeepLink = ({ url }: { url: string }) => {
+      console.log('Deep link received:', url);
+      
+      // Handle payment success deep link
+      if (url.includes('payment-success')) {
+        Alert.alert(
+          'Payment Successful',
+          'Your payment has been processed successfully!',
+          [{ text: 'OK' }]
+        );
+      }
+    };
+    
+    // Set up listeners
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+    
+    // Check for initial URL (app opened via deep link)
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+    
+    // Clean up listener on component unmount
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+  
   return (
     <SafeAreaView style={styles.container}>
       <BottomSheetModalProvider>
@@ -235,6 +355,23 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           idCardNumber: ''
         }}
       />
+      
+      {/* Payment Number Bottom Sheet */}
+      <PaymentNumberBottomSheet
+        ref={paymentNumberBottomSheetRef}
+        onDismiss={() => {}}
+        onSave={handlePaymentNumberSave}
+        initialPaymentNumber={paymentNumber}
+        paymentMethod={selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'GoPay'}
+      />
+      
+      {/* Payment processing indicator */}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.loadingText}>Processing payment...</Text>
+        </View>
+      )}
       <View style={styles.header}>
         <View style={styles.placeholder} />
         <Text style={styles.headerTitle}>Confirm and pay</Text>
@@ -369,23 +506,16 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                     onPress={() => handleSelectPaymentMethod(item.id)}
                   >
                     <View style={styles.paymentMethodContent}>
-                      {item.type === 'card' && (
-                        <View style={styles.cardIconContainer}>
-                          <View style={styles.masterCardIcon}>
-                            <View style={[styles.cardCircle, { backgroundColor: '#FF5F00' }]} />
-                            <View style={[styles.cardCircle, { backgroundColor: '#FF0000', marginLeft: -10 }]} />
-                          </View>
-                          <Text style={styles.paymentMethodText}>{item.title}</Text>
-                        </View>
-                      )}
-                      {item.type === 'gopay' && (
-                        <View style={styles.goPayIconContainer}>
-                          <View style={styles.goPayIcon}>
-                            <Text style={styles.goPayIconText}>G</Text>
-                          </View>
-                          <Text style={styles.paymentMethodText}>{item.title}</Text>
-                        </View>
-                      )}
+                      <View style={styles.paymentIconContainer}>
+                        <Image 
+                          source={item.type === 'gopay' 
+                            ? require('../../../assets/images/g-pay.webp')
+                            : require('../../../assets/images/s-pay.webp')} 
+                          style={styles.paymentIcon} 
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.paymentMethodText}>{item.title}</Text>
+                      </View>
                     </View>
                     {item.isSelected ? (
                       <View style={styles.paymentRadioButton}>
@@ -441,12 +571,12 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         
         {/* Book Now Button */}
         <View style={styles.bookButtonContainer}>
-          <TouchableOpacity 
-            style={styles.bookButton} 
-            onPress={handleBookNow}
-            disabled={isLoading}
-          >
-            <Text style={styles.bookButtonText}>Book now</Text>
+          <TouchableOpacity style={styles.bookButton} onPress={handleBookNow} disabled={isLoading}>
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.bookNowButtonText}>Book now</Text>
+            )}
           </TouchableOpacity>
         </View>
       
@@ -486,6 +616,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -497,7 +628,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
@@ -956,23 +1087,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEEEEE',
     width: '100%',
   },
-  goPayIconContainer: {
+  paymentIconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  goPayIcon: {
+  paymentIcon: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: '#00AEEF',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginRight: 12,
-  },
-  goPayIconText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: FONTS.SATOSHI_BOLD,
   },
   paymentMethodText: {
     fontSize: 16,
@@ -1094,10 +1216,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
-  bookButtonText: {
-    color: '#FFF',
+  bookNowButtonText: {
+    color: '#fff',
     fontSize: 16,
-    fontFamily: FONTS.SATOSHI_BOLD,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
   },
 });
 
