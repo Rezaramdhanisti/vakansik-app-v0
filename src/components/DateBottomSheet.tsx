@@ -1,6 +1,8 @@
 import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, useState, useContext, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FlashList } from '@shopify/flash-list';
 import {
