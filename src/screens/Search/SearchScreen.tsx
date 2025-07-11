@@ -146,21 +146,43 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     setFilteredListings(filtered);
   }, [sortByHighestPrice, sortByLowestPrice, destinations, activeCategory]);
   
-  // Setup double back press to exit for Android
+  // Setup double back press to exit for Android - only when this screen is focused
+  const [isFocused, setIsFocused] = useState(true);
+  
   useEffect(() => {
-    // Only setup the back handler on the main search screen
-    const backHandlerCleanup = setupDoubleBackExit({
-      message: 'Press back again to exit app',
-      resetTimeout: 2000
+    // Add listeners for screen focus and blur
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      setIsFocused(true);
+    });
+    
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      setIsFocused(false);
     });
     
     return () => {
-      // Clean up back handler when component unmounts
+      unsubscribeFocus();
+      unsubscribeBlur();
+    };
+  }, [navigation]);
+  
+  useEffect(() => {
+    // Only setup the back handler when this screen is focused
+    let backHandlerCleanup: (() => void) | null = null;
+    
+    if (isFocused) {
+      backHandlerCleanup = setupDoubleBackExit({
+        message: 'Press back again to exit app',
+        resetTimeout: 2000
+      });
+    }
+    
+    return () => {
+      // Clean up back handler when screen loses focus or component unmounts
       if (backHandlerCleanup) {
         backHandlerCleanup();
       }
     };
-  }, []);
+  }, [isFocused]);
   // Load destinations from Supabase
   useEffect(() => {
     const loadDestinations = async () => {
