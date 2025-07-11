@@ -217,7 +217,6 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
             console.log('Found deeplink URL:', deepLinkAction.value);
             
             Linking.openURL(deepLinkAction.value);
-            return;
           } else {
             console.log('No suitable deeplink found in actions');
           }
