@@ -95,7 +95,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     {
       id: 'shopee-1',
       type: 'shopee',
-      title: 'Shopee',
+      title: 'Shopee Pay',
       isSelected: selectedPaymentMethod === 'shopee-1'
     },
     {

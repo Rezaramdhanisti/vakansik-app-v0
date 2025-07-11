@@ -213,7 +213,7 @@ const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
             <View style={styles.phoneInputContainer}>
               <View style={styles.countryCodeContainer}>
                 <Image 
-                  source={require('../../assets/images/lovina-1.jpg')} 
+                  source={require('../../assets/images/indonesia.webp')} 
                   style={styles.flagIcon} 
                   resizeMode="contain"
                 />
@@ -358,6 +358,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 50,
     borderWidth: 1,
+    backgroundColor: '#DDDDDD',
     borderColor: '#DDDDDD',
     borderRadius: 8,
     paddingHorizontal: 12,
