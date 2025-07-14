@@ -86,8 +86,6 @@ Deno.serve(async (req) => {
       .from("orders")
       .update({
         status: orderStatus,
-        webhook_response: payload,
-        updated_at: new Date().toISOString()
       })
       .eq("id", reference_id)
       .select();
