@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import userService from '../services/userService';
+import supabase from '../services/supabaseClient';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -118,26 +120,67 @@ const MainNavigator = () => {
 // Create a context for authentication state
 export const AuthContext = React.createContext({
   isLoggedIn: false,
+  userId: null as string | null,
   login: () => {},
   logout: () => {},
 });
 
 // Root navigator that handles authentication flow
 function AppNavigator() {
-  // State to track if user is logged in
+  // State to track if user is logged in and user ID
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Auth context value
   const authContext = {
     isLoggedIn,
-    login: () => setIsLoggedIn(true),
-    logout: () => setIsLoggedIn(false),
+    userId,
+    login: async () => {
+      const success = await userService.initializeFromSession();
+      if (success) {
+        setIsLoggedIn(true);
+        setUserId(userService.getUserId());
+      }
+      return success;
+    },
+    logout: async () => {
+      await supabase.auth.signOut();
+      userService.clearUserData();
+      setIsLoggedIn(false);
+      setUserId(null);
+    },
   };
 
-  // For demo purposes - you would replace this with actual auth logic
+  // Check if user is already logged in when app starts
   useEffect(() => {
-    // Check if user is logged in (e.g., from AsyncStorage)
-    // For now, we'll just use the state variable
+    async function checkLoginStatus() {
+      const success = await userService.initializeFromSession();
+      if (success) {
+        setIsLoggedIn(true);
+        setUserId(userService.getUserId());
+      }
+    }
+    
+    checkLoginStatus();
+    
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          userService.storeUserData(session.user.id, session.user.email || undefined);
+          setIsLoggedIn(true);
+          setUserId(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          userService.clearUserData();
+          setIsLoggedIn(false);
+          setUserId(null);
+        }
+      }
+    );
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
   return (

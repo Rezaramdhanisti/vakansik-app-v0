@@ -7,17 +7,12 @@ Deno.serve(async (req) => {
     
     const supa = createClient(
       Deno.env.get("VAKANSIK_URL_BASE")!,
-      Deno.env.get("VAKANSIK_ANON_KEY_BASE")!,
-      { global: { headers: { Authorization: req.headers.get("Authorization")! } } }
+      Deno.env.get("VAKANSIK_SERVICE_ROLE_KEY_BASE")!
     );
 
-    // 1. Auth check
-    const { data: { user }, error: authError } = await supa.auth.getUser();
-    if (!user || authError) {
-      console.error('Auth error:', authError);
-      return new Response("Unauthorized", { status: 401 });
-    }
-    console.log('User authenticated:', user.id);
+    // Extract user_id from request body instead of auth check
+    console.log('Using service role authentication - bypassing auth check');
+
 
     // 2. Parse request
     const requestBody = await req.json();
@@ -28,8 +23,15 @@ Deno.serve(async (req) => {
       trip_date, 
       joined_users, 
       payment_number, 
-      payment_method 
+      payment_method,
+      user_id // Extract user_id from request body
     } = requestBody;
+    
+    if (!user_id) {
+      console.error('Missing user_id in request');
+      return new Response("Missing user_id in request", { status: 400 });
+    }
+    console.log('Using user_id from request:', user_id);
     
     if (!trip_id || !trip_date || !joined_users?.length) {
       console.error('Missing required fields');
@@ -71,7 +73,7 @@ Deno.serve(async (req) => {
     
     const orderData = {
       id: order_id,
-      user_id: user.id,
+      user_id: user_id, // Use user_id from request body
       trip_id,
       trip_date,
       amount_idr: trip.price,
@@ -134,43 +136,30 @@ Deno.serve(async (req) => {
     const xenditRes = await xenditResponse.json();
     console.log('Xendit response:', JSON.stringify(xenditRes));
 
-    // 6. Update order with payment_request_id
+    // 6. Update order with payment_request_id and response data
     if (xenditRes.payment_request_id) {
       console.log('Updating order with payment_request_id:', xenditRes.payment_request_id);
       
-      // Try updating with explicit text for payment_request_id and raw object for xendit_response
       try {
-        // Step 1: Save just the payment_request_id as text
-        const { error: idError } = await supa.from("orders")
-          .update({ payment_request_id: String(xenditRes.payment_request_id) })
-          .eq("id", order_id);
-          
-        if (idError) {
-          console.error('Error updating payment_request_id:', idError);
-        } else {
-          console.log('Successfully updated payment_request_id');
-        }
+        // Combine all updates into a single operation to ensure atomic update
+        const updateData = {
+          payment_request_id: xenditRes.payment_request_id,  // No String() conversion needed
+          xendit_response: xenditRes,                        // Send as raw object for JSONB column
+        };
         
-        // Step 2: Save xendit_response as a separate update
-        const { error: jsonError } = await supa.from("orders")
-          .update({ xendit_response: xenditRes })
-          .eq("id", order_id);
+        console.log('Update data being sent:', JSON.stringify(updateData));
+        
+        // Use a single update operation with all fields
+        const { data, error } = await supa.from("orders")
+          .update(updateData)
+          .eq("id", order_id)
+          .select();
           
-        if (jsonError) {
-          console.error('Error updating xendit_response as object:', jsonError);
-          
-          // Try with stringified JSON if object approach fails
-          const { error: stringError } = await supa.from("orders")
-            .update({ xendit_response: JSON.stringify(xenditRes) })
-            .eq("id", order_id);
-            
-          if (stringError) {
-            console.error('Error updating stringified xendit_response:', stringError);
-          } else {
-            console.log('Successfully updated xendit_response as string');
-          }
+        if (error) {
+          console.error('Error updating order with Xendit data:', error);
+          throw error;
         } else {
-          console.log('Successfully updated xendit_response as object');
+          console.log('Successfully updated order with Xendit data:', data);
         }
       } catch (error) {
         console.error('Exception during order update:', error);

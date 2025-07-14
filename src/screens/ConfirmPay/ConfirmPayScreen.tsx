@@ -1,8 +1,10 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useContext } from 'react';
 import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Alert, Linking } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
+import { AuthContext } from '../../navigation/AppNavigator';
+import userService from '../../services/userService';
 import Text from '../../components/Text';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import GuestBottomSheet, { GuestBottomSheetRef, GuestData } from '../../components/GuestBottomSheet';
@@ -53,11 +55,19 @@ interface PaymentMethod {
 
 const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const navigation = useNavigation();
+  const { userId } = useContext(AuthContext);
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('shopee-1');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentNumber, setPaymentNumber] = useState('');
   
+  // Log user ID when component mounts
+  useEffect(() => {
+    if (userId) {
+      console.log('Current user ID from context:', userId);
+    }
+  }, [userId]);
+
   // Default trip details if not provided through route params
   const tripDetails = route.params?.tripDetails || {
     tripId: `trip-${Date.now()}`, // Default trip ID using timestamp
@@ -180,17 +190,22 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           phone_number: guest.phoneNumber,
           id_card_number: guest.idCardNumber || '' // Include KTP number if it exists
         }));
-        console.log('tripDetails.date',tripDetails.date);
+        
+        // Check if we have the current user ID
+        if (!userId) {
+          throw new Error('User ID not available. Please log in again.');
+        }
         
         // Call the edge function
-        console.log('Calling Supabase edge function for Shopee payment...');
+        console.log('Calling Supabase edge function for payment with user ID:', userId);
         const { data, error } = await supabase.functions.invoke('create_payment_request', {
           body: {
             trip_id: route.params?.tripDetails?.tripId, // Using the real trip ID
             trip_date: tripDetails.date,
             payment_number: number, // Include the payment number
             payment_method: selectedPaymentMethod === 'shopee-1' ? 'shopee' : 'gopay',
-            joined_users: joinedUsers
+            joined_users: joinedUsers,
+            user_id: userId // Include the user ID from context
           }
         });
         
