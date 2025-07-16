@@ -1,85 +1,127 @@
-import React from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, StyleSheet, SafeAreaView, Image, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import dayjs from 'dayjs';
 import { FlashList } from '@shopify/flash-list';
+import { getUserOrdersWithDestinations, OrderListItem } from '../../services/orderService';
+import { AuthContext } from '../../navigation/AppNavigator';
 
 type BookingsScreenProps = {
   navigation: any;
 };
 
 function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element {
-  // Mock data for bookings
-  const bookings = [
-    {
-      id: '1',
-      destination: 'Nusa Penida',
-      title: 'Nusa Penida Day Tour With Snorkeling',
-      date: 'Jun 18',
-      time: '06:00',
-      host: 'I Dewa Made',
-      status: 'canceled',
-      image: require('../../../assets/images/lovina-1.jpg'),
-    },
-    // You can add more mock bookings here
-  ];
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [bookings, setBookings] = useState<OrderListItem[]>([]);
+  
+  // Get user context from AuthContext
+  const { userId } = useContext(AuthContext);
+  
+  const fetchUserOrders = async () => {
+    try {
+      // Check if userId is available from context
+      if (!userId) {
+        setIsLoading(false);
+        setRefreshing(false);
+        return;
+      }
+      
+      // Fetch orders using the userId from context
+      const orders = await getUserOrdersWithDestinations(userId);
+      console.log('orders',orders);
+      
+      setBookings(orders);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  };
+  
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchUserOrders();
+  }, [userId]);
+  
+  // Handle pull-to-refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchUserOrders();
+  };
 
-  const handleStartSearching = () => {
-    navigation.navigate('Explore');
+  const handleBookingPress = (booking: OrderListItem) => {
+    navigation.navigate('DetailBooking', { orderId: booking.id });
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Bookings</Text>
+        <Text style={styles.headerTitle}>Bookings</Text>
       </View>
-
-      {bookings.length === 0 ? (
-        <View style={styles.emptyStateContainer}>
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name="hand-wave" size={32} color="#FF6F00" />
-          </View>
-          <Text style={styles.emptyStateTitle}>No bookings booked...yet!</Text>
-          <Text style={styles.emptyStateSubtitle}>
-            Time to dust off your bags and start planning your next adventure
-          </Text>
+      
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#333" />
+          <Text style={styles.loadingText}>Loading your bookings...</Text>
+        </View>
+      ) : bookings.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons name="calendar-blank" size={60} color="#999" />
+          <Text style={styles.emptyTitle}>No bookings yet</Text>
+          <Text style={styles.emptyText}>Your bookings will appear here once you make a reservation.</Text>
           <TouchableOpacity 
-            style={styles.startSearchingButton}
-            onPress={handleStartSearching}
+            style={styles.exploreButton}
+            onPress={() => navigation.navigate('Explore')}
           >
-            <Text style={styles.startSearchingButtonText}>Start exploring</Text>
+            <Text style={styles.exploreButtonText}>Explore Destinations</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.bookingsContainer}>
-          <Text style={styles.destinationTitle}>{bookings[0].destination}</Text>
-          
           <View style={styles.flashListContainer}>
             <FlashList
               data={bookings}
+              showsVerticalScrollIndicator={false}
               renderItem={({ item: booking }) => (
                 <TouchableOpacity 
                   style={styles.bookingCard}
-                  onPress={() => navigation.navigate('DetailBooking', { booking })}
+                  onPress={() => handleBookingPress(booking)}
                 >
                   <View style={styles.bookingContent}>
-                    <Image source={booking.image} style={styles.bookingImage} />
+                    <Image 
+                      source={booking.image ? { uri: booking.image } : require('../../../assets/images/beach.webp')} 
+                      style={styles.bookingImage} 
+                    />
                     <View style={styles.bookingDetails}>
                       <Text style={styles.bookingTitle}>{booking.title}</Text>
                       <Text style={styles.bookingInfo}>
-                        {booking.date} · {booking.time} · Hosted by {booking.host}
+                        {dayjs(booking.date, 'YYYY-MM-DD').format('dddd, MMMM D YYYY')}
                       </Text>
-                      {booking.status === 'canceled' && (
-                        <Text style={styles.canceledText}>Canceled</Text>
+                      {booking.status === 'FAILED' ? (
+                        <Text style={styles.canceledText}>Failed</Text>
+                      ): booking.status === 'PENDING' ?(
+                        <Text style={styles.pendingText}>Pending Payment</Text>
+                      ): (
+                        <Text style={styles.successText}>Paid</Text>
                       )}
                     </View>
                   </View>
                 </TouchableOpacity>
               )}
-              keyExtractor={(item) => item.id}
               estimatedItemSize={100}
+              keyExtractor={(item) => item.id}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={['#FF6F00']}
+                  tintColor="#FF6F00"
+                />
+              }
             />
           </View>
         </View>
@@ -91,66 +133,84 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F8F8',
   },
   header: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 0,
+    paddingBottom: 8,
   },
-  title: {
-    fontSize: 28,
+  headerTitle: {
+    fontSize: 24,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginBottom: 10,
-    height: 50
+    marginBottom: 8,
+    height: 32,
   },
-  emptyStateContainer: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    marginTop: -40, // Adjust to center the content visually
   },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FFF8F7',
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+  },
+  errorContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    padding: 24,
   },
-  emptyStateTitle: {
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: '#FF6F00',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_BOLD,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
     fontSize: 20,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    marginBottom: 10,
+    marginBottom: 8,
     textAlign: 'center',
+    marginTop: 16,
   },
-  emptyStateSubtitle: {
+  emptyText: {
     fontSize: 16,
-    fontFamily: FONTS.SATOSHI_REGULAR,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#666',
     textAlign: 'center',
-    marginBottom: 30,
-    maxWidth: '80%',
+    marginBottom: 24,
   },
-  startSearchingButton: {
+  exploreButton: {
     backgroundColor: '#FF6F00',
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 30,
-    width: '90%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    borderRadius: 8,
   },
-  startSearchingButtonText: {
+  exploreButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
@@ -163,13 +223,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     marginBottom: 16,
-  },
-  destinationTitle: {
-    fontSize: 22,
-    fontFamily: FONTS.SATOSHI_BOLD,
-    color: '#333',
-    marginBottom: 10,
-    marginTop: 5,
   },
   bookingCard: {
     backgroundColor: '#FFFFFF',
@@ -203,35 +256,40 @@ const styles = StyleSheet.create({
   },
   bookingInfo: {
     fontSize: 14,
-    fontFamily: FONTS.SATOSHI_REGULAR,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#666',
     marginBottom: 4,
   },
   canceledText: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: 'red',
+  },
+  pendingText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#FF6F00',
+  },
+  successText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: 'green',
   },
   pastTripsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    padding: 16,
-    borderRadius: 12,
-    marginTop: 8,
+    justifyContent: 'center',
+    marginTop: 16,
     marginBottom: 24,
   },
-  pastTripsText: {
-    flex: 1,
-    fontSize: 15,
+  pastTripsButtonText: {
+    fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
-    color: '#333',
+    color: '#FF6F00',
+    marginRight: 8,
   },
   luggageIcon: {
-    width: 36,
-    height: 36,
-    position: 'absolute',
-    right: 24,
+    marginRight: 8,
   },
 });
 
