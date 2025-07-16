@@ -52,8 +52,6 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
     fetchOrderDetail();
   }, [orderId]);
   
-  // Use the meeting point from the API or fall back to a default value
-  const meetingPoint = orderDetail?.meeting_point || 'Jalan Raya Toya Pakeh - Ped';
   
   return (
     <SafeAreaView style={styles.container}>
@@ -134,7 +132,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
                     numberOfLines={1} 
                     ellipsizeMode="tail"
                   >
-                    {meetingPoint}
+                    {orderDetail?.meeting_point}
                   </Text>
                 )}
               </View>
@@ -178,7 +176,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             
             <View style={styles.arrivalContainer}>
               <View style={styles.arrivalTipsList}>
-                <Text style={styles.arrivalTipItem}>{meetingPoint}</Text>
+                <Text style={styles.arrivalTipItem}>{orderDetail?.meeting_point}</Text>
               </View>
             </View>
             
