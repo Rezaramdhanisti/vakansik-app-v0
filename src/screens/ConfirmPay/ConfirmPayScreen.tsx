@@ -170,7 +170,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     
     // Create a booking object from the current trip details and guest information
     const booking = {
-      id: route.params?.tripDetails?.tripId || (route.params?.tripDetails?.property?.id) || `trip-${Date.now()}`, // Use real trip ID or generate a timestamp-based ID as fallback
+      id: route.params?.tripDetails?.tripId || `trip-${Date.now()}`, // Use real trip ID or generate a timestamp-based ID as fallback
       destination: tripDetails.title.split('-')[0].trim(),
       title: tripDetails.title,
       date: tripDetails.date,
@@ -180,6 +180,10 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       image: tripDetails.image,
       property: route.params?.tripDetails?.property, // Store the entire property object for future reference
     };
+    
+    // Variable to store the order_id from the response
+    // Default to booking.id in case we don't get an order_id from the API
+    let orderId: string = booking.id;
     
     try {
       // If Shopee or GoPay payment method is selected, call the edge function
@@ -214,6 +218,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         }
         
         console.log('Payment request successful:', data);
+        
+        // Store the order_id from the response for later use in navigation
+        orderId = data.order_id;
         
         // Handle the response - open the payment URL if available
         if (data.actions && data.actions.length > 0) {
@@ -259,7 +266,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           navigation.dispatch({
             ...CommonActions.navigate('Bookings', {
               screen: 'DetailBooking',
-              params: { booking },
+              params: { orderId: orderId }, // Use order_id from the response
             }),
           });
         }, 100);
