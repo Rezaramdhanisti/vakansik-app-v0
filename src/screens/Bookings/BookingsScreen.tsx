@@ -31,11 +31,9 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
       
       // Fetch orders using the userId from context
       const orders = await getUserOrdersWithDestinations(userId);
-      console.log('orders',orders);
       
       setBookings(orders);
     } catch (err) {
-      console.error('Error fetching orders:', err);
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -86,6 +84,7 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
             <FlashList
               data={bookings}
               showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listingsContainer}
               renderItem={({ item: booking }) => (
                 <TouchableOpacity 
                   style={styles.bookingCard}
@@ -133,7 +132,7 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     paddingHorizontal: 16,
@@ -217,18 +216,23 @@ const styles = StyleSheet.create({
   },
   bookingsContainer: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   flashListContainer: {
     flex: 1,
     height: '100%',
-    marginBottom: 16,
+  },
+  listingsContainer: {
+    paddingTop: 8,
+    paddingBottom: 24,
   },
   bookingCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     marginBottom: 16,
-    padding: 12,
+    marginHorizontal: 8,
+    marginVertical: 4,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -239,8 +243,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   bookingImage: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     borderRadius: 8,
     marginRight: 12,
   },
