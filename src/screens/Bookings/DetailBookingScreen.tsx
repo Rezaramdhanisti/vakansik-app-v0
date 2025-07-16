@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -30,6 +30,25 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  // Add state for collapsed itinerary days
+  const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({0: false});
+  
+  // Parse itinerary from string to object if needed
+  const parsedItinerary = useMemo(() => {
+    if (!orderDetail?.itinerary) return null;
+    
+    try {
+      // If itinerary is stored as a JSON string, parse it
+      if (typeof orderDetail.itinerary === 'string') {
+        return JSON.parse(orderDetail.itinerary);
+      }
+      // If it's already an object (array), return as is
+      return orderDetail.itinerary;
+    } catch (e) {
+      console.error('Error parsing itinerary:', e);
+      return null;
+    }
+  }, [orderDetail?.itinerary]);
   
   useEffect(() => {
     const fetchOrderDetail = async () => {
@@ -194,7 +213,71 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               </TouchableOpacity>
             </View> */}
           </View>
+          <View style={styles.sectionDivider} />
           
+          {/* Where to Meet Section */}
+          <View style={styles.meetingContainer}>
+            <Text style={styles.meetingTitle}>What you'll do</Text>
+            
+            {!loading && parsedItinerary && parsedItinerary.length > 0 ? (
+              <View style={styles.timelineContainer}>
+                {parsedItinerary.map((dayData: any, dayIndex: number) => {
+                  // Check if the day is collapsed based on collapsedDays state
+                  const isCollapsed = collapsedDays[dayIndex] !== undefined ? collapsedDays[dayIndex] : true;
+                  
+                  return (
+                    <View key={dayIndex} style={styles.dayContainer}>
+                      <TouchableOpacity 
+                        style={styles.dayTitleContainer}
+                        onPress={() => setCollapsedDays({...collapsedDays, [dayIndex]: !isCollapsed})}
+                      >
+                        <Text style={styles.dayTitle}>{dayData.day}</Text>
+                        <Ionicons 
+                          name={isCollapsed ? 'chevron-down-outline' : 'chevron-up-outline'} 
+                          size={20} 
+                          color="#000" 
+                        />
+                      </TouchableOpacity>
+                      
+                      {!isCollapsed && (
+                        <View>
+                          {dayData.activities.map((item: any, index: number) => {
+                            const isLastItem = index === dayData.activities.length - 1;
+                            return (
+                              <View key={index} style={styles.timelineItem}>
+                                <View style={styles.timelineIconContainer}>
+                                  <View style={styles.timelineIcon}>
+                                    <Ionicons name={item.icon || 'time-outline'} size={24} color="#000" />
+                                  </View>
+                                  {!isLastItem && <View style={styles.timelineConnector} />}
+                                </View>
+                                <View style={styles.timelineContent}>
+                                  <Text style={styles.timelineTitle}>{item.title}</Text>
+                                  <Text style={styles.timelineDescription}>{item.description}</Text>
+                                  {item.duration && (
+                                    <View style={styles.durationContainer}>
+                                      <Ionicons name="time-outline" size={16} color="#666" />
+                                      <Text style={styles.durationText}>{item.duration}</Text>
+                                    </View>
+                                  )}
+                                </View>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            ) : (
+              <View style={styles.noItineraryContainer}>
+                <Text style={styles.noItineraryText}>
+                  {loading ? 'Loading itinerary...' : 'Itinerary details will be shared soon.'}
+                </Text>
+              </View>
+            )}
+          </View>
           {/* Section Divider */}
           <View style={styles.sectionDivider} />
           
@@ -618,7 +701,93 @@ const styles = StyleSheet.create({
   supportButtonText: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
-    color: '#333',
+    color: '#666',
+  },
+  timelineContainer: {
+    marginTop: 16,
+  },
+  dayContainer: {
+    marginBottom: 12,
+    borderRadius: 0,
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+  },
+  dayTitleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  dayTitle: {
+    fontSize: 20,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    paddingVertical: 16,
+  },
+  timelineIconContainer: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  timelineIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineConnector: {
+    width: 1,
+    flex: 1,
+    backgroundColor: '#E0E0E0',
+    marginVertical: 4,
+    alignSelf: 'center',
+  },
+  timelineContent: {
+    flex: 1,
+    paddingVertical: 4,
+  },
+  timelineTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.SATOSHI_BOLD,
+    color: '#000',
+    marginBottom: 6,
+  },
+  timelineDescription: {
+    fontSize: 15,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#777',
+    marginBottom: 6,
+  },
+  durationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  durationText: {
+    fontSize: 13,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+    marginLeft: 4,
+  },
+  noItineraryContainer: {
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8F8F8',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  noItineraryText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

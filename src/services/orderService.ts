@@ -18,6 +18,7 @@ export interface OrderDetail {
   amount_idr: number;
   status: string;
   image_url?: string;
+  itinerary: string;
 }
 
 /**
@@ -95,6 +96,7 @@ export const getOrderDetail = async (orderId: string): Promise<OrderDetail | nul
         name: string;
         meeting_point: string;
         image_urls?: string[];
+        itinerary?: string;
       };
     };
 
@@ -106,7 +108,7 @@ export const getOrderDetail = async (orderId: string): Promise<OrderDetail | nul
         trip_date,
         amount_idr,
         status,
-        orders_trip_id_fkey:trip_id(name, meeting_point, image_urls)
+        orders_trip_id_fkey:trip_id(name, meeting_point, image_urls, itinerary)
       `)
       .eq('id', orderId)
       .single<OrderResponse>();
@@ -129,6 +131,7 @@ export const getOrderDetail = async (orderId: string): Promise<OrderDetail | nul
       meeting_point: data.orders_trip_id_fkey?.meeting_point || '',
       amount_idr: data.amount_idr,
       status: data.status,
+      itinerary: data.orders_trip_id_fkey?.itinerary || '',
       // Get the first image URL if available
       image_url: data.orders_trip_id_fkey?.image_urls && 
                 Array.isArray(data.orders_trip_id_fkey.image_urls) && 
