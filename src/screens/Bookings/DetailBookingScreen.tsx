@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,37 +7,56 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { getOrderDetail, OrderDetail } from '../../services/orderService';
 
 type DetailBookingScreenProps = {
   navigation: any;
   route: {
     params: {
-      booking: {
-        id: string;
-        destination: string;
-        title: string;
-        date: string;
-        time: string;
-        host: string;
-        status: string;
-        image: any;
-      };
+      orderId: string;
     };
   };
 };
 
 function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): React.JSX.Element {
-  const { booking } = route.params;
+  const { orderId } = route.params;
+  const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Mock data for the booking details
+  // Default values that will be replaced with API data
   const startTime = '6:00 AM';
   const endTime = '4:00 PM';
-  const meetingPoint = 'Jalan Raya Toya Pakeh - Ped';
+  
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      try {
+        setLoading(true);
+        const detail = await getOrderDetail(orderId);
+        if (detail) {
+          setOrderDetail(detail);
+        } else {
+          setError('Could not find order details');
+        }
+      } catch (err) {
+        console.error('Error fetching order detail:', err);
+        setError('Failed to load order details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchOrderDetail();
+  }, [orderId]);
+  
+  // Use the meeting point from the API or fall back to a default value
+  const meetingPoint = orderDetail?.meeting_point || 'Jalan Raya Toya Pakeh - Ped';
   
   return (
     <SafeAreaView style={styles.container}>
@@ -56,31 +75,49 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
       <ScrollView style={styles.scrollView}>
         {/* Main Image */}
         <View style={styles.imageContainer}>
-          <Image 
-            source={require('../../../assets/images/lovina-1.jpg')} 
-            style={styles.mainImage} 
-            resizeMode="cover" 
-            borderRadius={16}
-          />
-          {booking.status === 'canceled' && (
+          {loading ? (
+            <View style={[styles.mainImage, styles.loadingImageContainer]}>
+              <ActivityIndicator size="large" color="#FFF" />
+            </View>
+          ) : (
+            <Image 
+              source={orderDetail?.image_url ? { uri: orderDetail.image_url } : require('../../../assets/images/lovina-1.jpg')} 
+              style={styles.mainImage} 
+              resizeMode="cover" 
+              borderRadius={16}
+            />
+          )}
+          {orderDetail?.status === 'canceled' && (
             <View style={styles.cancelledBadge}>
               <Text style={styles.cancelledText}>Cancelled</Text>
+            </View>
+          )}
+          {orderDetail?.status && orderDetail.status !== 'canceled' && (
+            <View style={[styles.statusBadge, 
+              orderDetail.status === 'confirmed' ? styles.confirmedBadge : 
+              orderDetail.status === 'pending' ? styles.pendingBadge : styles.defaultBadge
+            ]}>
+              <Text style={styles.statusText}>{orderDetail.status.charAt(0).toUpperCase() + orderDetail.status.slice(1)}</Text>
             </View>
           )}
         </View>
         
         {/* Tour Title */}
         <View style={styles.contentContainer}>
-          <Text style={styles.tourTitle}>{booking.title}</Text>
+          <Text style={styles.tourTitle}>
+            {loading ? 'Loading...' : orderDetail?.name || 'Loading destination...'}
+          </Text>
           <Text style={styles.tourInfo}>
-            {startTime} · {booking.date} 
+            {startTime} · {orderDetail?.trip_date || 'Loading date...'} 
           </Text>
           {/* Time Section - Card with Start and End */}
           <View style={styles.timeCardContainer}>
             <View style={styles.timeCard}>
               <View style={styles.timeSection}>
                 <Text style={styles.timeSectionTitle}>Starts</Text>
-                <Text style={styles.dateText}>Wed, {booking.date}</Text>
+                <Text style={styles.dateText}>
+                  {loading ? 'Loading...' : orderDetail?.trip_date ? `Wed, ${orderDetail.trip_date}` : 'Loading date...'}
+                </Text>
                 <Text style={styles.timeText}>{startTime}</Text>
               </View>
               
@@ -88,7 +125,9 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               
               <View style={styles.timeSection}>
                 <Text style={[styles.timeSectionTitle, {textAlign: 'right'}]}>Ends</Text>
-                <Text style={[styles.dateText, {textAlign: 'right'}]}>Wed, {booking.date}</Text>
+                <Text style={[styles.dateText, {textAlign: 'right'}]}>
+                  {loading ? 'Loading...' : orderDetail?.trip_date ? `Wed, ${orderDetail.trip_date}` : 'Loading date...'}
+                </Text>
                 <Text style={[styles.timeText, {textAlign: 'right'}]}>{endTime}</Text>
               </View>
             </View>
@@ -100,7 +139,13 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               <Ionicons name="location-outline" size={28} color="#333" style={styles.sectionIcon} />
               <View>
                 <Text style={styles.sectionTitle}>Where to meet</Text>
-                <Text style={styles.locationText}>{meetingPoint}</Text>
+                {loading ? (
+                  <Text style={styles.loadingText}>Loading meeting point...</Text>
+                ) : error ? (
+                  <Text style={styles.errorText}>{error}</Text>
+                ) : (
+                  <Text style={styles.locationText}>{meetingPoint}</Text>
+                )}
               </View>
             </View>
           </View>
@@ -121,9 +166,14 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             <View style={styles.iconTextContainer}>
               <Ionicons name="boat-outline" size={28} color="#333" style={styles.sectionIcon} />
               <View>
-              <Text style={styles.sectionTitle}>Your experience</Text>
-              <Text style={styles.descriptionText}>Nusa Penida Day Tour With Snorkeling</Text>
-
+                <Text style={styles.sectionTitle}>Your experience</Text>
+                {loading ? (
+                  <Text style={styles.loadingText}>Loading experience details...</Text>
+                ) : error ? (
+                  <Text style={styles.errorText}>{error}</Text>
+                ) : (
+                  <Text style={styles.descriptionText}>{orderDetail?.name || 'Loading experience details...'}</Text>
+                )}
               </View>
             </View>
           </View>
@@ -172,11 +222,21 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             
             <View style={styles.confirmationContainer}>
               <Text style={styles.confirmationLabel}>Confirmation code</Text>
-              <Text style={styles.confirmationCode}>TAZHPCAS</Text>
+              <Text style={styles.confirmationCode}>
+                {loading ? 'Loading...' : orderDetail?.id.substring(0, 8).toUpperCase() || 'TAZHPCAS'}
+              </Text>
             </View>
             <View style={styles.costContainer}>
               <Text style={styles.costLabel}>Total cost</Text>
-              <Text style={styles.costAmount}>Rp0.00 IDR</Text>
+              {loading ? (
+                <Text style={styles.loadingText}>Loading...</Text>
+              ) : error ? (
+                <Text style={styles.errorText}>Error loading cost</Text>
+              ) : (
+                <Text style={styles.costAmount}>
+                  Rp{orderDetail?.amount_idr?.toLocaleString() || '0.00'} IDR
+                </Text>
+              )}
             </View>
             
             <TouchableOpacity style={styles.receiptButton}>
@@ -259,10 +319,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 20,
   },
+  statusBadge: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  confirmedBadge: {
+    backgroundColor: '#4CAF50',
+  },
+  pendingBadge: {
+    backgroundColor: '#FFC107',
+  },
+  defaultBadge: {
+    backgroundColor: '#2196F3',
+  },
   cancelledText: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#333',
+  },
+  statusText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: 'white',
   },
   contentContainer: {
     paddingVertical: 16,
@@ -394,6 +476,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#333',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: FONTS.SATOSHI_REGULAR,
+    color: '#E53935',
+  },
+  loadingImageContainer: {
+    backgroundColor: '#CCCCCC',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   meetingContainer: {
     paddingTop: 24,

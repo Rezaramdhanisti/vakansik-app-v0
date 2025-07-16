@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import supabase from './supabaseClient';
 
 // Interface for order list item with destination details
 export interface OrderListItem {
@@ -7,6 +7,17 @@ export interface OrderListItem {
   date: string;
   status: string;
   image: string;
+}
+
+// Interface for detailed order information
+export interface OrderDetail {
+  id: string;
+  name: string;
+  trip_date: string;
+  meeting_point: string;
+  amount_idr: number;
+  status: string;
+  image_url?: string;
 }
 
 /**
@@ -66,6 +77,69 @@ export const getUserOrdersWithDestinations = async (userId: string): Promise<Ord
   } catch (error) {
     console.error('Unexpected error fetching user orders with destinations:', error);
     return [];
+  }
+};
+
+/**
+ * Fetch detailed information for a specific order
+ */
+export const getOrderDetail = async (orderId: string): Promise<OrderDetail | null> => {
+  try {
+    // Define the type for the response data
+    type OrderResponse = {
+      id: string;
+      trip_date: string;
+      amount_idr: number;
+      status: string;
+      orders_trip_id_fkey: {
+        name: string;
+        meeting_point: string;
+        image_urls?: string[];
+      };
+    };
+
+    // Join orders with destinations to get the name, meeting point, and other details
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        trip_date,
+        amount_idr,
+        status,
+        orders_trip_id_fkey:trip_id(name, meeting_point, image_urls)
+      `)
+      .eq('id', orderId)
+      .single<OrderResponse>();
+
+    if (error) {
+      console.error('Error fetching order detail:', error);
+      return null;
+    }
+
+    if (!data) {
+      console.error('No order found with ID:', orderId);
+      return null;
+    }
+
+    // Transform the data to match the OrderDetail interface
+    const orderDetail: OrderDetail = {
+      id: data.id,
+      name: data.orders_trip_id_fkey?.name || '',
+      trip_date: data.trip_date,
+      meeting_point: data.orders_trip_id_fkey?.meeting_point || '',
+      amount_idr: data.amount_idr,
+      status: data.status,
+      // Get the first image URL if available
+      image_url: data.orders_trip_id_fkey?.image_urls && 
+                Array.isArray(data.orders_trip_id_fkey.image_urls) && 
+                data.orders_trip_id_fkey.image_urls.length > 0 ? 
+                data.orders_trip_id_fkey.image_urls[0] : undefined
+    };
+
+    return orderDetail;
+  } catch (error) {
+    console.error('Unexpected error fetching order detail:', error);
+    return null;
   }
 };
 
