@@ -14,6 +14,7 @@ import { FONTS } from '../../config/fonts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { getOrderDetail, OrderDetail } from '../../services/orderService';
+import dayjs from 'dayjs';
 
 type DetailBookingScreenProps = {
   navigation: any;
@@ -29,10 +30,6 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Default values that will be replaced with API data
-  const startTime = '6:00 AM';
-  const endTime = '4:00 PM';
   
   useEffect(() => {
     const fetchOrderDetail = async () => {
@@ -87,19 +84,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               borderRadius={16}
             />
           )}
-          {orderDetail?.status === 'canceled' && (
-            <View style={styles.cancelledBadge}>
-              <Text style={styles.cancelledText}>Cancelled</Text>
-            </View>
-          )}
-          {orderDetail?.status && orderDetail.status !== 'canceled' && (
-            <View style={[styles.statusBadge, 
-              orderDetail.status === 'confirmed' ? styles.confirmedBadge : 
-              orderDetail.status === 'pending' ? styles.pendingBadge : styles.defaultBadge
-            ]}>
-              <Text style={styles.statusText}>{orderDetail.status.charAt(0).toUpperCase() + orderDetail.status.slice(1)}</Text>
-            </View>
-          )}
+         
         </View>
         
         {/* Tour Title */}
@@ -108,10 +93,10 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             {loading ? 'Loading...' : orderDetail?.name || 'Loading destination...'}
           </Text>
           <Text style={styles.tourInfo}>
-            {startTime} · {orderDetail?.trip_date || 'Loading date...'} 
+            {dayjs(orderDetail?.trip_date, 'YYYY-MM-DD').format('dddd, MMMM D YYYY')} 
           </Text>
           {/* Time Section - Card with Start and End */}
-          <View style={styles.timeCardContainer}>
+          {/* <View style={styles.timeCardContainer}>
             <View style={styles.timeCard}>
               <View style={styles.timeSection}>
                 <Text style={styles.timeSectionTitle}>Starts</Text>
@@ -131,7 +116,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
                 <Text style={[styles.timeText, {textAlign: 'right'}]}>{endTime}</Text>
               </View>
             </View>
-          </View>
+          </View> */}
           
           {/* Meeting Point */}
           <View style={[styles.sectionContainer]}>
@@ -144,7 +129,13 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
                 ) : error ? (
                   <Text style={styles.errorText}>{error}</Text>
                 ) : (
-                  <Text style={styles.locationText}>{meetingPoint}</Text>
+                  <Text 
+                    style={styles.locationText} 
+                    numberOfLines={1} 
+                    ellipsizeMode="tail"
+                  >
+                    {meetingPoint}
+                  </Text>
                 )}
               </View>
             </View>
@@ -162,7 +153,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           </View>
           
           {/* Your Experience */}
-          <View style={[styles.sectionContainer]}>
+          {/* <View style={[styles.sectionContainer]}>
             <View style={styles.iconTextContainer}>
               <Ionicons name="boat-outline" size={28} color="#333" style={styles.sectionIcon} />
               <View>
@@ -176,7 +167,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
                 )}
               </View>
             </View>
-          </View>
+          </View> */}
           
           {/* Section Divider */}
           <View style={styles.sectionDivider} />
@@ -186,19 +177,12 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             <Text style={styles.meetingTitle}>Where to meet</Text>
             
             <View style={styles.arrivalContainer}>
-              <Text style={styles.arrivalTitle}>Arrival tips</Text>
               <View style={styles.arrivalTipsList}>
-                <Text style={styles.arrivalTipItem}>1. first we will do 3 point snorkeling around nusa penida island</Text>
-                <View style={styles.arrivalTipRow}>
-                  <Text style={styles.arrivalTipItem}>2. lunch at a local... </Text>
-                  <TouchableOpacity>
-                    <Text style={styles.showDetailsLink}>Show full details</Text>
-                  </TouchableOpacity>
-                </View>
+                <Text style={styles.arrivalTipItem}>{meetingPoint}</Text>
               </View>
             </View>
             
-            <View style={styles.locationActions}>
+            {/* <View style={styles.locationActions}>
               <TouchableOpacity style={styles.locationActionButtonAlt}>
                 <Ionicons name="copy-outline" size={22} color="#333" style={styles.locationActionIcon} />
                 <Text style={styles.locationActionText}>Copy address</Text>
@@ -210,7 +194,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
                 <Text style={styles.locationActionText}>Get directions</Text>
                 <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
           
           {/* Section Divider */}
@@ -239,11 +223,11 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               )}
             </View>
             
-            <TouchableOpacity style={styles.receiptButton}>
+            {/* <TouchableOpacity style={styles.receiptButton}>
               <Ionicons name="receipt-outline" size={22} color="#333" style={styles.receiptIcon} />
               <Text style={styles.receiptText}>Get receipts</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
                     {/* Section Divider */}
           <View style={styles.sectionDivider} />
@@ -259,11 +243,11 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.supportButtonAlt}>
+            {/* <TouchableOpacity style={styles.supportButtonAlt}>
               <Ionicons name="help-circle-outline" size={22} color="#333" style={styles.supportIcon} />
               <Text style={styles.supportButtonText}>Visit the Help Center</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
       </ScrollView>
@@ -298,6 +282,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    width: '100%',
   },
   imageContainer: {
     height: 220,
@@ -349,18 +334,19 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    width: '100%',
   },
   tourTitle: {
     fontSize: 22,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
-    height: 60
+    height: 32
   },
   tourInfo: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#666',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   timeCardContainer: {
     marginBottom: 16,
@@ -427,6 +413,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#333',
+    flexShrink: 1,
+    width: 300
   },
   descriptionText: {
     fontSize: 16,
@@ -436,11 +424,13 @@ const styles = StyleSheet.create({
   reservationContainer: {
     paddingTop: 24,
     paddingBottom: 16,
+    width: '100%',
   },
   sectionDivider: {
     height: 8,
     backgroundColor: '#E9E9E9',
-    marginHorizontal: -24
+    width: '100%',
+    alignSelf: 'stretch'
   },
   reservationTitle: {
     fontSize: 22,
@@ -496,6 +486,7 @@ const styles = StyleSheet.create({
   meetingContainer: {
     paddingTop: 24,
     paddingBottom: 16,
+    width: '100%',
   },
   meetingTitle: {
     fontSize: 22,
@@ -592,6 +583,7 @@ const styles = StyleSheet.create({
   supportContainer: {
     paddingTop: 24,
     paddingBottom: 16,
+    width: '100%',
   },
   supportTitle: {
     fontSize: 22,
