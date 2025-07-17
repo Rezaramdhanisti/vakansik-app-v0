@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "MyTravel.app"
-               BlueprintName = "MyTravel"
-               ReferencedContainer = "container:MyTravel.xcodeproj">
+               BuildableName = "Vakansik.app"
+               BlueprintName = "Vakansik"
+               ReferencedContainer = "container:Vakansik.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "MyTravelTests.xctest"
-               BlueprintName = "MyTravelTests"
-               ReferencedContainer = "container:MyTravel.xcodeproj">
+               BuildableName = "VakansikTests.xctest"
+               BlueprintName = "VakansikTests"
+               ReferencedContainer = "container:Vakansik.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "MyTravel.app"
-            BlueprintName = "MyTravel"
-            ReferencedContainer = "container:MyTravel.xcodeproj">
+            BuildableName = "Vakansik.app"
+            BlueprintName = "Vakansik"
+            ReferencedContainer = "container:Vakansik.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "MyTravel.app"
-            BlueprintName = "MyTravel"
-            ReferencedContainer = "container:MyTravel.xcodeproj">
+            BuildableName = "Vakansik.app"
+            BlueprintName = "Vakansik"
+            ReferencedContainer = "container:Vakansik.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
