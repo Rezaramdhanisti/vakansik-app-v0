@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { GOOGLE_WEB_CLIENT_ID_DEV } from '@env';
+import { GOOGLE_WEB_CLIENT_ID_DEV, IOS_CLIENT_ID_DEV } from '@env';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ const LoginScreen = () => {
     GoogleSignin.configure({
       scopes: ['https://www.googleapis.com/auth/drive.readonly'],
       webClientId: GOOGLE_WEB_CLIENT_ID_DEV,
+      iosClientId: IOS_CLIENT_ID_DEV, 
     });
   }, []);
   const [loading, setLoading] = useState(false);

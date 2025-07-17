@@ -93,13 +93,13 @@ function ProfileScreen(): React.JSX.Element {
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.menuItem}>
+          {/* <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="person-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>View profile</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           
         </View>
         
@@ -108,13 +108,13 @@ function ProfileScreen(): React.JSX.Element {
         
         {/* Second Section */}
         <View style={styles.menuSection}>
-          <TouchableOpacity style={styles.menuItem}>
+          {/* <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="people-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Refer a friend</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           
           {/* Login/Logout Button */}
           {isLoggedIn ? (
