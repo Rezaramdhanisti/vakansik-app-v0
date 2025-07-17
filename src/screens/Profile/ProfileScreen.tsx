@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef } from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
@@ -27,6 +27,28 @@ function ProfileScreen(): React.JSX.Element {
     logoutBottomSheetRef.current?.present();
   };
   
+  const handleGetHelp = async () => {
+    const phoneNumber = '081380550020';
+    const text = 'Hello, I need help with Vakansik app.';
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`;
+    
+    // Check if WhatsApp is installed
+    const canOpen = await Linking.canOpenURL(whatsappUrl);
+    
+    if (canOpen) {
+      await Linking.openURL(whatsappUrl);
+    } else {
+      // WhatsApp is not installed, show fallback message
+      Alert.alert(
+        'WhatsApp Not Found', 
+        'Please install WhatsApp to contact our support team.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+  
   const handleLogoutConfirm = async () => {
     try {
       setIsLoggingOut(true);
@@ -52,9 +74,9 @@ function ProfileScreen(): React.JSX.Element {
       <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity style={styles.notificationButton}>
+        {/* <TouchableOpacity style={styles.notificationButton}>
           <Ionicons name="notifications-outline" size={24} color="#000" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       
       <View style={styles.profileCardContainer}>
@@ -96,7 +118,7 @@ function ProfileScreen(): React.JSX.Element {
       <View style={styles.menuContainer}>
         {/* First Section */}
         <View style={styles.menuSection}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={handleGetHelp}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="help-circle-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Get help</Text>
