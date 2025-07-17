@@ -60,7 +60,7 @@ function ProfileScreen(): React.JSX.Element {
             <Text style={styles.userType}>Guest</Text>
           </View>
           
-          <View style={styles.statsContainer}>
+          {/* <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Text style={styles.statNumber}>2</Text>
               <Text style={styles.statLabel}>Trips</Text>
@@ -77,7 +77,7 @@ function ProfileScreen(): React.JSX.Element {
               <Text style={styles.statNumber}>5</Text>
               <Text style={styles.statLabel}>Years on Liburun</Text>
             </View>
-          </View>
+          </View> */}
         </View>
       </View>
       
@@ -163,11 +163,11 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginTop: 12,
-    height: 40
+    lineHeight: 40
   },
   notificationButton: {
     width: 40,
@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#FFFFFF',
+    lineHeight: 40
   },
   verifiedBadge: {
     position: 'absolute',

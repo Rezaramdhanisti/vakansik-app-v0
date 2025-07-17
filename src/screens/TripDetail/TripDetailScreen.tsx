@@ -11,6 +11,7 @@ import {
   Animated,
   Pressable,
   StatusBar,
+  Platform
 } from 'react-native';
 import PropertyCarousel from '../../components/PropertyCarousel';
 import { FlashList } from '@shopify/flash-list';
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     position: 'absolute',
-    top: 0,
+    top: Platform.OS === 'ios' ? 64 : 10,
     left: 0,
     right: 0,
     zIndex: 10,
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 8,
     textAlign:'center',
-    height: 28
+    lineHeight: 40
   },
   tripDescription: {
     fontSize: 16,

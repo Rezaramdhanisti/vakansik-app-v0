@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
-    height: 32,
+    lineHeight: 40,
   },
   loadingContainer: {
     flex: 1,
