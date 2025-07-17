@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    paddingTop: 24,
+    paddingTop: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -492,6 +492,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#ffffff',
     borderRadius: 30,
+    height: 56,
     paddingHorizontal: 16,
     paddingVertical: 10,
     justifyContent: 'center',

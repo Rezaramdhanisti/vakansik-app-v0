@@ -4,9 +4,10 @@ import supabase from '../services/supabaseClient';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Image } from 'react-native';
+import { Image, Platform } from 'react-native';
 import 'react-native-gesture-handler';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import CustomTabBar from '../components/CustomTabBar';
 
 // Import screens
 import HomeScreen from '../screens/Home/HomeScreen';
@@ -25,6 +26,7 @@ const Stack = createStackNavigator();
 const MainNavigator = () => {
   return (
     <Tab.Navigator
+        tabBar={props => <CustomTabBar {...props} />}
         screenOptions={({ route }) => {
           return {
             tabBarIcon: ({ focused, color, size }) => {
@@ -66,11 +68,6 @@ const MainNavigator = () => {
               fontSize: 12,
               fontWeight: '500',
             },
-            tabBarStyle: {
-              height: 60,
-              paddingBottom: 8,
-              paddingTop: 4,
-            },
             headerShown: false,
           };
         }}
@@ -85,10 +82,8 @@ const MainNavigator = () => {
             const isTabBarHidden = hideOnScreens.includes(routeName);
             
             return {
+              tabBarVisible: !isTabBarHidden,
               tabBarStyle: {
-                height: 60,
-                paddingBottom: 8,
-                paddingTop: 4,
                 display: isTabBarHidden ? 'none' : 'flex',
               }
             };
@@ -103,10 +98,8 @@ const MainNavigator = () => {
             const isTabBarHidden = hideOnScreens.includes(routeName);
             
             return {
+              tabBarVisible: !isTabBarHidden,
               tabBarStyle: {
-                height: 60,
-                paddingBottom: 8,
-                paddingTop: 4,
                 display: isTabBarHidden ? 'none' : 'flex',
               }
             };
