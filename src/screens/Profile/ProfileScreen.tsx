@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { View, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Text from '../../components/Text';
@@ -7,17 +7,27 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../../navigation/AppNavigator';
 import { supabase } from '../../../lib/supabase';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import LogoutBottomSheet, { LogoutBottomSheetRef } from '../../components/LogoutBottomSheet';
 
 function ProfileScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const { isLoggedIn, logout } = useContext(AuthContext);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
+  // Reference to the logout bottom sheet
+  const logoutBottomSheetRef = useRef<LogoutBottomSheetRef>(null);
+  
   const handleLoginPress = () => {
     navigation.navigate('Auth' as never);
   };
   
-  const handleLogoutPress = async () => {
+  const handleLogoutPress = () => {
+    // Show bottom sheet for logout confirmation
+    logoutBottomSheetRef.current?.present();
+  };
+  
+  const handleLogoutConfirm = async () => {
     try {
       setIsLoggingOut(true);
       const { error } = await supabase.auth.signOut();
@@ -38,7 +48,8 @@ function ProfileScreen(): React.JSX.Element {
     }
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <BottomSheetModalProvider>
+      <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <TouchableOpacity style={styles.notificationButton}>
@@ -145,7 +156,14 @@ function ProfileScreen(): React.JSX.Element {
           )}
         </View>
       </View>
+      
+      {/* Logout Bottom Sheet */}
+      <LogoutBottomSheet
+        ref={logoutBottomSheetRef}
+        onLogout={handleLogoutConfirm}
+      />
     </SafeAreaView>
+    </BottomSheetModalProvider>
   );
 }
 
