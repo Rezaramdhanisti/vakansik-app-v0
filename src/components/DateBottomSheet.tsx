@@ -645,7 +645,8 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
                         item.date === selectedDate
                       )?.time || '3:30 AM – 11:45 AM',
                       price: price,
-                      guestCount: adultCount
+                      guestCount: adultCount,
+                      is_need_ktp: property?.is_need_ktp
                     };
                     
                     // Check if user is logged in

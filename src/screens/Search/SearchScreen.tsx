@@ -207,6 +207,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           category: item.category,
           location: item.location,
           available_dates: item.available_dates,
+          is_need_ktp: item.is_need_ktp,
           isFavorite: false
         }));
         setDestinations(formattedData);

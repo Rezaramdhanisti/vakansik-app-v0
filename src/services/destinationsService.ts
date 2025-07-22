@@ -28,12 +28,13 @@ export interface Destination {
   location?: string;
   category?: string;
   available_dates?: Record<string, Record<string, number[]>>; 
+  is_need_ktp: boolean;
 }
 
 export async function fetchDestinations() {
   const { data, error } = await supabase
     .from('destinations')
-    .select('id, name, description, price, rating, reviews, image_urls, price_information, itinerary, meeting_point, budget_band, category, available_dates');
+    .select('id, name, description, price, rating, reviews, image_urls, price_information, itinerary, meeting_point, budget_band, category, available_dates, is_need_ktp');
 
   if (error) throw error;
   return data as Destination[];

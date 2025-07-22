@@ -27,6 +27,7 @@ interface ConfirmPayScreenProps {
         price: string;
         guestCount: number;
         requiredIdCard?: boolean;
+        is_need_ktp?: boolean;
       };
     };
   };
@@ -364,6 +365,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         ref={guestBottomSheetRef}
         onDismiss={closeGuestModal}
         onSave={handleSaveGuest}
+        showIdCardField={tripDetails.is_need_ktp}
         initialGuestData={editedGuest ? {
           title: editedGuest.title,
           name: editedGuest.name,

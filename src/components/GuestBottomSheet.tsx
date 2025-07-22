@@ -15,6 +15,7 @@ export interface GuestBottomSheetProps {
   onDismiss?: () => void;
   onSave?: (guest: GuestData) => void;
   initialGuestData?: GuestData;
+  showIdCardField?: boolean;
 }
 
 export interface GuestBottomSheetRef {
@@ -30,7 +31,7 @@ export interface GuestData {
 }
 
 const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
-  ({ onDismiss, onSave, initialGuestData }, ref) => {
+  ({ onDismiss, onSave, initialGuestData, showIdCardField = false }, ref) => {
     // ref for bottom sheet modal
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     
@@ -106,7 +107,7 @@ const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
       // Validate inputs
       if (!editedGuest.name || editedGuest.name.trim() === '' || 
           !editedGuest.phoneNumber || editedGuest.phoneNumber.length <= 3 ||
-          !editedGuest.idCardNumber || editedGuest.idCardNumber.trim() === '') {
+          (showIdCardField && (!editedGuest.idCardNumber || editedGuest.idCardNumber.trim() === ''))) {
         setShowValidation(true);
         return;
       }
@@ -232,23 +233,27 @@ const GuestBottomSheet = forwardRef<GuestBottomSheetRef, GuestBottomSheetProps>(
               <Text style={styles.inputLabel}>Isi nomor ponsel dulu, ya.</Text>
             }
             
-            {/* ID Card Number Input */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nomor KTP"
-                placeholderTextColor="#CCC"
-                value={editedGuest.idCardNumber}
-                onChangeText={(text) => setEditedGuest({...editedGuest, idCardNumber: text})}
-                keyboardType="number-pad"
-              />
-            </View>
-            <Text style={styles.infoText}>
-              Nomor KTP diperlukan untuk berlabuh menggunakan kapal sesuai dengan peraturan pelayaran.
-            </Text>
-            {showValidation && (!editedGuest.idCardNumber || editedGuest.idCardNumber.trim() === '') && 
-              <Text style={styles.inputLabel}>Isi nomor KTP dulu, ya.</Text>
-            }
+            {/* ID Card Number Input - Conditional */}
+            {showIdCardField && (
+              <>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nomor KTP"
+                    placeholderTextColor="#CCC"
+                    value={editedGuest.idCardNumber}
+                    onChangeText={(text) => setEditedGuest({...editedGuest, idCardNumber: text})}
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <Text style={styles.infoText}>
+                  Nomor KTP diperlukan untuk berlabuh menggunakan kapal sesuai dengan peraturan pelayaran.
+                </Text>
+                {showValidation && (!editedGuest.idCardNumber || editedGuest.idCardNumber.trim() === '') && 
+                  <Text style={styles.inputLabel}>Isi nomor KTP dulu, ya.</Text>
+                }
+              </>
+            )}
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveGuest}>
