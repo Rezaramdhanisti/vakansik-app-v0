@@ -7,6 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../../navigation/AppNavigator';
 import { supabase } from '../../../lib/supabase';
+import userService from '../../services/userService';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import LogoutBottomSheet, { LogoutBottomSheetRef } from '../../components/LogoutBottomSheet';
 
@@ -14,6 +15,18 @@ function ProfileScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const { isLoggedIn, logout } = useContext(AuthContext);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  // Function to extract and format name from email
+  const getUserDisplayName = (): string => {
+    const email = userService.getUserEmail();
+    if (!email) return 'Guest';
+    
+    // Extract the part before @ symbol
+    const username = email.split('@')[0];
+    
+    // Capitalize first letter and return
+    return username.charAt(0).toUpperCase() + username.slice(1).toLowerCase();
+  };
   
   // Reference to the logout bottom sheet
   const logoutBottomSheetRef = useRef<LogoutBottomSheetRef>(null);
@@ -83,13 +96,13 @@ function ProfileScreen(): React.JSX.Element {
         <View style={styles.profileCard}>
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>R</Text>
+              <Text style={styles.avatarText}>{getUserDisplayName().charAt(0)}</Text>
               <View style={styles.verifiedBadge}>
                 <MaterialCommunityIcons name="check" size={16} color="#FFF" />
               </View>
             </View>
             
-            <Text style={styles.userName}>Reza</Text>
+            <Text style={styles.userName}>{getUserDisplayName()}</Text>
             <Text style={styles.userType}>Guest</Text>
           </View>
           
