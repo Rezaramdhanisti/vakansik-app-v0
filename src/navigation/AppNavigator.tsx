@@ -26,7 +26,18 @@ const Stack = createStackNavigator();
 const MainNavigator = () => {
   return (
     <Tab.Navigator
-        tabBar={props => <CustomTabBar {...props} />}
+        tabBar={props => {
+          // Only show tab bar on SearchMain screen
+          const routeName = getFocusedRouteNameFromRoute(props.navigation.getState().routes[props.navigation.getState().index]) ?? 'SearchMain';
+          
+          // Only show tab bar on SearchMain screen or initial load
+          if (routeName !== 'SearchMain' && routeName !== 'Explore' && routeName !== 'BookingsList') {
+            return null; // Don't render the tab bar at all
+          }
+          
+          // Otherwise render the custom tab bar
+          return <CustomTabBar {...props} />;
+        }}
         screenOptions={({ route }) => {
           return {
             tabBarIcon: ({ focused, color, size }) => {
@@ -76,33 +87,15 @@ const MainNavigator = () => {
         <Tab.Screen 
           name="Explore" 
           component={SearchNavigator}
-          options={({ route }) => {
-            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-            const hideOnScreens = ['TripDetail', 'ConfirmPay'];
-            const isTabBarHidden = hideOnScreens.includes(routeName);
-            
-            return {
-              tabBarVisible: !isTabBarHidden,
-              tabBarStyle: {
-                display: isTabBarHidden ? 'none' : 'flex',
-              }
-            };
+          options={{
+            headerShown: false,
           }}
         />
         <Tab.Screen 
           name="Bookings" 
           component={BookingsNavigator}
-          options={({ route }) => {
-            const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-            const hideOnScreens = ['DetailBooking'];
-            const isTabBarHidden = hideOnScreens.includes(routeName);
-            
-            return {
-              tabBarVisible: !isTabBarHidden,
-              tabBarStyle: {
-                display: isTabBarHidden ? 'none' : 'flex',
-              }
-            };
+          options={{
+            headerShown: false,
           }}
         />
         <Tab.Screen name="Profile" component={ProfileScreen} />
