@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StatusBar, Linking } from 'react-native';
+import { NavigationContainerRef } from '@react-navigation/native';
 import { supabase } from './lib/supabase';
 
 // Import the AppNavigator
 import AppNavigator from './src/navigation/AppNavigator';
 
 function App(): React.JSX.Element {
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
+
   useEffect(() => {
-    // Handle deep links for Supabase authentication
+    // Handle deep links for Supabase authentication and payments
     const handleDeepLink = async (url: string) => {
       console.log('Deep link received:', url);
       
@@ -27,6 +30,27 @@ function App(): React.JSX.Element {
           }
         } catch (error) {
           console.error('Failed to process auth callback:', error);
+        }
+      }
+      
+      // Handle payment deep links
+      if (url.startsWith('vakansik://')) {
+        // Navigate to BookingsList screen for all payment results
+        if (navigationRef.current?.isReady()) {
+          navigationRef.current.navigate('Main', {
+            screen: 'Explore',
+            params: {
+              screen: 'BookingsList'
+            }
+          });
+        }
+        
+        if (url.includes('payment-success')) {
+          console.log('Payment successful! Navigating to BookingsList');
+        } else if (url.includes('payment-cancel')) {
+          console.log('Payment cancelled by user. Navigating to BookingsList');
+        } else if (url.includes('payment-failed')) {
+          console.log('Payment failed. Navigating to BookingsList');
         }
       }
     };
@@ -52,7 +76,7 @@ function App(): React.JSX.Element {
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <AppNavigator />
+      <AppNavigator navigationRef={navigationRef} />
     </>
   );
 }

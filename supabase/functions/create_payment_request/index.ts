@@ -105,7 +105,9 @@ Deno.serve(async (req) => {
       channel_properties: {
         display_name: "Vakansik", // Change to your brand
         account_mobile_number: payment_number,
-        success_return_url: "myapp://payment-success",
+        success_return_url: "vakansik://payment-success",
+        cancel_return_url: "vakansik://payment-cancel",
+        failure_return_url: "vakansik://payment-failed"
       }
     };
     

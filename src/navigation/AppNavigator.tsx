@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import userService from '../services/userService';
 import supabase from '../services/supabaseClient';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Image, Platform } from 'react-native';
 import 'react-native-gesture-handler';
@@ -112,7 +112,7 @@ export const AuthContext = React.createContext({
 });
 
 // Root navigator that handles authentication flow
-function AppNavigator() {
+function AppNavigator({ navigationRef }: { navigationRef?: React.RefObject<NavigationContainerRef<any> | null> }) {
   // State to track if user is logged in and user ID
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -170,7 +170,7 @@ function AppNavigator() {
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <AuthContext.Provider value={authContext}>
         <Stack.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
           <Stack.Screen name="Main" component={MainNavigator} />

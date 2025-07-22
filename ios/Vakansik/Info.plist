@@ -38,6 +38,14 @@
 				<string>com.googleusercontent.apps.697036253998-ispk8vj3qmnp1c3ai3a0lrnntuusb2gq</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>payment</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vakansik</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>

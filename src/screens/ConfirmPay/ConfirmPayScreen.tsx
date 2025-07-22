@@ -109,12 +109,12 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       title: 'Shopee Pay',
       isSelected: selectedPaymentMethod === 'shopee-1'
     },
-    {
-      id: 'gopay-1',
-      type: 'gopay',
-      title: 'Gopay',
-      isSelected: selectedPaymentMethod === 'gopay-1'
-    }
+    // {
+    //   id: 'gopay-1',
+    //   type: 'gopay',
+    //   title: 'Gopay',
+    //   isSelected: selectedPaymentMethod === 'gopay-1'
+    // }
   ], [selectedPaymentMethod]);
   
   // Handle payment method selection
