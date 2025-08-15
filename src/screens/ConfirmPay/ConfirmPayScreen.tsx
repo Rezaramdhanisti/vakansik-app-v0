@@ -9,6 +9,7 @@ import Text from '../../components/Text';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import GuestBottomSheet, { GuestBottomSheetRef, GuestData } from '../../components/GuestBottomSheet';
 import PaymentNumberBottomSheet, { PaymentNumberBottomSheetRef } from '../../components/PaymentNumberBottomSheet';
+import PaymentSuccessBottomSheet, { PaymentSuccessBottomSheetRef } from '../../components/PaymentSuccessBottomSheet';
 import { FONTS } from '../../config/fonts';
 import supabase from '../../services/supabaseClient';
 
@@ -282,6 +283,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   // Reference to the bottom sheets
   const guestBottomSheetRef = useRef<GuestBottomSheetRef>(null);
   const paymentNumberBottomSheetRef = useRef<PaymentNumberBottomSheetRef>(null);
+  const paymentSuccessBottomSheetRef = useRef<PaymentSuccessBottomSheetRef>(null);
   
   // Guest modal functions
   const openGuestModal = (guest: Guest) => {
@@ -331,13 +333,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     const handleDeepLink = ({ url }: { url: string }) => {
       console.log('Deep link received:', url);
       
-      // Handle payment success deep link
+      // Handle payment success deeplink
       if (url.includes('payment-success')) {
-        Alert.alert(
-          'Payment Successful',
-          'Your payment has been processed successfully!',
-          [{ text: 'OK' }]
-        );
+        paymentSuccessBottomSheetRef.current?.present();
       }
     };
     
@@ -386,6 +384,23 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         onSave={handlePaymentNumberSave}
         initialPaymentNumber={paymentNumber}
         paymentMethod={selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'GoPay'}
+      />
+
+      {/* Payment Success Bottom Sheet */}
+      <PaymentSuccessBottomSheet
+        ref={paymentSuccessBottomSheetRef}
+        onDismiss={() => {}}
+        onContinue={() => {
+          // Navigate to Bookings tab after payment success
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                { name: 'Bookings' },
+              ],
+            })
+          );
+        }}
       />
       
       {/* Payment processing indicator */}

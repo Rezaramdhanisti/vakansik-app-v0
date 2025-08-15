@@ -134,7 +134,15 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               </View>
             </View>
           </View> */}
-          
+               {/* Attention Banner */}
+               <View style={styles.attentionBanner}>
+            <View style={styles.attentionBannerContent}>
+              <Ionicons name="information-circle" size={24} color="#856404" style={styles.attentionIcon} />
+              <Text style={styles.attentionText}>
+              Sebentar lagi kamu diundang ke grup WA Open Trip ini. Tunggu sebentar ya!
+              </Text>
+            </View>
+          </View>
           {/* Meeting Point */}
           <View style={[styles.sectionContainer]}>
             <View style={styles.iconTextContainer}>
@@ -157,6 +165,8 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
               </View>
             </View>
           </View>
+          
+     
           
           {/* What You'll Do */}
           <View style={[styles.sectionContainer]}>
@@ -788,6 +798,30 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
     textAlign: 'center',
+  },
+  attentionBanner: {
+    backgroundColor: '#FFF3CD',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FFE69C',
+    marginBottom: 16,
+  },
+  attentionBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  attentionIcon: {
+    marginRight: 12,
+    color: '#856404',
+  },
+  attentionText: {
+    fontSize: 15,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#856404',
+    flex: 1,
+    lineHeight: 20,
   },
 });
 
