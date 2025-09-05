@@ -122,7 +122,7 @@ const LoginScreen = () => {
           </View>
           
       
-          {/* Email Sign In Button */}
+          {/* Email Sign In Button
           <TouchableOpacity 
             style={styles.emailButton}
             onPress={() => navigation.navigate('LoginEmail', {})}
@@ -130,7 +130,7 @@ const LoginScreen = () => {
           >
             <Ionicons name="mail-outline" size={22} color="#000" />
             <Text style={styles.emailButtonText}>Sign in with email</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           
           {/* Google Sign In Button */}
           <TouchableOpacity 

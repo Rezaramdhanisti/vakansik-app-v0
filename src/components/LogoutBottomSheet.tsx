@@ -26,7 +26,7 @@ const LogoutBottomSheet = forwardRef<LogoutBottomSheetRef, LogoutBottomSheetProp
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     
     // variables for bottom sheet modal
-    const snapPoints = useMemo(() => ['30%'], []);
+    const snapPoints = useMemo(() => ['40%'], []);
     
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({

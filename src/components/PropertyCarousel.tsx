@@ -8,7 +8,7 @@ import { FONTS } from '../config/fonts';
 const { width } = Dimensions.get('window');
 
 interface PropertyCarouselProps {
-  images: string[];
+  images: (string | number)[];
   itemId: string;
   onSnapToItem?: (index: number) => void;
   carouselRefs?: React.MutableRefObject<{[key: string]: ICarouselInstance}>;

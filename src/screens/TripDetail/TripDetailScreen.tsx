@@ -45,12 +45,12 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
 
   // Use image_urls from the property data if available, otherwise use fallback images
   const images = property.image_urls && property.image_urls.length > 0 
-    ? property.image_urls 
-    : [
-        require('../../../assets/images/lovina-1.jpg'),
-        require('../../../assets/images/lovina-2.jpg'),
-        require('../../../assets/images/lovina-3.jpg'),
-      ];
+  ? property.image_urls 
+  :  [
+    require('../../../assets/images/lovina-1.jpg'),
+    require('../../../assets/images/lovina-2.jpg'),
+    require('../../../assets/images/lovina-3.jpg'),
+  ];
   // Reviews data
   const reviews = [
     {

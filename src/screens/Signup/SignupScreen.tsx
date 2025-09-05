@@ -124,14 +124,14 @@ const SignupScreen = () => {
           
       
           {/* Email Sign In Button */}
-          <TouchableOpacity 
+          {/* <TouchableOpacity 
             style={styles.emailButton}
             onPress={() => navigation.navigate('SignupEmail', {})}
             disabled={loading}
           >
             <Ionicons name="mail-outline" size={22} color="#000" />
             <Text style={styles.emailButtonText}>Continue with email</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           
           {/* Google Sign In Button */}
           <TouchableOpacity 

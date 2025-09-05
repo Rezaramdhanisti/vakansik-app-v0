@@ -97,8 +97,8 @@ android {
         applicationId "com.vakansik.capy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.1"
+        versionCode 9
+        versionName "0.0.1"
     }
     signingConfigs {
         debug {

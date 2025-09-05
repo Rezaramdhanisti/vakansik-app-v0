@@ -11,7 +11,8 @@ import {
   Image,
   Switch,
   ActivityIndicator,
-  Platform
+  Platform,
+  Alert
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 // Removed carousel imports as we're using a single image
@@ -283,12 +284,18 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       <View style={styles.propertyImageContainer}>
         {item.image_urls && item.image_urls.length > 0 ? (
           <Image 
-            source={{ uri: item.image_urls[0] }}
+            source={{ 
+              uri: item.image_urls[0]
+            }}
             style={styles.propertyImage}
             resizeMode="cover"
           />
         ) : (
-          <View style={styles.propertyImage} />
+          <Image 
+            source={require('../../../assets/images/lovina-3.jpg')}
+            style={styles.propertyImage}
+            resizeMode="cover"
+          />
         )}
         <TouchableOpacity 
           style={styles.favoriteButton}
@@ -624,7 +631,6 @@ const styles = StyleSheet.create({
   propertyImage: {
     width: width, // Full width
     height: '100%',
-    backgroundColor: '#E0E0E0',
     borderRadius: 12,
   },
   favoriteButton: {
