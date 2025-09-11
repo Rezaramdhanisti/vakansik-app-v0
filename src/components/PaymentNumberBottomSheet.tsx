@@ -73,8 +73,8 @@ const PaymentNumberBottomSheet = forwardRef<PaymentNumberBottomSheetRef, Payment
       return false;
     }
     
-    // For Shopee, ensure it's a valid phone number format
-    if (paymentMethod === 'Shopee' || paymentMethod === 'GoPay') {
+    // For Shopee and OVO, ensure it's a valid phone number format
+    if (paymentMethod === 'Shopee' || paymentMethod === 'OVO') {
       // Simple validation for Indonesian phone numbers
       const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
       if (!phoneRegex.test(number.replace(/\s/g, ''))) {
@@ -117,8 +117,8 @@ const PaymentNumberBottomSheet = forwardRef<PaymentNumberBottomSheetRef, Payment
     switch (paymentMethod) {
       case 'Shopee':
         return 'Nomor Shopee Pay';
-      case 'GoPay':
-        return 'Nomor GoPay';
+      case 'OVO':
+        return 'Nomor OVO';
       default:
         return 'Nomor Pembayaran';
     }

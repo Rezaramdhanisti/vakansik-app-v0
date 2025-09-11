@@ -44,7 +44,7 @@ interface Guest {
 }
 
 // Define payment method types
-type PaymentMethodType = 'card' | 'gopay' | 'shopee' | 'qris' | 'other';
+type PaymentMethodType = 'card' | 'ovo' | 'shopee' | 'qris' | 'other';
 
 interface PaymentMethod {
   id: string;
@@ -117,10 +117,10 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       isSelected: selectedPaymentMethod === 'qris-1'
     },
     {
-      id: 'gopay-1',
-      type: 'gopay',
-      title: 'Gopay',
-      isSelected: selectedPaymentMethod === 'gopay-1'
+      id: 'ovo-1',
+      type: 'ovo',
+      title: 'OVO',
+      isSelected: selectedPaymentMethod === 'ovo-1'
     }
   ], [selectedPaymentMethod]);
   
@@ -152,10 +152,10 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       return;
     }
     
-    // If Shopee or GoPay payment method is selected, show payment number input
-    if (selectedPaymentMethod === 'shopee-1' || selectedPaymentMethod === 'gopay-1') {
+    // If Shopee or OVO payment method is selected, show payment number input
+    if (selectedPaymentMethod === 'shopee-1' || selectedPaymentMethod === 'ovo-1') {
       // Show payment number bottom sheet
-      const paymentMethodName = selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'GoPay';
+      const paymentMethodName = selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'OVO';
       paymentNumberBottomSheetRef.current?.present();
       return;
     }
@@ -253,8 +253,8 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     let orderId: string = booking.id;
     
     try {
-      // If Shopee or GoPay payment method is selected, call the edge function
-      if (selectedPaymentMethod === 'shopee-1' || selectedPaymentMethod === 'gopay-1') {
+      // If Shopee or OVO payment method is selected, call the edge function
+      if (selectedPaymentMethod === 'shopee-1' || selectedPaymentMethod === 'ovo-1') {
         // Format guests data for the API call
         const joinedUsers = guests.map(guest => ({
           name: guest.name,
@@ -274,7 +274,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
             trip_id: route.params?.tripDetails?.tripId, // Using the real trip ID
             trip_date: tripDetails.date,
             payment_number: number, // Include the payment number
-            payment_method: selectedPaymentMethod === 'shopee-1' ? 'shopee' : 'gopay',
+            payment_method: selectedPaymentMethod === 'shopee-1' ? 'shopee' : 'ovo',
             joined_users: joinedUsers,
             user_id: userId // Include the user ID from context
           }
@@ -448,7 +448,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         onDismiss={() => {}}
         onSave={handlePaymentNumberSave}
         initialPaymentNumber={paymentNumber}
-        paymentMethod={selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'GoPay'}
+        paymentMethod={selectedPaymentMethod === 'shopee-1' ? 'Shopee' : 'OVO'}
       />
 
       {/* Payment Success Bottom Sheet */}
@@ -597,7 +597,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         {/* Payment Method */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Payment method</Text>
-          <View style={[styles.paymentMethodsContainer, { height: paymentMethods.length * 60 }]}>
+          <View style={styles.paymentMethodsContainer}>
             <FlashList
               data={paymentMethods}
               keyExtractor={(item) => item.id}
@@ -611,13 +611,15 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                     <View style={styles.paymentMethodContent}>
                       <View style={styles.paymentIconContainer}>
                         {item.type === 'qris' ? (
-                          <View style={styles.qrisIconContainer}>
-                            <Ionicons name="qr-code-outline" size={32} color="#000" />
-                          </View>
+                          <Image 
+                            source={require('../../../assets/images/qris-logo.webp')} 
+                            style={styles.paymentIcon} 
+                            resizeMode="contain"
+                          />
                         ) : (
                           <Image 
-                            source={item.type === 'gopay' 
-                              ? require('../../../assets/images/g-pay.webp')
+                            source={item.type === 'ovo' 
+                              ? require('../../../assets/images/ovo-logo.webp')
                               : require('../../../assets/images/s-pay.webp')} 
                             style={styles.paymentIcon} 
                             resizeMode="contain"
@@ -1246,14 +1248,6 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-  },
-  goPayLogoSmall: {
-    marginRight: 16,
-  },
-  goPayLogoText: {
-    fontSize: 14,
-    fontFamily: FONTS.SATOSHI_BOLD,
-    color: '#00AEEF',
   },
   // Coupon Section
   couponButton: {
