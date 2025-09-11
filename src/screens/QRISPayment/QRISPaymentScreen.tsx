@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Alert, Platform, PermissionsAndroid } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Alert, Platform, PermissionsAndroid, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
-import { AuthContext } from '../../navigation/AppNavigator';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import supabase from '../../services/supabaseClient';
@@ -53,23 +52,18 @@ interface QRISPaymentScreenProps {
 
 const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
   const navigation = useNavigation();
-  const { userId } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | 'failed' | 'expired'>('pending');
-  const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isQRReady, setIsQRReady] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState<'success' | 'error'>('success');
   const qrCodeRef = useRef<any>(null);
   const viewShotRef = useRef<ViewShot>(null);
   
   const { paymentData, tripDetails, orderId } = route.params;
   
-  // Debug logging
-  console.log('QRIS Payment Screen - Received data:', {
-    paymentData,
-    tripDetails,
-    orderId
-  });
   
   // Safety check for paymentData
   if (!paymentData) {
@@ -106,6 +100,18 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
     }, 1000);
     
     return () => clearTimeout(timer);
+  }, []);
+
+  // Handle Android back button
+  useEffect(() => {
+    const backAction = () => {
+      handleGoBack();
+      return true; // Prevent default behavior
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
   }, []);
   
   // Countdown timer
@@ -174,7 +180,15 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
   }, [orderId, paymentStatus]);
   
   const handleGoBack = () => {
-    navigation.goBack();
+    // Navigate to Bookings tab instead of going back
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          { name: 'Bookings' },
+        ],
+      })
+    );
   };
   
   const handlePaymentSuccess = () => {
@@ -234,9 +248,20 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
     return true;
   };
 
+  const showSnackbar = (message: string, type: 'success' | 'error') => {
+    setSnackbarMessage(message);
+    setSnackbarType(type);
+    setSnackbarVisible(true);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      setSnackbarVisible(false);
+    }, 3000);
+  };
+
   const handleSaveToGallery = async () => {
     if (!viewShotRef.current) {
-      Alert.alert('Error', 'QR code is still loading. Please wait a moment and try again.');
+      showSnackbar('QR code is still loading. Please wait a moment and try again.', 'error');
       return;
     }
 
@@ -246,7 +271,7 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
       // Request permission
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
-        Alert.alert('Permission Denied', 'Storage permission is required to save the QR code');
+        showSnackbar('Storage permission is required to save the QR code', 'error');
         return;
       }
       
@@ -255,24 +280,24 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
       
       // Capture the QR code view as an image
       if (!viewShotRef.current) {
-        Alert.alert('Error', 'ViewShot ref is not available');
+        showSnackbar('ViewShot ref is not available', 'error');
         return;
       }
       const uri = await (viewShotRef.current as any).capture();
       
       if (!uri) {
-        Alert.alert('Error', 'Failed to capture QR code image. Please try again.');
+        showSnackbar('Failed to capture QR code image. Please try again.', 'error');
         return;
       }
       
       // Save directly to gallery
       await CameraRoll.save(uri, { type: 'photo' });
       
-      Alert.alert('Success', 'QR code saved to gallery successfully!');
+      showSnackbar('QR code saved to gallery successfully!', 'success');
       
     } catch (error) {
       console.error('Error saving QR code:', error);
-      Alert.alert('Error', 'Failed to save QR code to gallery');
+      showSnackbar('Failed to save QR code to gallery', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -449,6 +474,23 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#FF6F00" />
           <Text style={styles.loadingText}>Processing...</Text>
+        </View>
+      )}
+      
+      {/* Snackbar */}
+      {snackbarVisible && (
+        <View style={[
+          styles.snackbar,
+          snackbarType === 'success' ? styles.snackbarSuccess : styles.snackbarError
+        ]}>
+          <View style={styles.snackbarContent}>
+            <Ionicons 
+              name={snackbarType === 'success' ? 'checkmark-circle' : 'alert-circle'} 
+              size={20} 
+              color="#FFFFFF" 
+            />
+            <Text style={styles.snackbarText}>{snackbarMessage}</Text>
+          </View>
         </View>
       )}
     </SafeAreaView>
@@ -712,6 +754,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#000',
+  },
+  // Snackbar styles
+  snackbar: {
+    position: 'absolute',
+    bottom: 50,
+    left: 20,
+    right: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  snackbarSuccess: {
+    backgroundColor: '#4CAF50',
+  },
+  snackbarError: {
+    backgroundColor: '#F44336',
+  },
+  snackbarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  snackbarText: {
+    fontSize: 14,
+    fontFamily: FONTS.SATOSHI_MEDIUM,
+    color: '#FFFFFF',
+    marginLeft: 8,
+    flex: 1,
   },
 });
 
