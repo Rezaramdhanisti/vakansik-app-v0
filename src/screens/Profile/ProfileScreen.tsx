@@ -39,7 +39,7 @@ function ProfileScreen(): React.JSX.Element {
     // Show bottom sheet for logout confirmation
     logoutBottomSheetRef.current?.present();
   };
-  
+
   const handleGetHelp = async () => {
     const phoneNumber = '081380550020';
     const text = 'Hello, I need help with Vakansik app.';
@@ -138,7 +138,7 @@ function ProfileScreen(): React.JSX.Element {
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
-          
+        
           {/* <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="person-outline" size={24} color="#333" />

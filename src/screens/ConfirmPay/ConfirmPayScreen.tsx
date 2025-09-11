@@ -44,7 +44,7 @@ interface Guest {
 }
 
 // Define payment method types
-type PaymentMethodType = 'card' | 'gopay' | 'shopee' | 'other';
+type PaymentMethodType = 'card' | 'gopay' | 'shopee' | 'qris' | 'other';
 
 interface PaymentMethod {
   id: string;
@@ -110,12 +110,18 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       title: 'Shopee Pay',
       isSelected: selectedPaymentMethod === 'shopee-1'
     },
-    // {
-    //   id: 'gopay-1',
-    //   type: 'gopay',
-    //   title: 'Gopay',
-    //   isSelected: selectedPaymentMethod === 'gopay-1'
-    // }
+    {
+      id: 'qris-1',
+      type: 'qris',
+      title: 'QRIS',
+      isSelected: selectedPaymentMethod === 'qris-1'
+    },
+    {
+      id: 'gopay-1',
+      type: 'gopay',
+      title: 'Gopay',
+      isSelected: selectedPaymentMethod === 'gopay-1'
+    }
   ], [selectedPaymentMethod]);
   
   // Handle payment method selection
@@ -154,6 +160,12 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       return;
     }
     
+    // If QRIS payment method is selected, navigate to QRIS payment screen
+    if (selectedPaymentMethod === 'qris-1') {
+      proceedWithQRISPayment();
+      return;
+    }
+    
     // For other payment methods, proceed directly
     // proceedWithPayment();
   };
@@ -163,6 +175,59 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     setPaymentNumber(number);
     // Proceed with payment after getting the number
     proceedWithPayment(number);
+  };
+  
+  // Handle QRIS payment
+  const proceedWithQRISPayment = async () => {
+    // Set loading state to true
+    setIsLoading(true);
+    
+    try {
+      // Format guests data for the API call
+      const joinedUsers = guests.map(guest => ({
+        name: guest.name,
+        phone_number: guest.phoneNumber,
+        id_card_number: guest.idCardNumber || ''
+      }));
+      
+      // Check if we have the current user ID
+      if (!userId) {
+        throw new Error('User ID not available. Please log in again.');
+      }
+      
+      // Call the edge function for QRIS payment
+      console.log('Calling Supabase edge function for QRIS payment with user ID:', userId);
+      const { data, error } = await supabase.functions.invoke('create_payment_request', {
+        body: {
+          trip_id: route.params?.tripDetails?.tripId,
+          trip_date: tripDetails.date,
+          payment_method: 'qris',
+          joined_users: joinedUsers,
+          user_id: userId
+        }
+      });
+      
+      if (error) {
+        throw new Error(`Payment request failed: ${error.message}`);
+      }
+      
+      console.log('QRIS Payment request successful:', data);
+      
+      // Reset loading state
+      setIsLoading(false);
+      
+      // Navigate to QRIS payment screen with the payment data
+      (navigation as any).navigate('QRISPayment', {
+        paymentData: data,
+        tripDetails: tripDetails,
+        orderId: data.order_id
+      });
+      
+    } catch (error: any) {
+      console.error('Error processing QRIS payment:', error);
+      setIsLoading(false);
+      Alert.alert('Payment Error', `An error occurred while processing your payment: ${error.message || 'Unknown error'}`);
+    }
   };
  
   // Proceed with payment after validation
@@ -545,13 +610,19 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                   >
                     <View style={styles.paymentMethodContent}>
                       <View style={styles.paymentIconContainer}>
-                        <Image 
-                          source={item.type === 'gopay' 
-                            ? require('../../../assets/images/g-pay.webp')
-                            : require('../../../assets/images/s-pay.webp')} 
-                          style={styles.paymentIcon} 
-                          resizeMode="contain"
-                        />
+                        {item.type === 'qris' ? (
+                          <View style={styles.qrisIconContainer}>
+                            <Ionicons name="qr-code-outline" size={32} color="#000" />
+                          </View>
+                        ) : (
+                          <Image 
+                            source={item.type === 'gopay' 
+                              ? require('../../../assets/images/g-pay.webp')
+                              : require('../../../assets/images/s-pay.webp')} 
+                            style={styles.paymentIcon} 
+                            resizeMode="contain"
+                          />
+                        )}
                         <Text style={styles.paymentMethodText}>{item.title}</Text>
                       </View>
                     </View>
@@ -1133,6 +1204,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     marginRight: 12,
+  },
+  qrisIconContainer: {
+    width: 32,
+    height: 32,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   paymentMethodText: {
     fontSize: 16,
