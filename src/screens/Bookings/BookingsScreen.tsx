@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, StyleSheet, SafeAreaView, Image, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -40,10 +41,12 @@ function BookingsScreen({ navigation }: BookingsScreenProps): React.JSX.Element 
     }
   };
   
-  // Initial fetch on component mount
-  useEffect(() => {
-    fetchUserOrders();
-  }, [userId]);
+  // Refresh data every time screen comes into focus (including initial mount)
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserOrders();
+    }, [userId])
+  );
   
   // Handle pull-to-refresh
   const onRefresh = () => {
