@@ -75,12 +75,24 @@ const PaymentNumberBottomSheet = forwardRef<PaymentNumberBottomSheetRef, Payment
     
     // For Shopee and OVO, ensure it's a valid phone number format
     if (paymentMethod === 'Shopee' || paymentMethod === 'OVO') {
-      // Simple validation for Indonesian phone numbers
-      const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
-      if (!phoneRegex.test(number.replace(/\s/g, ''))) {
-        setIsValid(false);
-        setErrorMessage('Masukkan nomor telepon yang valid');
-        return false;
+      // For OVO, validate Indonesian phone number format (will be auto-formatted later)
+      if (paymentMethod === 'OVO') {
+        const cleanNumber = number.replace(/\s/g, '');
+        // Accept formats: +62, 62, 0, or just the number
+        const ovoRegex = /^(\+62|62|0)?8[1-9][0-9]{6,10}$/;
+        if (!ovoRegex.test(cleanNumber)) {
+          setIsValid(false);
+          setErrorMessage('Masukkan nomor telepon Indonesia yang valid (contoh: 081234567890)');
+          return false;
+        }
+      } else {
+        // For Shopee, use the original validation
+        const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
+        if (!phoneRegex.test(number.replace(/\s/g, ''))) {
+          setIsValid(false);
+          setErrorMessage('Masukkan nomor telepon yang valid');
+          return false;
+        }
       }
     }
     
@@ -157,7 +169,7 @@ const PaymentNumberBottomSheet = forwardRef<PaymentNumberBottomSheetRef, Payment
                 setPaymentNumber(text);
                 if (!isValid) validatePaymentNumber(text);
               }}
-              placeholder={`Masukkan nomor ${paymentMethod} Anda`}
+              placeholder={paymentMethod === 'OVO' ? 'Masukkan nomor OVO Anda (contoh: 081234567890)' : `Masukkan nomor ${paymentMethod} Anda`}
               keyboardType="phone-pad"
               autoFocus
             />

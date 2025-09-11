@@ -64,8 +64,32 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
   
   const { paymentData, tripDetails, orderId } = route.params;
   
+  // Debug logging
+  console.log('QRIS Payment Screen - Received data:', {
+    paymentData,
+    tripDetails,
+    orderId
+  });
+  
+  // Safety check for paymentData
+  if (!paymentData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Payment Data Not Found</Text>
+          <Text style={styles.errorMessage}>
+            Unable to load payment information. Please try again.
+          </Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.retryButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
   // Get QR string from actions
-  const qrAction = paymentData.actions.find(action => 
+  const qrAction = paymentData?.actions?.find(action => 
     action.type === 'PRESENT_TO_CUSTOMER' && action.descriptor === 'QR_STRING'
   );
   const qrString = qrAction?.value || '';
@@ -353,7 +377,7 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
             <View style={styles.amountContainer}>
               <Text style={styles.amountLabel}>Amount to Pay</Text>
               <Text style={styles.amountValue}>
-                Rp{paymentData.request_amount.toLocaleString('id-ID')}
+                Rp{paymentData.request_amount ? paymentData.request_amount.toLocaleString('id-ID') : '0'}
               </Text>
             </View>
             
@@ -368,7 +392,7 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
               <Text style={styles.paymentInfoTitle}>Payment Information</Text>
               <View style={styles.paymentInfoRow}>
                 <Text style={styles.paymentInfoLabel}>Order ID:</Text>
-                <Text style={styles.paymentInfoValue}>{paymentData.reference_id}</Text>
+                <Text style={styles.paymentInfoValue}>{paymentData?.reference_id || 'N/A'}</Text>
               </View>
               <View style={styles.paymentInfoRow}>
                 <Text style={styles.paymentInfoLabel}>Payment Method:</Text>
@@ -387,9 +411,9 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>QRIS Payment</Text>
-        <TouchableOpacity onPress={handleCancelPayment} style={styles.cancelButton}>
+        {/* <TouchableOpacity onPress={handleCancelPayment} style={styles.cancelButton}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       
       <ScrollView
@@ -603,6 +627,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#000',
+    maxWidth: '70%',
+    textAlign: 'right',
   },
   successContainer: {
     alignItems: 'center',

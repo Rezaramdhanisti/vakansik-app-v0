@@ -59,17 +59,10 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const navigation = useNavigation();
   const { userId } = useContext(AuthContext);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('shopee-1');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('qris-1');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentNumber, setPaymentNumber] = useState('');
   
-  // Log user ID when component mounts
-  useEffect(() => {
-    if (userId) {
-      console.log('Current user ID from context:', userId);
-    }
-  }, [userId]);
-
   // Default trip details if not provided through route params
   const tripDetails = route.params?.tripDetails || {
     tripId: `trip-${Date.now()}`, // Default trip ID using timestamp
@@ -83,6 +76,36 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     guestCount: 2,
     requiredIdCard: true
   };
+  
+  // Utility function to parse price string and calculate per-person price
+  const parsePrice = (priceString: string): number => {
+    // Remove 'Rp' prefix and commas, then convert to number
+    const cleanPrice = priceString.replace(/[Rp,]/g, '');
+    return parseInt(cleanPrice, 10);
+  };
+  
+  // Utility function to format price back to string
+  const formatPrice = (price: number): string => {
+    return `Rp${price.toLocaleString('id-ID')}`;
+  };
+  
+  // Calculate price per person
+  const pricePerPerson = useMemo(() => {
+    const totalPrice = parsePrice(tripDetails.price);
+    return Math.floor(totalPrice / tripDetails.guestCount);
+  }, [tripDetails.price, tripDetails.guestCount]);
+  
+  // Calculate total price
+  const totalPrice = useMemo(() => {
+    return parsePrice(tripDetails.price);
+  }, [tripDetails.price]);
+  
+  // Log user ID when component mounts
+  useEffect(() => {
+    if (userId) {
+      console.log('Current user ID from context:', userId);
+    }
+  }, [userId]);
   
   // Guest state management - initialize based on guestCount from route params
   const [guests, setGuests] = useState<Guest[]>(() => {
@@ -104,12 +127,12 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   
   // Payment methods data
   const paymentMethods = useMemo<PaymentMethod[]>(() => [
-    {
-      id: 'shopee-1',
-      type: 'shopee',
-      title: 'Shopee Pay',
-      isSelected: selectedPaymentMethod === 'shopee-1'
-    },
+    // {
+    //   id: 'shopee-1',
+    //   type: 'shopee',
+    //   title: 'Shopee Pay',
+    //   isSelected: selectedPaymentMethod === 'shopee-1'
+    // },
     {
       id: 'qris-1',
       type: 'qris',
@@ -267,13 +290,34 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           throw new Error('User ID not available. Please log in again.');
         }
         
+        // Normalize phone number for OVO (ensure it starts with +)
+        let normalizedPaymentNumber = number;
+        if (selectedPaymentMethod === 'ovo-1') {
+          // Remove any spaces and ensure it starts with +
+          normalizedPaymentNumber = number.replace(/\s/g, '');
+          if (!normalizedPaymentNumber.startsWith('+')) {
+            // If it starts with 62, replace with +62
+            if (normalizedPaymentNumber.startsWith('62')) {
+              normalizedPaymentNumber = '+' + normalizedPaymentNumber;
+            }
+            // If it starts with 0, replace with +62
+            else if (normalizedPaymentNumber.startsWith('0')) {
+              normalizedPaymentNumber = '+62' + normalizedPaymentNumber.substring(1);
+            }
+            // If it doesn't start with +, add +62
+            else if (!normalizedPaymentNumber.startsWith('+')) {
+              normalizedPaymentNumber = '+62' + normalizedPaymentNumber;
+            }
+          }
+        }
+        
         // Call the edge function
         console.log('Calling Supabase edge function for payment with user ID:', userId);
         const { data, error } = await supabase.functions.invoke('create_payment_request', {
           body: {
             trip_id: route.params?.tripDetails?.tripId, // Using the real trip ID
             trip_date: tripDetails.date,
-            payment_number: number, // Include the payment number
+            payment_number: normalizedPaymentNumber, // Use normalized payment number
             payment_method: selectedPaymentMethod === 'shopee-1' ? 'shopee' : 'ovo',
             joined_users: joinedUsers,
             user_id: userId // Include the user ID from context
@@ -555,7 +599,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>Total price</Text>
           </View>
-          <Text style={styles.priceText}>{tripDetails.price} IDR</Text>
+          <Text style={styles.priceText}>{formatPrice(totalPrice)} IDR</Text>
         </View>
         
         <View style={styles.divider} />
@@ -662,13 +706,13 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         <View style={[styles.sectionContainer, { marginTop: 24 }]}>
           <Text style={styles.sectionTitle}>Price details</Text>
           <View style={styles.priceDetailsRow}>
-            <Text style={styles.priceDetailsText}>Rp390,000.00 x 2 adults</Text>
-            <Text style={styles.priceDetailsValue}>Rp780,000.00</Text>
+            <Text style={styles.priceDetailsText}>{formatPrice(pricePerPerson)} x {tripDetails.guestCount} adults</Text>
+            <Text style={styles.priceDetailsValue}>{formatPrice(totalPrice)}</Text>
           </View>
           <View style={styles.priceDivider} />
           <View style={styles.priceDetailsRow}>
             <Text style={styles.totalText}>Total <Text style={styles.totalCurrency}>IDR</Text></Text>
-            <Text style={styles.totalValue}>Rp780,000.00</Text>
+            <Text style={styles.totalValue}>{formatPrice(totalPrice)}</Text>
           </View>
         </View>
         

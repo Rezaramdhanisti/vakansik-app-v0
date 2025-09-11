@@ -59,10 +59,12 @@ Deno.serve(async (req) => {
 
     // Determine channel code based on payment method
     let channel_code = "SHOPEEPAY"; // Default
-    if (payment_method === 'gopay') {
-      channel_code = "GOPAY";
+    if (payment_method === 'ovo') {
+      channel_code = "OVO";
     } else if (payment_method === 'shopee') {
       channel_code = "SHOPEEPAY";
+    } else if (payment_method === 'qris') {
+      channel_code = "QRIS";
     }
     
     console.log('Using channel code:', channel_code);
@@ -102,7 +104,11 @@ Deno.serve(async (req) => {
       currency: "IDR",
       request_amount: trip.price,
       channel_code,
-      channel_properties: {
+      channel_properties: channel_code === "QRIS" ? {
+        display_name: "Vakansik"
+      } : channel_code === "OVO" ? {
+        account_mobile_number: payment_number
+      } : {
         display_name: "Vakansik", // Change to your brand
         account_mobile_number: payment_number,
         success_return_url: "vakansik://payment-success",
@@ -174,7 +180,7 @@ Deno.serve(async (req) => {
     console.log('Returning success response');
     return Response.json({
       order_id,
-      actions: xenditRes.actions || [],
+      ...xenditRes, // Include the full Xendit response
     });
   } catch (error) {
     console.error('Unhandled error in payment request function:', error);

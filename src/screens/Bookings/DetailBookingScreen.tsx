@@ -139,7 +139,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             <View style={styles.attentionBannerContent}>
               <Ionicons name="information-circle" size={24} color="#856404" style={styles.attentionIcon} />
               <Text style={styles.attentionText}>
-              Sebentar lagi kamu diundang ke grup WA Open Trip ini. Tunggu sebentar ya!
+              Setelah pembayaranmu sudah selesai, kamu akan diundang ke grup WA Open Trip ini. Tunggu sebentar ya!
               </Text>
             </View>
           </View>

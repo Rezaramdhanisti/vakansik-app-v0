@@ -2,7 +2,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 // Xendit webhook callback token for authentication
-const XENDIT_CALLBACK_TOKEN = "12DktP1a4WzZjdRDH2874Lns3A8lXE1NiVP3G4xEVAoM6Bx6";
+const XENDIT_CALLBACK_TOKEN = Deno.env.get("XENDIT_CALLBACK_TOKEN_V2");
 
 // Define webhook event types
 type XenditWebhookEvent = 
