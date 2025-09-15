@@ -115,6 +115,17 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   useEffect(() => {
     let filtered = [...destinations];
     
+    // Filter by search text
+    if (searchText.trim()) {
+      const searchTerm = searchText.toLowerCase().trim();
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm) ||
+        (item.location && item.location.toLowerCase().includes(searchTerm)) ||
+        (item.category && item.category.toLowerCase().includes(searchTerm))
+      );
+    }
+    
     // Filter by active category
     if (activeCategory === 'Budget') {
       filtered = filtered.filter(item => item.budget_band === 'budget');
@@ -145,7 +156,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     }
     
     setFilteredListings(filtered);
-  }, [sortByHighestPrice, sortByLowestPrice, destinations, activeCategory]);
+  }, [sortByHighestPrice, sortByLowestPrice, destinations, activeCategory, searchText]);
   
   // Setup double back press to exit for Android - only when this screen is focused
   const [isFocused, setIsFocused] = useState(true);
