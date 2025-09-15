@@ -41,7 +41,7 @@ function ProfileScreen(): React.JSX.Element {
   };
 
   const handleGetHelp = async () => {
-    const phoneNumber = '081380550020';
+    const phoneNumber = '087811047085';
     const text = 'Hello, I need help with Vakansik app.';
     
     // Create WhatsApp URL
