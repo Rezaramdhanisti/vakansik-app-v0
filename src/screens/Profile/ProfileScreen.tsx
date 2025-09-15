@@ -19,7 +19,7 @@ function ProfileScreen(): React.JSX.Element {
   // Function to extract and format name from email
   const getUserDisplayName = (): string => {
     const email = userService.getUserEmail();
-    if (!email) return 'Guest';
+    if (!email) return 'Tamu';
     
     // Extract the part before @ symbol
     const username = email.split('@')[0];
@@ -134,7 +134,7 @@ function ProfileScreen(): React.JSX.Element {
           <TouchableOpacity style={styles.menuItem} onPress={handleGetHelp}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="help-circle-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Get help</Text>
+              <Text style={styles.menuItemText}>Kontak bantuan</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>

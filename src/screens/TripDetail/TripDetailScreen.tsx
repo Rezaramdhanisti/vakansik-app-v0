@@ -304,14 +304,14 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           
           {/* Things to know section */}
           <View>
-            <Text style={styles.sectionTitle}>Things to know</Text>
+            <Text style={styles.sectionTitle}>Hal yang perlu diketahui</Text>
              {/* Price includes/excludes */}
             <View style={styles.infoItem}>
               <View style={styles.infoIconContainer}>
                 <Ionicons name="cash-outline" size={24} color="#333" />
               </View>
               <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Price details</Text>
+                <Text style={styles.infoTitle}>Detail harga</Text>
                 <Text style={styles.infoText}>{property.price_information}</Text>
               </View>
             </View>
@@ -323,8 +323,8 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
                 <Ionicons name="close-circle-outline" size={24} color="#333" />
               </View>
               <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Cancellation policy</Text>
-                <Text style={styles.infoText}>Cancel at least 7 day before the start time for a full refund.</Text>
+                <Text style={styles.infoTitle}>Kebijakan pembatalan</Text>
+                <Text style={styles.infoText}>Pembatalan minimal 7 hari sebelum waktu mulai untuk pengembalian dana penuh.</Text>
               </View>
             </View>
             
@@ -338,11 +338,11 @@ function TripDetailScreen({ navigation, route }: TripDetailScreenProps): React.J
           <View style={styles.floatingBookingBar}>
             <View style={styles.priceContainer}>
               <Text style={styles.priceText}>{property.price}</Text>
-              <Text style={styles.priceSubtext}>/ guest</Text>
+              <Text style={styles.priceSubtext}>/ orang</Text>
             </View>
             
             <TouchableOpacity style={styles.bookButton} onPress={handleShowDates}>
-              <Text style={styles.bookButtonText}>Show dates</Text>
+              <Text style={styles.bookButtonText}>Lihat tanggal</Text>
             </TouchableOpacity>
           </View>
         </View>

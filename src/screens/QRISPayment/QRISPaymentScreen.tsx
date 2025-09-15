@@ -64,18 +64,56 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
   
   const { paymentData, tripDetails, orderId } = route.params;
   
+  // Utility function to format trip date for display
+  const formatTripDateForDisplay = (tripDateString: string): string => {
+    try {
+      // Parse the trip date string (e.g., "Saturday, Jun 28, 2025")
+      const tripDate = new Date(tripDateString);
+      
+      // Check if the date is valid
+      if (isNaN(tripDate.getTime())) {
+        // If parsing fails, try alternative parsing methods
+        const parts = tripDateString.split(', ');
+        if (parts.length >= 2) {
+          const datePart = parts[1]; // "Jun 28, 2025"
+          const parsedDate = new Date(datePart);
+          if (!isNaN(parsedDate.getTime())) {
+            tripDate.setTime(parsedDate.getTime());
+          }
+        }
+      }
+      
+      // If still invalid, return the original string
+      if (isNaN(tripDate.getTime())) {
+        return tripDateString;
+      }
+      
+      // Format the date as "day, date, Month name and year" (e.g., "Saturday, 28, June 2025")
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      };
+      
+      return tripDate.toLocaleDateString('en-US', options);
+    } catch (error) {
+      console.error('Error formatting trip date:', error);
+      return tripDateString;
+    }
+  };
   
   // Safety check for paymentData
   if (!paymentData) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorTitle}>Payment Data Not Found</Text>
+          <Text style={styles.errorTitle}>Data Pembayaran Tidak Ditemukan</Text>
           <Text style={styles.errorMessage}>
-            Unable to load payment information. Please try again.
+            Tidak dapat memuat informasi pembayaran. Silakan coba lagi.
           </Text>
           <TouchableOpacity style={styles.retryButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.retryButtonText}>Go Back</Text>
+            <Text style={styles.retryButtonText}>Kembali</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -311,12 +349,12 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
             <View style={styles.successIconContainer}>
               <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
             </View>
-            <Text style={styles.successTitle}>Payment Successful!</Text>
+            <Text style={styles.successTitle}>Pembayaran Berhasil!</Text>
             <Text style={styles.successMessage}>
-              Your payment has been processed successfully. You will receive a confirmation email shortly.
+              Pembayaran Anda telah berhasil diproses. Anda akan menerima email konfirmasi dalam waktu singkat.
             </Text>
             <TouchableOpacity style={styles.continueButton} onPress={handlePaymentSuccess}>
-              <Text style={styles.continueButtonText}>Continue to Bookings</Text>
+              <Text style={styles.continueButtonText}>Lanjut ke Pemesanan</Text>
             </TouchableOpacity>
           </View>
         );
@@ -327,12 +365,12 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
             <View style={styles.errorIconContainer}>
               <Ionicons name="close-circle" size={80} color="#F44336" />
             </View>
-            <Text style={styles.errorTitle}>Payment Failed</Text>
+            <Text style={styles.errorTitle}>Pembayaran Gagal</Text>
             <Text style={styles.errorMessage}>
-              Your payment could not be processed. Please try again or use a different payment method.
+              Pembayaran Anda tidak dapat diproses. Silakan coba lagi atau gunakan metode pembayaran lain.
             </Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRetryPayment}>
-              <Text style={styles.retryButtonText}>Try Again</Text>
+              <Text style={styles.retryButtonText}>Coba Lagi</Text>
             </TouchableOpacity>
           </View>
         );
@@ -343,12 +381,12 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
             <View style={styles.errorIconContainer}>
               <Ionicons name="time-outline" size={80} color="#FF9800" />
             </View>
-            <Text style={styles.errorTitle}>Payment Expired</Text>
+            <Text style={styles.errorTitle}>Pembayaran Kedaluwarsa</Text>
             <Text style={styles.errorMessage}>
-              This payment request has expired. Please create a new payment request.
+              Permintaan pembayaran ini telah kedaluwarsa. Silakan buat permintaan pembayaran baru.
             </Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRetryPayment}>
-              <Text style={styles.retryButtonText}>Create New Payment</Text>
+              <Text style={styles.retryButtonText}>Buat Pembayaran Baru</Text>
             </TouchableOpacity>
           </View>
         );
@@ -356,9 +394,9 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
       default:
         return (
           <View style={styles.qrContainer}>
-            <Text style={styles.instructionTitle}>Scan QR Code to Pay</Text>
+            <Text style={styles.instructionTitle}>Pindai Kode QR untuk Membayar</Text>
             <Text style={styles.instructionText}>
-              Open your mobile banking app or e-wallet and scan the QR code below to complete your payment.
+              Buka aplikasi mobile banking atau e-wallet Anda dan pindai kode QR di bawah untuk menyelesaikan pembayaran.
             </Text>
             
             <ViewShot
@@ -389,18 +427,18 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
               ) : !isQRReady ? (
                 <>
                   <Ionicons name="hourglass-outline" size={20} color="#FFFFFF" />
-                  <Text style={styles.saveButtonText}>Loading QR...</Text>
+                  <Text style={styles.saveButtonText}>Memuat QR...</Text>
                 </>
               ) : (
                 <>
                   <Ionicons name="download-outline" size={20} color="#FFFFFF" />
-                  <Text style={styles.saveButtonText}>Save to Gallery</Text>
+                  <Text style={styles.saveButtonText}>Simpan ke Galeri</Text>
                 </>
               )}
             </TouchableOpacity>
             
             <View style={styles.amountContainer}>
-              <Text style={styles.amountLabel}>Amount to Pay</Text>
+              <Text style={styles.amountLabel}>Jumlah yang Harus Dibayar</Text>
               <Text style={styles.amountValue}>
                 Rp{paymentData.request_amount ? paymentData.request_amount.toLocaleString('id-ID') : '0'}
               </Text>
@@ -414,13 +452,13 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
             </View>
             
             <View style={styles.paymentInfoContainer}>
-              <Text style={styles.paymentInfoTitle}>Payment Information</Text>
+              <Text style={styles.paymentInfoTitle}>Informasi Pembayaran</Text>
               <View style={styles.paymentInfoRow}>
-                <Text style={styles.paymentInfoLabel}>Order ID:</Text>
+                <Text style={styles.paymentInfoLabel}>ID Pesanan:</Text>
                 <Text style={styles.paymentInfoValue}>{paymentData?.reference_id || 'N/A'}</Text>
               </View>
               <View style={styles.paymentInfoRow}>
-                <Text style={styles.paymentInfoLabel}>Payment Method:</Text>
+                <Text style={styles.paymentInfoLabel}>Metode Pembayaran:</Text>
                 <Text style={styles.paymentInfoValue}>QRIS</Text>
               </View>
             </View>
@@ -435,9 +473,9 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>QRIS Payment</Text>
+        <Text style={styles.headerTitle}>Pembayaran QRIS</Text>
         {/* <TouchableOpacity onPress={handleCancelPayment} style={styles.cancelButton}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
+          <Text style={styles.cancelButtonText}>Batal</Text>
         </TouchableOpacity> */}
       </View>
       
@@ -450,16 +488,16 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
         <View style={styles.tripDetailsContainer}>
           <Text style={styles.tripTitle}>{tripDetails.title}</Text>
           <View style={styles.tripInfoRow}>
-            <Text style={styles.tripInfoLabel}>Date:</Text>
-            <Text style={styles.tripInfoValue}>{tripDetails.date}</Text>
+            <Text style={styles.tripInfoLabel}>Tanggal:</Text>
+            <Text style={styles.tripInfoValue}>{formatTripDateForDisplay(tripDetails.date)}</Text>
           </View>
           <View style={styles.tripInfoRow}>
-            <Text style={styles.tripInfoLabel}>Time:</Text>
+            <Text style={styles.tripInfoLabel}>Waktu:</Text>
             <Text style={styles.tripInfoValue}>{tripDetails.timeSlot}</Text>
           </View>
           <View style={styles.tripInfoRow}>
-            <Text style={styles.tripInfoLabel}>Guests:</Text>
-            <Text style={styles.tripInfoValue}>{tripDetails.guestCount} adults</Text>
+            <Text style={styles.tripInfoLabel}>Tamu:</Text>
+            <Text style={styles.tripInfoValue}>{tripDetails.guestCount} dewasa</Text>
           </View>
         </View>
         
@@ -473,7 +511,7 @@ const QRISPaymentScreen: React.FC<QRISPaymentScreenProps> = ({ route }) => {
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#FF6F00" />
-          <Text style={styles.loadingText}>Processing...</Text>
+          <Text style={styles.loadingText}>Memproses...</Text>
         </View>
       )}
       

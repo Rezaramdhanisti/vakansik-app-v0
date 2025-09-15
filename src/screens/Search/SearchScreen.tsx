@@ -421,7 +421,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       >
         <BottomSheetView style={styles.bottomSheetContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Filters</Text>
+            <Text style={styles.modalTitle}>Filter</Text>
             <TouchableOpacity onPress={() => bottomSheetRef.current?.close()}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
@@ -430,7 +430,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
           <View style={styles.filterSection}>
             <View style={styles.filterOption}>
               <View style={styles.filterOptionTextContainer}>
-                <Text style={styles.filterOptionText}>Highest price first</Text>
+                <Text style={styles.filterOptionText}>Harga tertinggi</Text>
               </View>
               <Switch
                 value={sortByHighestPrice}
@@ -445,7 +445,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
             
             <View style={styles.filterOption}>
               <View style={styles.filterOptionTextContainer}>
-                <Text style={styles.filterOptionText}>Lowest price first</Text>
+                <Text style={styles.filterOptionText}>Harga terendah</Text>
               </View>
               <Switch
                 value={sortByLowestPrice}
@@ -467,14 +467,14 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
                 setSortByLowestPrice(false);
               }}
             >
-              <Text style={styles.clearButtonText}>Clear all</Text>
+              <Text style={styles.clearButtonText}>Hapus semua</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
               style={styles.applyButton}
               onPress={() => bottomSheetRef.current?.close()}
             >
-              <Text style={styles.applyButtonText}>Show results</Text>
+              <Text style={styles.applyButtonText}>Tampilkan</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

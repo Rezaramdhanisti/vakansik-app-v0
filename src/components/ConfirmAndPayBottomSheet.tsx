@@ -41,6 +41,92 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
     price: 'Rp780,000',
     guestCount: 2
   } }, ref) => {
+    // Utility function to format trip date for display
+    const formatTripDateForDisplay = (tripDateString: string): string => {
+      try {
+        // Parse the trip date string (e.g., "Saturday, Jun 28, 2025")
+        const tripDate = new Date(tripDateString);
+        
+        // Check if the date is valid
+        if (isNaN(tripDate.getTime())) {
+          // If parsing fails, try alternative parsing methods
+          const parts = tripDateString.split(', ');
+          if (parts.length >= 2) {
+            const datePart = parts[1]; // "Jun 28, 2025"
+            const parsedDate = new Date(datePart);
+            if (!isNaN(parsedDate.getTime())) {
+              tripDate.setTime(parsedDate.getTime());
+            }
+          }
+        }
+        
+        // If still invalid, return the original string
+        if (isNaN(tripDate.getTime())) {
+          return tripDateString;
+        }
+        
+        // Format the date as "day, date, Month name and year" (e.g., "Saturday, 28, June 2025")
+        const options: Intl.DateTimeFormatOptions = {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        };
+        
+        return tripDate.toLocaleDateString('en-US', options);
+      } catch (error) {
+        console.error('Error formatting trip date:', error);
+        return tripDateString;
+      }
+    };
+
+    // Utility function to calculate cancellation deadline (7 days before trip date)
+    const calculateCancellationDeadline = (tripDateString: string): string => {
+      try {
+        // Parse the trip date string (e.g., "Saturday, Jun 28, 2025")
+        const tripDate = new Date(tripDateString);
+        
+        // Check if the date is valid
+        if (isNaN(tripDate.getTime())) {
+          // If parsing fails, try alternative parsing methods
+          const parts = tripDateString.split(', ');
+          if (parts.length >= 2) {
+            const datePart = parts[1]; // "Jun 28, 2025"
+            const parsedDate = new Date(datePart);
+            if (!isNaN(parsedDate.getTime())) {
+              tripDate.setTime(parsedDate.getTime());
+            }
+          }
+        }
+        
+        // If still invalid, return a fallback
+        if (isNaN(tripDate.getTime())) {
+          return "Batalkan sebelum tanggal perjalanan untuk pengembalian penuh.";
+        }
+        
+        // Subtract 7 days
+        const cancellationDate = new Date(tripDate);
+        cancellationDate.setDate(cancellationDate.getDate() - 7);
+        
+        // Format the date in the same style as the original
+        const options: Intl.DateTimeFormatOptions = {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'Asia/Jakarta' // WIB timezone
+        };
+        
+        const formattedDate = cancellationDate.toLocaleDateString('en-US', options);
+        const timeZone = 'WIB';
+        
+        return `Batalkan sebelum ${formattedDate} (${timeZone}) untuk pengembalian penuh.`;
+      } catch (error) {
+        console.error('Error calculating cancellation deadline:', error);
+        return "Batalkan sebelum tanggal perjalanan untuk pengembalian penuh.";
+      }
+    };
     // ref for bottom sheet modal
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     
@@ -107,7 +193,7 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
       >
         <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
           <View style={styles.modalHeader}>
-            <Text style={styles.bottomSheetTitle}>Confirm and pay</Text>
+            <Text style={styles.bottomSheetTitle}>Konfirmasi dan bayar</Text>
             <TouchableOpacity onPress={handleCloseModal}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
@@ -136,8 +222,8 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
             
             {/* Date and Time */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Date</Text>
-              <Text style={styles.sectionContent}>{tripDetails.date}</Text>
+              <Text style={styles.sectionTitle}>Tanggal</Text>
+              <Text style={styles.sectionContent}>{formatTripDateForDisplay(tripDetails.date)}</Text>
               <Text style={styles.sectionContent}>{tripDetails.timeSlot}</Text>
             </View>
             
@@ -146,12 +232,12 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
             {/* Guests */}
             <View style={styles.sectionContainer}>
               <View style={styles.sectionRow}>
-                <Text style={styles.sectionTitle}>Guests</Text>
+                <Text style={styles.sectionTitle}>Tamu</Text>
                 <TouchableOpacity style={styles.changeButton}>
-                  <Text style={styles.changeButtonText}>Change</Text>
+                  <Text style={styles.changeButtonText}>Ubah</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={styles.sectionContent}>{tripDetails.guestCount} adults</Text>
+              <Text style={styles.sectionContent}>{tripDetails.guestCount} dewasa</Text>
             </View>
             
             <View style={styles.divider} />
@@ -159,9 +245,9 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
             {/* Price */}
             <View style={styles.sectionContainer}>
               <View style={styles.sectionRow}>
-                <Text style={styles.sectionTitle}>Total price</Text>
+                <Text style={styles.sectionTitle}>Total harga</Text>
                 <TouchableOpacity style={styles.changeButton}>
-                  <Text style={styles.changeButtonText}>Details</Text>
+                  <Text style={styles.changeButtonText}>Detail</Text>
                 </TouchableOpacity>
               </View>
               <Text style={styles.priceText}>{tripDetails.price} IDR</Text>
@@ -171,9 +257,9 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
             
             {/* Cancellation Policy */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Free cancellation</Text>
+              <Text style={styles.sectionTitle}>Pembatalan gratis</Text>
               <Text style={styles.cancellationText}>
-                Cancel before Jun 27, 3:30 AM (WITA) for full refund.
+                {calculateCancellationDeadline(tripDetails.date)}
               </Text>
             </View>
             
@@ -181,10 +267,10 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
             
             {/* Private Booking Option */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Book for just your group</Text>
+              <Text style={styles.sectionTitle}>Pesan untuk grup Anda saja</Text>
               <View style={styles.privateBookingContainer}>
                 <View style={styles.privateBookingRow}>
-                  <Text style={styles.privateBookingText}>Make it private for Rp420,000 more</Text>
+                  <Text style={styles.privateBookingText}>Jadikan privat dengan tambahan Rp420.000</Text>
                   <Switch
                     value={isPrivate}
                     onValueChange={togglePrivateBooking}
@@ -193,10 +279,10 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
                   />
                 </View>
                 <Text style={styles.privateBookingDescription}>
-                  Just meet the host's Rp1,200,000 minimum before taxes or discounts.
+                  Cukup penuhi minimum Rp1.200.000 dari host sebelum pajak atau diskon.
                 </Text>
                 <TouchableOpacity>
-                  <Text style={styles.learnMoreText}>Learn more</Text>
+                  <Text style={styles.learnMoreText}>Pelajari lebih lanjut</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -205,11 +291,11 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
             
             {/* Payment Method */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Payment method</Text>
+              <Text style={styles.sectionTitle}>Metode pembayaran</Text>
               <TouchableOpacity style={styles.paymentMethodButton}>
                 <View style={styles.paymentMethodContent}>
                   <Ionicons name="card-outline" size={24} color="#000" />
-                  <Text style={styles.paymentMethodText}>Add payment method</Text>
+                  <Text style={styles.paymentMethodText}>Tambah metode pembayaran</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={24} color="#000" />
               </TouchableOpacity>
@@ -219,7 +305,7 @@ const ConfirmAndPayBottomSheet = forwardRef<ConfirmAndPayBottomSheetRef, Confirm
           {/* Book Now Button */}
           <View style={styles.bookButtonContainer}>
             <TouchableOpacity style={styles.bookButton}>
-              <Text style={styles.bookButtonText}>Book now</Text>
+              <Text style={styles.bookButtonText}>Pesan sekarang</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

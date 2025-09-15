@@ -2,7 +2,9 @@ import React, { useRef, useCallback, useMemo, forwardRef, useImperativeHandle, u
 import { View, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import 'dayjs/locale/id';
 dayjs.extend(customParseFormat);
+dayjs.locale('id');
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FlashList } from '@shopify/flash-list';
 import {
@@ -529,7 +531,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
       >
         <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
           <View style={styles.modalHeader}>
-            <Text style={styles.bottomSheetTitle}>Select a time</Text>
+            <Text style={styles.bottomSheetTitle}>Pilih tanggal</Text>
             <TouchableOpacity onPress={handleCloseModal}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
@@ -539,7 +541,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
           <View style={styles.sectionContainer}>
             <View style={styles.guestCountRow}>
               <View>
-                <Text style={styles.guestCountText}>{adultCount} adults</Text>
+                <Text style={styles.guestCountText}>{adultCount} dewasa</Text>
               </View>
               
               <View style={styles.counterContainer}>
@@ -606,7 +608,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
                     >
                       <View>
                         {/* <Text style={styles.timeSlotText}>{item.time}</Text> */}
-                        <Text style={styles.priceText}>{item.price} / guest</Text>
+                        <Text style={styles.priceText}>{item.price} / orang</Text>
                       </View>
                       <Text style={styles.spotsLeftText}>10 spots left</Text>
                     </Pressable>
@@ -623,7 +625,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
               <View style={styles.bookingBar}>
                 <View style={styles.priceContainer}>
                   <Text style={styles.totalPriceText}>{calculateTotalPrice()}</Text>
-                  <Text style={styles.guestInfoText}>for {adultCount} guests</Text>
+                  <Text style={styles.guestInfoText}>for {adultCount} orang</Text>
                 </View>
                 
                 <TouchableOpacity 
@@ -668,7 +670,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
                     }
                   }}
                 >
-                  <Text style={styles.nextButtonText}>Next</Text>
+                  <Text style={styles.nextButtonText}>Lanjutkan</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -689,7 +691,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
       >
         <BottomSheetView style={styles.bottomSheetContent} collapsable={false}>
           <View style={styles.modalHeader}>
-            <Text style={styles.bottomSheetTitle}>Select a date</Text>
+            <Text style={styles.bottomSheetTitle}>Pilih tanggal</Text>
             <TouchableOpacity onPress={handleCloseCalendar}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
@@ -792,6 +794,7 @@ const styles = StyleSheet.create({
   bottomSheetTitle: {
     fontSize: 24,
     fontFamily: FONTS.SATOSHI_BOLD,
+    minHeight: 28,
     color: '#000',
   },
   sectionContainer: {
@@ -884,7 +887,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   selectedTimeSlot: {
-    borderColor: '#000',
+    borderColor: '#FF6F00',
     borderWidth: 2,
     opacity: 0.8
   },
@@ -932,15 +935,15 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   nextButton: {
-    backgroundColor: '#222',
+    backgroundColor: '#FF6F00',
     borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
     alignItems: 'center',
   },
   nextButtonText: {
-    color: '#FFF',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 14,
     fontFamily: FONTS.SATOSHI_BOLD,
   },
   calendarMonthContainer: {

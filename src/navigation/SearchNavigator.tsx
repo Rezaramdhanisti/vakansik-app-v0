@@ -6,7 +6,6 @@ import SearchScreen from '../screens/Search/SearchScreen';
 import TripDetailScreen from '../screens/TripDetail/TripDetailScreen';
 import ConfirmPayScreen from '../screens/ConfirmPay/ConfirmPayScreen';
 import QRISPaymentScreen from '../screens/QRISPayment/QRISPaymentScreen';
-import QRISPaymentTestScreen from '../screens/QRISPayment/QRISPaymentTestScreen';
 
 // Define the type for the activity in the itinerary
 type Activity = {
@@ -96,7 +95,6 @@ export type SearchStackParamList = {
     };
     orderId: string;
   };
-  QRISPaymentTest: undefined;
 };
 
 const Stack = createStackNavigator<SearchStackParamList>();
@@ -153,14 +151,6 @@ function SearchNavigator() {
       <Stack.Screen 
         name="QRISPayment" 
         component={QRISPaymentScreen}
-        options={{
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
-        }}
-      />
-      <Stack.Screen 
-        name="QRISPaymentTest" 
-        component={QRISPaymentTestScreen}
         options={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',

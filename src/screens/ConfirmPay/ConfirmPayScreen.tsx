@@ -4,7 +4,6 @@ import { FlashList } from '@shopify/flash-list';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { AuthContext } from '../../navigation/AppNavigator';
-import userService from '../../services/userService';
 import Text from '../../components/Text';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import GuestBottomSheet, { GuestBottomSheetRef, GuestData } from '../../components/GuestBottomSheet';
@@ -89,6 +88,93 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     return `Rp${price.toLocaleString('id-ID')}`;
   };
   
+  // Utility function to format trip date for display
+  const formatTripDateForDisplay = (tripDateString: string): string => {
+    try {
+      // Parse the trip date string (e.g., "Saturday, Jun 28, 2025")
+      const tripDate = new Date(tripDateString);
+      
+      // Check if the date is valid
+      if (isNaN(tripDate.getTime())) {
+        // If parsing fails, try alternative parsing methods
+        const parts = tripDateString.split(', ');
+        if (parts.length >= 2) {
+          const datePart = parts[1]; // "Jun 28, 2025"
+          const parsedDate = new Date(datePart);
+          if (!isNaN(parsedDate.getTime())) {
+            tripDate.setTime(parsedDate.getTime());
+          }
+        }
+      }
+      
+      // If still invalid, return the original string
+      if (isNaN(tripDate.getTime())) {
+        return tripDateString;
+      }
+      
+      // Format the date as "day, date, Month name and year" (e.g., "Saturday, 28, June 2025")
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      };
+      
+      return tripDate.toLocaleDateString('en-US', options);
+    } catch (error) {
+      console.error('Error formatting trip date:', error);
+      return tripDateString;
+    }
+  };
+
+  // Utility function to calculate cancellation deadline (7 days before trip date)
+  const calculateCancellationDeadline = (tripDateString: string): string => {
+    try {
+      // Parse the trip date string (e.g., "Saturday, Jun 28, 2025")
+      const tripDate = new Date(tripDateString);
+      
+      // Check if the date is valid
+      if (isNaN(tripDate.getTime())) {
+        // If parsing fails, try alternative parsing methods
+        const parts = tripDateString.split(', ');
+        if (parts.length >= 2) {
+          const datePart = parts[1]; // "Jun 28, 2025"
+          const parsedDate = new Date(datePart);
+          if (!isNaN(parsedDate.getTime())) {
+            tripDate.setTime(parsedDate.getTime());
+          }
+        }
+      }
+      
+      // If still invalid, return a fallback
+      if (isNaN(tripDate.getTime())) {
+        return "Batalkan sebelum tanggal perjalanan untuk pengembalian penuh.";
+      }
+      
+      // Subtract 7 days
+      const cancellationDate = new Date(tripDate);
+      cancellationDate.setDate(cancellationDate.getDate() - 7);
+      
+      // Format the date in the same style as the original
+      const options: Intl.DateTimeFormatOptions = {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Jakarta' // WIB timezone
+      };
+      
+      const formattedDate = cancellationDate.toLocaleDateString('en-US', options);
+      const timeZone = 'WIB';
+      
+      return `Batalkan sebelum ${formattedDate} (${timeZone}) untuk pengembalian penuh.`;
+    } catch (error) {
+      console.error('Error calculating cancellation deadline:', error);
+      return "Batalkan sebelum tanggal perjalanan untuk pengembalian penuh.";
+    }
+  };
+  
   // Calculate price per person
   const pricePerPerson = useMemo(() => {
     const totalPrice = parsePrice(tripDetails.price);
@@ -170,7 +256,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     });
     
     if (!allGuestsFilled) {
-      setErrorMessage('Please fill out all guest information before booking.');
+      setErrorMessage('Silakan lengkapi semua informasi tamu sebelum memesan.');
       setIsErrorModalVisible(true);
       return;
     }
@@ -215,7 +301,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       
       // Check if we have the current user ID
       if (!userId) {
-        throw new Error('User ID not available. Please log in again.');
+        throw new Error('ID pengguna tidak tersedia. Silakan masuk kembali.');
       }
       
       // Call the edge function for QRIS payment
@@ -231,7 +317,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       });
       
       if (error) {
-        throw new Error(`Payment request failed: ${error.message}`);
+        throw new Error(`Permintaan pembayaran gagal: ${error.message}`);
       }
       
       console.log('QRIS Payment request successful:', data);
@@ -249,7 +335,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     } catch (error: any) {
       console.error('Error processing QRIS payment:', error);
       setIsLoading(false);
-      Alert.alert('Payment Error', `An error occurred while processing your payment: ${error.message || 'Unknown error'}`);
+      Alert.alert('Error Pembayaran', `Terjadi kesalahan saat memproses pembayaran Anda: ${error.message || 'Kesalahan tidak diketahui'}`);
     }
   };
  
@@ -287,7 +373,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         
         // Check if we have the current user ID
         if (!userId) {
-          throw new Error('User ID not available. Please log in again.');
+          throw new Error('ID pengguna tidak tersedia. Silakan masuk kembali.');
         }
         
         // Normalize phone number for OVO (ensure it starts with +)
@@ -325,7 +411,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         });
         
         if (error) {
-          throw new Error(`Payment request failed: ${error.message}`);
+          throw new Error(`Permintaan pembayaran gagal: ${error.message}`);
         }
         
         console.log('Payment request successful:', data);
@@ -385,7 +471,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
     } catch (error: any) {
       console.error('Error processing payment:', error);
       setIsLoading(false);
-      Alert.alert('Payment Error', `An error occurred while processing your payment: ${error.message || 'Unknown error'}`);
+      Alert.alert('Error Pembayaran', `Terjadi kesalahan saat memproses pembayaran Anda: ${error.message || 'Kesalahan tidak diketahui'}`);
     }
   };
   
@@ -516,12 +602,12 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#000" />
-          <Text style={styles.loadingText}>Processing payment...</Text>
+          <Text style={styles.loadingText}>Memproses pembayaran...</Text>
         </View>
       )}
       <View style={styles.header}>
         <View style={styles.placeholder} />
-        <Text style={styles.headerTitle}>Confirm and pay</Text>
+        <Text style={styles.headerTitle}>Konfirmasi dan bayar</Text>
         <TouchableOpacity onPress={handleGoBack} style={styles.closeButton}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
@@ -550,8 +636,8 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         
         {/* Date and Time */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Date</Text>
-          <Text style={styles.sectionContent}>{tripDetails.date}</Text>
+          <Text style={styles.sectionTitle}>Tanggal</Text>
+          <Text style={styles.sectionContent}>{formatTripDateForDisplay(tripDetails.date)}</Text>
           <Text style={styles.sectionContent}>{tripDetails.timeSlot}</Text>
         </View>
         
@@ -560,9 +646,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         {/* Guests */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>Guests</Text>
+            <Text style={styles.sectionTitle}>Tamu</Text>
           </View>
-          <Text style={styles.sectionContent}>{tripDetails.guestCount} adults</Text>
+          <Text style={styles.sectionContent}>{tripDetails.guestCount} dewasa</Text>
           
           {/* Guest List */}
           <View style={styles.guestListContainer}>
@@ -574,7 +660,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
               >
                 <View style={styles.guestItemContent}>
                   <Text style={styles.guestItemTitle}>
-                    Guest {index + 1}{guest.name ? `: ${guest.name}` : ''}
+                    Tamu {index + 1}{guest.name ? `: ${guest.name}` : ''}
                   </Text>
                   {guest.name ? (
                     <Text style={styles.guestItemSubtitle}>
@@ -582,7 +668,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
                     </Text>
                   ) : (
                     <Text style={styles.guestItemSubtitle}>
-                      Tap to add details
+                      Ketuk untuk menambah detail
                     </Text>
                   )}
                 </View>
@@ -597,7 +683,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         {/* Price */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>Total price</Text>
+            <Text style={styles.sectionTitle}>Total harga</Text>
           </View>
           <Text style={styles.priceText}>{formatPrice(totalPrice)} IDR</Text>
         </View>
@@ -606,9 +692,9 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         
         {/* Cancellation Policy */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Free cancellation</Text>
+          <Text style={styles.sectionTitle}>Pembatalan gratis</Text>
           <Text style={styles.cancellationText}>
-            Cancel before Jun 27, 3:30 AM (WITA) for full refund.
+            {calculateCancellationDeadline(tripDetails.date)}
           </Text>
         </View>
         
@@ -640,7 +726,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         
         {/* Payment Method */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Payment method</Text>
+          <Text style={styles.sectionTitle}>Metode pembayaran</Text>
           <View style={styles.paymentMethodsContainer}>
             <FlashList
               data={paymentMethods}
@@ -695,18 +781,18 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
           
         {/* Coupons Section */}
         <View style={[styles.sectionContainer]}>
-          <Text style={styles.sectionTitle}>Coupons</Text>
+          <Text style={styles.sectionTitle}>Kupon</Text>
           <TouchableOpacity style={styles.couponButton}>
-            <Text style={styles.couponButtonText}>Enter a coupon</Text>
+            <Text style={styles.couponButtonText}>Masukkan kupon</Text>
             <Ionicons name="chevron-forward" size={24} color="#000" />
           </TouchableOpacity>
         </View>
         
         {/* Price Details */}
         <View style={[styles.sectionContainer, { marginTop: 24 }]}>
-          <Text style={styles.sectionTitle}>Price details</Text>
+          <Text style={styles.sectionTitle}>Detail harga</Text>
           <View style={styles.priceDetailsRow}>
-            <Text style={styles.priceDetailsText}>{formatPrice(pricePerPerson)} x {tripDetails.guestCount} adults</Text>
+            <Text style={styles.priceDetailsText}>{formatPrice(pricePerPerson)} x {tripDetails.guestCount} dewasa</Text>
             <Text style={styles.priceDetailsValue}>{formatPrice(totalPrice)}</Text>
           </View>
           <View style={styles.priceDivider} />
@@ -719,7 +805,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
         {/* Terms and Conditions */}
         <View style={styles.termsContainer}>
           <Text style={styles.termsText}>
-            By selecting the button, I agree to the <Text style={styles.termsLink}>booking terms</Text>, <Text style={styles.termsLink}>release and waiver</Text> and <Text style={styles.termsLink}>updated Terms of Service</Text>. View <Text style={styles.termsLink}>Privacy Policy</Text>.
+            Dengan memilih tombol, saya menyetujui <Text style={styles.termsLink}>syarat pemesanan</Text>, <Text style={styles.termsLink}>pelepasan dan penolakan</Text> dan <Text style={styles.termsLink}>Ketentuan Layanan yang diperbarui</Text>. Lihat <Text style={styles.termsLink}>Kebijakan Privasi</Text>.
           </Text>
         </View>
         </ScrollView>
@@ -730,7 +816,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.bookNowButtonText}>Book now</Text>
+              <Text style={styles.bookNowButtonText}>Pesan sekarang</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -744,7 +830,7 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
               color="#FF6F00"
               style={styles.lottieAnimation}
             />
-            <Text style={styles.loadingOverlayText}>Processing your booking...</Text>
+            <Text style={styles.loadingOverlayText}>Memproses pemesanan Anda...</Text>
           </View>
         </View>
       )}

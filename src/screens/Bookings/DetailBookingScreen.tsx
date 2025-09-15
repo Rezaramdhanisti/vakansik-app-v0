@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
+  Linking,
+  Alert,
 } from 'react-native';
 import Text from '../../components/Text';
 import { FONTS } from '../../config/fonts';
@@ -32,6 +34,28 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
   const [error, setError] = useState<string | null>(null);
   // Add state for collapsed itinerary days
   const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({0: false});
+  
+  const handleGetHelp = async () => {
+    const phoneNumber = '087811047085';
+    const text = 'Halo, saya butuh bantuan dengan aplikasi Vakansik.';
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`;
+    
+    // Check if WhatsApp is installed
+    const canOpen = await Linking.canOpenURL(whatsappUrl);
+    
+    if (canOpen) {
+      await Linking.openURL(whatsappUrl);
+    } else {
+      // WhatsApp is not installed, show fallback message
+      Alert.alert(
+        'WhatsApp Tidak Ditemukan', 
+        'Silakan instal WhatsApp untuk menghubungi tim dukungan kami.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
   
   // Parse itinerary from string to object if needed
   const parsedItinerary = useMemo(() => {
@@ -148,7 +172,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             <View style={styles.iconTextContainer}>
               <Ionicons name="location-outline" size={28} color="#333" style={styles.sectionIcon} />
               <View>
-                <Text style={styles.sectionTitle}>Where to meet</Text>
+                <Text style={styles.sectionTitle}>Meeting Point</Text>
                 {loading ? (
                   <Text style={styles.loadingText}>Loading meeting point...</Text>
                 ) : error ? (
@@ -173,8 +197,8 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
             <View style={styles.iconTextContainer}>
               <MaterialIcons name="event-note" size={28} color="#333" style={styles.sectionIcon} />
               <View>
-                <Text style={styles.sectionTitle}>What you'll do</Text>
-                <Text style={styles.descriptionText}>How you'll spend your time</Text>
+                <Text style={styles.sectionTitle}>Yang akan kamu lakukan</Text>
+                <Text style={styles.descriptionText}>Bagaimana kamu akan menghabiskan waktu</Text>
               </View>
             </View>
           </View>
@@ -201,7 +225,7 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           
           {/* Where to Meet Section */}
           <View style={styles.meetingContainer}>
-            <Text style={styles.meetingTitle}>Where to meet</Text>
+            <Text style={styles.meetingTitle}>Meeting Point</Text>
             
             <View style={styles.arrivalContainer}>
               <View style={styles.arrivalTipsList}>
@@ -227,10 +251,10 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           
           {/* Where to Meet Section */}
           <View style={styles.meetingContainer}>
-            <Text style={styles.meetingTitle}>What you'll do</Text>
+            <Text style={styles.meetingTitle}>Yang akan kamu lakukan</Text>
             
             {!loading && parsedItinerary && parsedItinerary.length > 0 ? (
-              <View style={styles.timelineContainer}>
+              <View>
                 {parsedItinerary.map((dayData: any, dayIndex: number) => {
                   // Check if the day is collapsed based on collapsedDays state
                   const isCollapsed = collapsedDays[dayIndex] !== undefined ? collapsedDays[dayIndex] : true;
@@ -293,16 +317,16 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           
           {/* Reservation Details Section */}
           <View style={styles.reservationContainer}>
-            <Text style={styles.reservationTitle}>Reservation details</Text>
+            <Text style={styles.reservationTitle}>Detail reservasi</Text>
             
             <View style={styles.confirmationContainer}>
-              <Text style={styles.confirmationLabel}>Confirmation code</Text>
+              <Text style={styles.confirmationLabel}>Kode konfirmasi</Text>
               <Text style={styles.confirmationCode}>
                 {loading ? 'Loading...' : orderDetail?.id.substring(0, 8).toUpperCase() || 'TAZHPCAS'}
               </Text>
             </View>
             <View style={styles.costContainer}>
-              <Text style={styles.costLabel}>Total cost</Text>
+              <Text style={styles.costLabel}>Total biaya</Text>
               {loading ? (
                 <Text style={styles.loadingText}>Loading...</Text>
               ) : error ? (
@@ -325,12 +349,12 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
           
           {/* Support Section */}
           <View style={styles.supportContainer}>
-            <Text style={styles.supportTitle}>Get support anytime</Text>
-            <Text style={styles.supportDescription}>If you need help, we're available 24/7 from anywhere in the world.</Text>
+            <Text style={styles.supportTitle}>Dapatkan bantuan kapan saja</Text>
+            <Text style={styles.supportDescription}>Jika kamu membutuhkan bantuan, kami tersedia 24/7 dari mana saja di dunia.</Text>
             
-            <TouchableOpacity style={styles.supportButton}>
+            <TouchableOpacity style={styles.supportButton} onPress={handleGetHelp}>
               <Ionicons name="help-circle-outline" size={22} color="#333" style={styles.supportIcon} />
-              <Text style={styles.supportButtonText}>Contact Vakansik Support</Text>
+              <Text style={styles.supportButtonText}>Kontak Vakansik Support</Text>
               <Ionicons name="chevron-forward" size={20} color="#333" style={{marginLeft: 'auto'}} />
             </TouchableOpacity>
             
@@ -476,6 +500,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 4,
+    lineHeight: 20,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -528,6 +553,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 24,
+    lineHeight: 28,
   },
   confirmationContainer: {
     marginBottom: 24,
@@ -584,6 +610,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 24,
+    lineHeight: 28,
   },
   arrivalContainer: {
     marginBottom: 24,
@@ -681,7 +708,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#333',
     marginBottom: 8,
-    height: 28
+    lineHeight: 28,
   },
   supportDescription: {
     fontSize: 16,
