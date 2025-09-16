@@ -41,22 +41,19 @@ function ProfileScreen(): React.JSX.Element {
   };
 
   const handleGetHelp = async () => {
-    const phoneNumber = '087811047085';
+    const phoneNumber = '6287811047085'; // Add country code (62 for Indonesia)
     const text = 'Hello, I need help with Vakansik app.';
     
-    // Create WhatsApp URL
+    // Try WhatsApp app first
     const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`;
     
-    // Check if WhatsApp is installed
-    const canOpen = await Linking.canOpenURL(whatsappUrl);
-    
-    if (canOpen) {
+    try {
       await Linking.openURL(whatsappUrl);
-    } else {
-      // WhatsApp is not installed, show fallback message
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
       Alert.alert(
-        'WhatsApp Not Found', 
-        'Please install WhatsApp to contact our support team.',
+        'Error', 
+        'Unable to open WhatsApp. Please try again.',
         [{ text: 'OK' }]
       );
     }

@@ -36,22 +36,19 @@ function DetailBookingScreen({ navigation, route }: DetailBookingScreenProps): R
   const [collapsedDays, setCollapsedDays] = useState<{[key: number]: boolean}>({0: false});
   
   const handleGetHelp = async () => {
-    const phoneNumber = '087811047085';
+    const phoneNumber = '6287811047085'; // Add country code (62 for Indonesia)
     const text = 'Halo, saya butuh bantuan dengan aplikasi Vakansik.';
     
     // Create WhatsApp URL
     const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`;
     
-    // Check if WhatsApp is installed
-    const canOpen = await Linking.canOpenURL(whatsappUrl);
-    
-    if (canOpen) {
+    try {
       await Linking.openURL(whatsappUrl);
-    } else {
-      // WhatsApp is not installed, show fallback message
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
       Alert.alert(
-        'WhatsApp Tidak Ditemukan', 
-        'Silakan instal WhatsApp untuk menghubungi tim dukungan kami.',
+        'Error', 
+        'Unable to open WhatsApp. Please try again.',
         [{ text: 'OK' }]
       );
     }
