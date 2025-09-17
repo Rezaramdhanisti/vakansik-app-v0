@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './Text';
 
 /**
@@ -12,8 +13,10 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   descriptors, 
   navigation 
 }) => {
+  const insets = useSafeAreaInsets();
+  
   return (
-    <View style={styles.tabBarContainer}>
+    <View style={[styles.tabBarContainer, { paddingBottom: Math.max(insets.bottom, Platform.OS === 'ios' ? 20 : 16) }]}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel || options.title || route.name;
@@ -69,9 +72,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
-    height: Platform.OS === 'ios' ? 80 : 60,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-    paddingTop: 4,
+    minHeight: Platform.OS === 'ios' ? 60 : 56,
+    paddingTop: 8,
   },
   tabButton: {
     flex: 1,

@@ -14,6 +14,7 @@ import {
   Platform,
   Alert
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 // Removed carousel imports as we're using a single image
 import { fetchDestinations } from '../../services/destinationsService';
@@ -39,6 +40,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
   const [searchText, setSearchText] = useState('');
   const [sortByHighestPrice, setSortByHighestPrice] = useState(false);
   const [sortByLowestPrice, setSortByLowestPrice] = useState(false);
+  const insets = useSafeAreaInsets();
   
   // Bottom sheet ref
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -385,7 +387,10 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
             renderItem={renderPropertyItem}
             keyExtractor={item => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listingsContainer}
+            contentContainerStyle={{
+              ...styles.listingsContainer,
+              paddingBottom: Math.max(insets.bottom + 100, 120)
+            }}
             estimatedItemSize={350}
           />
         ) : (
@@ -398,7 +403,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
       
       {/* Filter Button */}
       {filteredListings.length > 0 && 
-      <View style={styles.mapButtonContainer}>
+      <View style={[styles.mapButtonContainer, { bottom: Math.max(insets.bottom + 14, 10) }]}>
         <TouchableOpacity 
           style={styles.mapButton}
           onPress={openBottomSheet}
@@ -626,7 +631,6 @@ const styles = StyleSheet.create({
   },
   listingsContainer: {
     paddingTop: 16,
-    paddingBottom: 80, 
   },
   propertyCard: {
     marginBottom: 24,
@@ -704,7 +708,6 @@ const styles = StyleSheet.create({
   },
   mapButtonContainer: {
     position: 'absolute',
-    bottom: 24,
     alignSelf: 'center',
   },
   mapButton: {

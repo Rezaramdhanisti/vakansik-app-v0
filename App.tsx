@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StatusBar, Linking } from 'react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './lib/supabase';
 
 // Import the AppNavigator
@@ -74,10 +75,10 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <AppNavigator navigationRef={navigationRef} />
-    </>
+    </SafeAreaProvider>
   );
 }
 
