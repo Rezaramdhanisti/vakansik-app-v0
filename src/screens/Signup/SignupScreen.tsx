@@ -24,7 +24,7 @@ const SignupScreen = () => {
   // Configure Google Sign-In on component mount
   useEffect(() => {
     GoogleSignin.configure({
-      scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+      scopes: ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
       webClientId: GOOGLE_WEB_CLIENT_ID_DEV,
       iosClientId: IOS_CLIENT_ID_DEV, 
     });
