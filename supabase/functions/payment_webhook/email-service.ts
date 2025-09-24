@@ -397,7 +397,7 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
       : '• ' + userName;
 
     const emailTemplate: EmailTemplate = {
-      to: adminEmails.join(','), // Send to all admin emails
+      to: '', // Will be set individually for each admin
       subject: `🔔 New Successful Payment - Order ${orderId}`,
       html: `
         <!DOCTYPE html>
@@ -676,9 +676,10 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
       `,
     };
 
+    // Send email to all admins using array format
     const result = await resend.emails.send({
       from: 'Vakansik Admin <admin@vakansik.com>',
-      to: emailTemplate.to,
+      to: adminEmails, // Send as array of emails
       subject: emailTemplate.subject,
       html: emailTemplate.html,
     });
