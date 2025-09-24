@@ -391,21 +391,21 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
     const joinedUsersList = joinedUsers && joinedUsers.length > 0 
       ? joinedUsers.map(user => {
           const name = user.name || user.email || 'Unknown';
-          const phone = user.phone ? ` (${user.phone})` : '';
+          const phone = user.phone_number ? ` (${user.phone_number})` : '';
           return `• ${name}${phone}`;
         }).join('<br>')
       : '• ' + userName;
 
     const emailTemplate: EmailTemplate = {
       to: '', // Will be set individually for each admin
-      subject: `🔔 New Successful Payment - Order ${orderId}`,
+      subject: `🔔 Pembayaran Berhasil Baru - Pesanan ${orderId}`,
       html: `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>New Payment Notification</title>
+          <title>Notifikasi Pembayaran Baru</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -595,15 +595,15 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
             <div class="header">
               <div class="logo">Vakansik Admin</div>
               <div style="font-size: 48px; color: #059669;">🔔</div>
-              <div class="title">New Successful Payment!</div>
-              <div class="subtitle">A customer has successfully completed their payment</div>
+              <div class="title">Pembayaran Berhasil Baru!</div>
+              <div class="subtitle">Seorang pelanggan telah berhasil menyelesaikan pembayaran</div>
             </div>
 
             <div class="order-details">
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span class="detail-label">Order ID:</span>
+                    <span class="detail-label">ID Pesanan:</span>
                   </td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
                     <span class="detail-value">${orderId}</span>
@@ -611,7 +611,7 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span class="detail-label">Customer Name:</span>
+                    <span class="detail-label">Nama Pelanggan:</span>
                   </td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
                     <span class="detail-value">${userName}</span>
@@ -619,7 +619,7 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span class="detail-label">Customer Email:</span>
+                    <span class="detail-label">Email Pelanggan:</span>
                   </td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
                     <span class="detail-value">${userEmail}</span>
@@ -627,7 +627,7 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span class="detail-label">Trip:</span>
+                    <span class="detail-label">Destinasi:</span>
                   </td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
                     <span class="detail-value">${tripName}</span>
@@ -635,7 +635,7 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span class="detail-label">Trip Date:</span>
+                    <span class="detail-label">Tanggal Perjalanan:</span>
                   </td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
                     <span class="detail-value">${formattedDate}</span>
@@ -643,7 +643,7 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
                 </tr>
                 <tr>
                   <td style="padding: 8px 0;">
-                    <span class="detail-label">Total Amount:</span>
+                    <span class="detail-label">Total Pembayaran:</span>
                   </td>
                   <td style="padding: 8px 0; text-align: right;">
                     <span class="detail-value amount">${formattedAmount}</span>
@@ -653,22 +653,18 @@ export async function sendAdminNotificationEmail(data: AdminNotificationEmailDat
             </div>
 
             <div class="meeting-info">
-              <div class="meeting-title">📍 Meeting Point</div>
+              <div class="meeting-title">📍 Titik Kumpul</div>
               <div class="meeting-text">${meetingPoint}</div>
             </div>
 
             <div class="participants-info">
-              <div class="participants-title">👥 Participants</div>
+              <div class="participants-title">👥 Peserta</div>
               <div class="participants-text">${joinedUsersList}</div>
             </div>
-
-            <div style="text-align: center;">
-              <a href="mailto:${userEmail}" class="cta-button">Contact Customer</a>
-            </div>
-
+           
             <div class="footer">
-              <p><strong>Vakansik Admin Panel</strong></p>
-              <p>This is an automated notification for successful payments.</p>
+              <p><strong>Panel Admin Vakansik</strong></p>
+              <p>Ini adalah notifikasi otomatis untuk pembayaran yang berhasil.</p>
             </div>
           </div>
         </body>
