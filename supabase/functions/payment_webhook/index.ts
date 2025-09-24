@@ -1,9 +1,17 @@
 // @ts-nocheck
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-import { sendPaymentSuccessEmail, PaymentSuccessEmailData } from "./email-service.ts";
+import { sendPaymentSuccessEmail, PaymentSuccessEmailData, sendAdminNotificationEmail, AdminNotificationEmailData } from "./email-service.ts";
 
 // Xendit webhook callback token for authentication
 const XENDIT_CALLBACK_TOKEN = Deno.env.get("XENDIT_CALLBACK_TOKEN_V2");
+
+// Required environment variables for this function:
+// - XENDIT_CALLBACK_TOKEN_V2: Xendit webhook callback token
+// - VAKANSIK_URL_BASE: Supabase project URL
+// - VAKANSIK_SERVICE_ROLE_KEY_BASE: Supabase service role key
+// - RESEND_KEY: Resend API key for sending emails
+// - ADMIN_EMAIL: Admin email address(es) to receive payment notifications
+//   (single email: "admin@example.com" or multiple: "admin1@example.com,admin2@example.com")
 
 // Define webhook event types
 type XenditWebhookEvent = 
@@ -96,6 +104,7 @@ Deno.serve(async (req) => {
         trip_date,
         amount_idr,
         status,
+        joined_users,
         orders_trip_id_fkey:trip_id(
           name,
           meeting_point
@@ -141,6 +150,25 @@ Deno.serve(async (req) => {
           console.log('Payment success email sent successfully');
         } else {
           console.error('Failed to send payment success email');
+        }
+
+        // Send admin notification for successful payments
+        const adminNotificationData: AdminNotificationEmailData = {
+          orderId: order.id,
+          userName: userData.user.user_metadata?.full_name || userData.user.email.split('@')[0],
+          userEmail: userData.user.email,
+          tripName: order.orders_trip_id_fkey?.name || 'Unknown Trip',
+          tripDate: order.trip_date,
+          amount: order.amount_idr,
+          meetingPoint: order.orders_trip_id_fkey?.meeting_point || 'TBA',
+          joinedUsers: order.joined_users || [],
+        };
+        
+        const adminEmailSent = await sendAdminNotificationEmail(adminNotificationData);
+        if (adminEmailSent) {
+          console.log('Admin notification email sent successfully');
+        } else {
+          console.error('Failed to send admin notification email');
         }
       } else {
         console.log(`No email sent for payment status: ${orderStatus}`);
