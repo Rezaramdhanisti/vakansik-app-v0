@@ -345,7 +345,7 @@ function SearchScreen({ navigation }: SearchScreenProps): React.JSX.Element {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, Platform.OS === 'ios' ? 20 : 26) }]}>
         <View style={styles.searchContainer}>
           <Icon name="search" size={20} style={styles.searchIcon} color="#333" />
           <TextInput
@@ -508,7 +508,6 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    paddingTop: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

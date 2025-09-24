@@ -57,6 +57,10 @@ Deno.serve(async (req) => {
     
     console.log('Trip data fetched:', trip);
 
+    // Calculate total amount based on trip price and number of joined users
+    const totalAmount = trip.price * joined_users.length;
+    console.log(`Calculating total amount: ${trip.price} × ${joined_users.length} = ${totalAmount}`);
+
     // Determine channel code based on payment method
     let channel_code = "SHOPEEPAY"; // Default
     if (payment_method === 'ovo') {
@@ -78,7 +82,7 @@ Deno.serve(async (req) => {
       user_id: user_id, // Use user_id from request body
       trip_id,
       trip_date,
-      amount_idr: trip.price,
+      amount_idr: totalAmount, // Use calculated total amount
       status: "PENDING",
       channel_code,
       joined_users, // store raw JSON array
@@ -102,7 +106,7 @@ Deno.serve(async (req) => {
       type: "PAY",
       country: "ID",
       currency: "IDR",
-      request_amount: trip.price,
+      request_amount: totalAmount, // Use calculated total amount
       channel_code,
       channel_properties: channel_code === "QRIS" ? {
         display_name: "Vakansik"

@@ -178,13 +178,14 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   // Calculate price per person
   const pricePerPerson = useMemo(() => {
     const totalPrice = parsePrice(tripDetails.price);
-    return Math.floor(totalPrice / tripDetails.guestCount);
+    return Math.floor(totalPrice);
   }, [tripDetails.price, tripDetails.guestCount]);
   
   // Calculate total price
   const totalPrice = useMemo(() => {
-    return parsePrice(tripDetails.price);
-  }, [tripDetails.price]);
+    const pricePerPerson = parsePrice(tripDetails.price);
+    return Math.floor(pricePerPerson * tripDetails.guestCount);
+  }, [tripDetails.price, tripDetails.guestCount]);
   
   // Log user ID when component mounts
   useEffect(() => {
