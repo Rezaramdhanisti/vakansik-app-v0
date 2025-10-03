@@ -511,6 +511,7 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
     const totalPrice = priceValue * adultCount;
     
     // Format the total price with 'Rp' prefix and thousand separators
+    // Ensure proper formatting for Indonesian locale
     return `Rp${totalPrice.toLocaleString('id-ID')}`;
   }, [price, adultCount]);
   
@@ -775,6 +776,7 @@ const styles = StyleSheet.create({
   bottomSheetContent: {
     flex: 1,
     padding: 20,
+    width: '100%',
   },
   scrollViewContainer: {
     flex: 1,
@@ -885,6 +887,8 @@ const styles = StyleSheet.create({
     borderColor: '#DDDDDD',
     borderRadius: 12,
     marginBottom: 12,
+    width: '100%',
+    minHeight: 60,
   },
   selectedTimeSlot: {
     borderColor: '#FF6F00',
@@ -901,6 +905,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
+    flexShrink: 0,
+    lineHeight: 20,
+    textAlign: 'left',
   },
   spotsLeftText: {
     fontSize: 14,
@@ -919,20 +926,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
+    minHeight: 56,
   },
   priceContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
+    flex: 1,
+    marginRight: 12,
   },
   totalPriceText: {
     fontSize: 18,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
+    flexShrink: 0,
+    lineHeight: 22,
+    textAlign: 'left',
   },
   guestInfoText: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
+    flexShrink: 0,
+    lineHeight: 18,
+    textAlign: 'left',
   },
   nextButton: {
     backgroundColor: '#FF6F00',
@@ -940,6 +957,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 18,
     alignItems: 'center',
+    flexShrink: 0,
+    minWidth: 100,
   },
   nextButtonText: {
     color: '#FFFFFF',

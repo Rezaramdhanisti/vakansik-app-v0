@@ -682,6 +682,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     width: '90%',
+    minHeight: 56,
   },
   bookingBar: {
     flexDirection: 'row',
@@ -696,23 +697,31 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    flex: 1,
+    marginRight: 12,
   },
   priceText: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
+    flexShrink: 0,
+    lineHeight: 20,
   },
   priceSubtext: {
     fontSize: 14,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#666',
     marginLeft: 4,
+    flexShrink: 0,
+    lineHeight: 18,
   },
   bookButton: {
     backgroundColor: '#FF6F00',
     paddingVertical: 8,
     paddingHorizontal: 18,
     borderRadius: 24,
+    flexShrink: 0,
+    minWidth: 120,
   },
   bookButtonText: {
     fontSize: 14,

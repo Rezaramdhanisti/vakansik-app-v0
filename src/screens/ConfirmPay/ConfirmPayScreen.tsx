@@ -85,7 +85,10 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   
   // Utility function to format price back to string
   const formatPrice = (price: number): string => {
-    return `Rp${price.toLocaleString('id-ID')}`;
+    // Ensure price is a valid number
+    const validPrice = isNaN(price) ? 0 : Math.floor(price);
+    // Format with Indonesian locale and add proper spacing
+    return `Rp${validPrice.toLocaleString('id-ID')}`;
   };
   
   // Utility function to format trip date for display
@@ -863,6 +866,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    width: '100%',
   },
   loadingOverlay: {
     position: 'absolute',
@@ -1159,6 +1163,8 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     padding: 20,
+    paddingBottom: 100, // Extra padding for bottom button
+    minWidth: '100%',
   },
   tripDetailsContainer: {
     flexDirection: 'row',
@@ -1202,6 +1208,7 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     marginBottom: 4,
+    width: '100%',
   },
   sectionRow: {
     flexDirection: 'row',
@@ -1234,6 +1241,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
+    textAlign: 'left',
+    lineHeight: 22,
+    width: '100%',
+    flexWrap: 'wrap',
   },
   cancellationText: {
     fontSize: 16,
@@ -1390,6 +1401,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DDDDDD',
     borderRadius: 12,
+    width: '100%',
   },
   couponButtonText: {
     fontSize: 16,
@@ -1400,18 +1412,31 @@ const styles = StyleSheet.create({
   priceDetailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 16,
+    minHeight: 24,
+    width: '100%',
   },
   priceDetailsText: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_REGULAR,
     color: '#333',
+    flex: 1,
+    flexShrink: 1,
+    marginRight: 12,
+    lineHeight: 22,
+    textAlign: 'left',
   },
   priceDetailsValue: {
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_MEDIUM,
     color: '#000',
+    textAlign: 'right',
+    flex: 0,
+    flexShrink: 0,
+    minWidth: 120,
+    maxWidth: 150,
+    lineHeight: 22,
   },
   priceDivider: {
     height: 1,
@@ -1423,6 +1448,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
+    flex: 1,
+    flexShrink: 1,
+    marginRight: 12,
+    lineHeight: 22,
   },
   totalCurrency: {
     textDecorationLine: 'underline',
@@ -1431,6 +1460,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.SATOSHI_BOLD,
     color: '#000',
+    textAlign: 'right',
+    flex: 0,
+    flexShrink: 0,
+    minWidth: 120,
+    maxWidth: 150,
+    lineHeight: 22,
   },
   // Terms
   termsContainer: {
