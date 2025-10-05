@@ -87,8 +87,11 @@ const ConfirmPayScreen: React.FC<ConfirmPayScreenProps> = ({ route }) => {
   const formatPrice = (price: number): string => {
     // Ensure price is a valid number
     const validPrice = isNaN(price) ? 0 : Math.floor(price);
-    // Format with Indonesian locale and add proper spacing
-    return `Rp${validPrice.toLocaleString('id-ID')}`;
+    // Use manual formatting to ensure consistency across all devices
+    // This prevents issues with toLocaleString on different Android versions
+    const priceStr = validPrice.toString();
+    const formatted = priceStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `Rp${formatted}`;
   };
   
   // Utility function to format trip date for display
@@ -1245,6 +1248,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     width: '100%',
     flexWrap: 'wrap',
+    minWidth: 150,
+    flexShrink: 0,
   },
   cancellationText: {
     fontSize: 16,
@@ -1434,8 +1439,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     flex: 0,
     flexShrink: 0,
-    minWidth: 120,
-    maxWidth: 150,
+    minWidth: 140,
+    maxWidth: 180,
     lineHeight: 22,
   },
   priceDivider: {
@@ -1463,8 +1468,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     flex: 0,
     flexShrink: 0,
-    minWidth: 120,
-    maxWidth: 150,
+    minWidth: 140,
+    maxWidth: 180,
     lineHeight: 22,
   },
   // Terms

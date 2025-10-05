@@ -511,8 +511,10 @@ const DateBottomSheet = forwardRef<DateBottomSheetRef, DateBottomSheetProps>(({
     const totalPrice = priceValue * adultCount;
     
     // Format the total price with 'Rp' prefix and thousand separators
-    // Ensure proper formatting for Indonesian locale
-    return `Rp${totalPrice.toLocaleString('id-ID')}`;
+    // Use manual formatting to ensure consistency across all devices
+    const priceStr = totalPrice.toString();
+    const formatted = priceStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `Rp${formatted}`;
   }, [price, adultCount]);
   
 
